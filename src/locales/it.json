@@ -1,0 +1,81 @@
+{
+  "appName": "FormatX",
+  "slogan": "I tuoi contenuti — in ordine perfetto",
+  "nav": {
+    "tools": "Strumenti",
+    "account": "Account"
+  },
+  "tiles": {
+    "text": "Testo",
+    "photo": "Foto",
+    "documents": "Documenti",
+    "classes": "Classi → CSS",
+    "soon": "v1"
+  },
+  "theme": { "light": "Chiaro", "dark": "Scuro", "toggle": "Cambia tema" },
+  "locale": { "uk": "UK", "it": "IT", "en": "EN" },
+  "toast": { "copied": "Copiato!", "saved": "Salvato", "cleared": "Cancellato", "error": "Errore" },
+  "sanitizer": {
+    "title": "Testo",
+    "replaceChar": "Carattere da sostituire",
+    "replaceWith": "Sostituisci con",
+    "spacing": "Spaziatura intorno",
+    "removeArgs": "Rimuovi segmenti iniziali",
+    "input": "Testo di input",
+    "output": "Risultato",
+    "outputPlaceholder": "Il risultato apparirà qui",
+    "convert": "Converti",
+    "convertCopy": "Converti e copia",
+    "trimCopy": "Trim e copia",
+    "classesTitle": "Classi → CSS",
+    "classesInput": "Classi (separate da spazio)",
+    "classesPlaceholder": "Classi o class=\"...\"",
+    "selectorPlaceholder": "Il selettore apparirà qui",
+    "classConvert": "Converti",
+    "classCopy": "Copia",
+    "recent": "Ultimi 10 testi",
+    "replaceSpace": "Spazio",
+    "replaceDash": "Trattino (-)",
+    "replaceComma": "Virgola (,)",
+    "spacingNone": "Nessuna spaziatura",
+    "spacingAround": "Spazio prima e dopo"
+  },
+  "images": {
+    "title": "Foto",
+    "fmtIn": "Formato input",
+    "fmtOut": "Risultato",
+    "quality": "Qualità (JPEG / WebP), %",
+    "drop": "Trascina le immagini o clicca per scegliere",
+    "heicHint": "HEIC elaborato localmente via WASM",
+    "queue": "Coda file",
+    "empty": "Nessun file",
+    "convertAll": "Converti tutto",
+    "convertSel": "Converti selezionati",
+    "zipSel": "ZIP: selezionati",
+    "zipAll": "ZIP: tutti pronti",
+    "selAll": "Seleziona tutti",
+    "selNone": "Deseleziona",
+    "clear": "Svuota lista",
+    "convert": "Converti",
+    "download": "Scarica",
+    "remove": "Rimuovi",
+    "statusReady": "Pronto",
+    "statusError": "Errore",
+    "statusConverting": "Conversione…",
+    "statusPending": "In attesa",
+    "noReadyZip": "Nessun file pronto per ZIP",
+    "auto": "Auto"
+  },
+  "documents": {
+    "title": "Documenti",
+    "coming": "Conversione PDF, Word e testo — in v1"
+  },
+  "account": {
+    "title": "Account",
+    "history": "Cronologia immagini (fino a 3 giorni)",
+    "noHistory": "Cronologia vuota",
+    "clearHistory": "Svuota cronologia",
+    "settings": "Impostazioni",
+    "pwaHint": "Installa FormatX dal menu del browser"
+  }
+}

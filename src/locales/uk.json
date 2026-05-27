@@ -1,0 +1,81 @@
+{
+  "appName": "FormatX",
+  "slogan": "Ваш контент — у досконалому порядку",
+  "nav": {
+    "tools": "Інструменти",
+    "account": "Кабінет"
+  },
+  "tiles": {
+    "text": "Текст",
+    "photo": "Фото",
+    "documents": "Документи",
+    "classes": "Класи → CSS",
+    "soon": "v1"
+  },
+  "theme": { "light": "Світла", "dark": "Темна", "toggle": "Змінити тему" },
+  "locale": { "uk": "УК", "it": "IT", "en": "EN" },
+  "toast": { "copied": "Скопійовано!", "saved": "Збережено", "cleared": "Очищено", "error": "Помилка" },
+  "sanitizer": {
+    "title": "Текст",
+    "replaceChar": "Символ для заміни",
+    "replaceWith": "Замінити на",
+    "spacing": "Відступи навколо заміни",
+    "removeArgs": "Прибрати аргумент (кількість початкових)",
+    "input": "Вхідний текст",
+    "output": "Результат",
+    "outputPlaceholder": "Тут зʼявиться результат",
+    "convert": "Перетворити",
+    "convertCopy": "Перетворити і копіювати",
+    "trimCopy": "Трім і копіювати",
+    "classesTitle": "Класи → CSS",
+    "classesInput": "Класи (через пробіл)",
+    "classesPlaceholder": "Класи або class=\"...\"",
+    "selectorPlaceholder": "Тут зʼявиться селектор",
+    "classConvert": "Перетворити",
+    "classCopy": "Копіювати",
+    "recent": "Останні 10 текстів",
+    "replaceSpace": "Пробіл",
+    "replaceDash": "Дефіс (-)",
+    "replaceComma": "Кома (,)",
+    "spacingNone": "Без відступів",
+    "spacingAround": "Пробіл до і після"
+  },
+  "images": {
+    "title": "Фото",
+    "fmtIn": "Вхідний формат",
+    "fmtOut": "Результат",
+    "quality": "Якість (JPEG / WebP), %",
+    "drop": "Перетягни зображення або натисни, щоб обрати",
+    "heicHint": "HEIC обробляється локально через WASM",
+    "queue": "Черга файлів",
+    "empty": "Поки що немає файлів",
+    "convertAll": "Конвертувати все",
+    "convertSel": "Конвертувати обрані",
+    "zipSel": "ZIP: обрані",
+    "zipAll": "ZIP: усі готові",
+    "selAll": "Обрати всі",
+    "selNone": "Зняти вибір",
+    "clear": "Очистити список",
+    "convert": "Конвертувати",
+    "download": "Завантажити",
+    "remove": "Прибрати",
+    "statusReady": "Готово",
+    "statusError": "Помилка",
+    "statusConverting": "Конвертація…",
+    "statusPending": "Очікує",
+    "noReadyZip": "Немає готових файлів для ZIP",
+    "auto": "Автовизначення"
+  },
+  "documents": {
+    "title": "Документи",
+    "coming": "Конвертація PDF, Word і тексту — у версії v1"
+  },
+  "account": {
+    "title": "Кабінет",
+    "history": "Історія зображень (до 3 днів)",
+    "noHistory": "Історія порожня",
+    "clearHistory": "Очистити історію",
+    "settings": "Налаштування",
+    "pwaHint": "Встанови FormatX як додаток через меню браузера"
+  }
+}

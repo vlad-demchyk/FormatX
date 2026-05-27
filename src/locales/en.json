@@ -1,0 +1,81 @@
+{
+  "appName": "FormatX",
+  "slogan": "Your content — in perfect order",
+  "nav": {
+    "tools": "Tools",
+    "account": "Account"
+  },
+  "tiles": {
+    "text": "Text",
+    "photo": "Photo",
+    "documents": "Documents",
+    "classes": "Classes → CSS",
+    "soon": "v1"
+  },
+  "theme": { "light": "Light", "dark": "Dark", "toggle": "Toggle theme" },
+  "locale": { "uk": "UK", "it": "IT", "en": "EN" },
+  "toast": { "copied": "Copied!", "saved": "Saved", "cleared": "Cleared", "error": "Error" },
+  "sanitizer": {
+    "title": "Text",
+    "replaceChar": "Character to replace",
+    "replaceWith": "Replace with",
+    "spacing": "Spacing around replacement",
+    "removeArgs": "Remove leading segments",
+    "input": "Input text",
+    "output": "Result",
+    "outputPlaceholder": "Result will appear here",
+    "convert": "Convert",
+    "convertCopy": "Convert & copy",
+    "trimCopy": "Trim & copy",
+    "classesTitle": "Classes → CSS",
+    "classesInput": "Classes (space-separated)",
+    "classesPlaceholder": "Classes or class=\"...\"",
+    "selectorPlaceholder": "Selector will appear here",
+    "classConvert": "Convert",
+    "classCopy": "Copy",
+    "recent": "Last 10 texts",
+    "replaceSpace": "Space",
+    "replaceDash": "Dash (-)",
+    "replaceComma": "Comma (,)",
+    "spacingNone": "No spacing",
+    "spacingAround": "Space before and after"
+  },
+  "images": {
+    "title": "Photo",
+    "fmtIn": "Input format",
+    "fmtOut": "Output",
+    "quality": "Quality (JPEG / WebP), %",
+    "drop": "Drop images here or click to browse",
+    "heicHint": "HEIC is processed locally via WASM",
+    "queue": "File queue",
+    "empty": "No files yet",
+    "convertAll": "Convert all",
+    "convertSel": "Convert selected",
+    "zipSel": "ZIP: selected",
+    "zipAll": "ZIP: all ready",
+    "selAll": "Select all",
+    "selNone": "Clear selection",
+    "clear": "Clear list",
+    "convert": "Convert",
+    "download": "Download",
+    "remove": "Remove",
+    "statusReady": "Ready",
+    "statusError": "Error",
+    "statusConverting": "Converting…",
+    "statusPending": "Pending",
+    "noReadyZip": "No ready files for ZIP",
+    "auto": "Auto"
+  },
+  "documents": {
+    "title": "Documents",
+    "coming": "PDF, Word and text conversion — in v1"
+  },
+  "account": {
+    "title": "Account",
+    "history": "Image history (up to 3 days)",
+    "noHistory": "History is empty",
+    "clearHistory": "Clear history",
+    "settings": "Settings",
+    "pwaHint": "Install FormatX from your browser menu"
+  }
+}
