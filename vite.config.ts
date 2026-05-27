@@ -5,8 +5,11 @@ import { VitePWA } from "vite-plugin-pwa";
 const host = process.env.TAURI_DEV_HOST;
 /** PWA service worker breaks Tauri WebView2 (white screen) */
 const isTauri = Boolean(process.env.TAURI_ENV_PLATFORM || process.env.TAURI_DEV_HOST);
+/** GitHub Pages base path */
+const isGithubPages = process.env.GITHUB_PAGES === "true";
 
 export default defineConfig({
+  base: isGithubPages ? "/FormatX/" : "/",
   plugins: [
     react(),
     ...(isTauri
