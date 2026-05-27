@@ -9,6 +9,7 @@
     "text": "Testo",
     "photo": "Foto",
     "documents": "Documenti",
+    "clipboard": "Appunti",
     "classes": "Classi → CSS",
     "soon": "v1"
   },
@@ -68,7 +69,23 @@
   },
   "documents": {
     "title": "Documenti",
-    "coming": "Conversione PDF, Word e testo — in v1"
+    "coming": "Conversione PDF, Word e testo — in v1",
+    "outputFormat": "Formato output",
+    "to": "→",
+    "drop": "Trascina i file o clicca per scegliere",
+    "preview": "Anteprima",
+    "wasmLoading": "Caricamento modulo conversione…",
+    "wasmError": "Caricamento modulo conversione fallito"
+  },
+  "clipboard": {
+    "title": "Appunti",
+    "hint": "Ultimi 20 testi copiati. Monitora Ctrl+C.",
+    "copied": "Copiato negli appunti!",
+    "copyBtn": "Copia",
+    "clear": "Pulisci appunti",
+    "empty": "Appunti vuoti",
+    "showMore": "Mostra altri {{count}}",
+    "showLess": "Mostra meno"
   },
   "account": {
     "title": "Account",
@@ -76,6 +93,8 @@
     "noHistory": "Cronologia vuota",
     "clearHistory": "Svuota cronologia",
     "settings": "Impostazioni",
+    "trayLabel": "Riduci a icona invece di uscire",
+    "notifLabel": "Notifiche di completamento",
     "pwaHint": "Installa FormatX dal menu del browser"
   }
 }

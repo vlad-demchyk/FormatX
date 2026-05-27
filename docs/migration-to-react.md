@@ -1,18 +1,29 @@
 # Migration Guide: Vanilla TypeScript → React
 
+> **Status: COMPLETED** (May 2026) — all views migrated to React 19.
 > FormatX · incremental migration without stopping shipping  
 > Companion: [documents-module-research.md](./documents-module-research.md)
 
-## 1. Why migrate
+## ✅ Migration complete
 
-| Current (vanilla) | Target (React) |
-|-------------------|----------------|
-| `innerHTML` + manual listeners in `view.ts` / `shell.ts` | Declarative UI, fewer listener leaks |
-| String templates for i18n | `t()` in JSX with type-safe keys (optional) |
-| Global router in `router.ts` | URL optional; state via Context + same persistence |
-| Harder to test UI edge cases | React Testing Library for components |
+All vanilla views have been replaced with React components:
 
-**Do not big-bang rewrite.** Migrate **one vertical slice** at a time (Photo → Documents → Text → Shell).
+| Was (vanilla) | Now (React) |
+|---------------|-------------|
+| `main.ts` + `shell.ts` | `main.tsx` + `App.tsx` + `components/ShellLayout.tsx` |
+| `app/tabNav.ts` | `components/TabBar.tsx` |
+| `app/router.ts` | `hooks/useAppRoute.ts` (lastTab persists) |
+| `app/settings.ts` | `hooks/useSettings.ts` + `app/providers/ThemeProvider.tsx` |
+| `features/sanitizer/view.ts` | `features/text/TextPage.tsx` |
+| `features/images/view.ts` | `features/photo/PhotoPage.tsx` |
+| `app/views/account.ts` | `features/account/AccountPage.tsx` |
+| `app/views/documents.ts` | `features/documents/DocumentsPage.tsx` |
+
+**Preserved untouched:** `features/sanitizer/logic.ts`, `features/images/logic.ts`, `lib/storage/*`, `lib/download.ts`, `lib/clipboard.ts`, `locales/*.json`.
+
+---
+
+The guide below is preserved for reference. The migration followed these steps:
 
 ## 2. Target stack
 

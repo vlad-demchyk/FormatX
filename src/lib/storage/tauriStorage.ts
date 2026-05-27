@@ -17,7 +17,7 @@ async function getDb(): Promise<Database> {
 }
 
 function defaultSettings(): AppSettings {
-  return { locale: "uk", theme: "light", pwaInstallDismissed: false, lastTab: "photo" };
+  return { locale: "uk", theme: "light", pwaInstallDismissed: false, lastTab: "photo", closeToTray: true, notificationsEnabled: true };
 }
 
 function parseLastTab(value: string | undefined): TabRoute {
@@ -42,6 +42,8 @@ export async function getSettings(): Promise<AppSettings> {
     theme: (map.theme as AppSettings["theme"]) || "light",
     pwaInstallDismissed: map.pwaInstallDismissed === "true",
     lastTab: parseLastTab(map.lastTab),
+    closeToTray: map.closeToTray !== "false",
+    notificationsEnabled: map.notificationsEnabled !== "false",
   };
 }
 
@@ -52,6 +54,8 @@ export async function saveSettings(settings: AppSettings): Promise<void> {
     ["theme", settings.theme],
     ["pwaInstallDismissed", String(settings.pwaInstallDismissed)],
     ["lastTab", settings.lastTab],
+    ["closeToTray", String(settings.closeToTray)],
+    ["notificationsEnabled", String(settings.notificationsEnabled)],
   ];
   for (const [key, value] of entries) {
     await database.execute(

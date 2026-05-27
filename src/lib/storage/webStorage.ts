@@ -37,7 +37,7 @@ function persist(): void {
 }
 
 function defaultSettings(): AppSettings {
-  return { locale: "uk", theme: "light", pwaInstallDismissed: false, lastTab: "photo" };
+  return { locale: "uk", theme: "light", pwaInstallDismissed: false, lastTab: "photo", closeToTray: true, notificationsEnabled: true };
 }
 
 export async function initWebStorage(): Promise<void> {

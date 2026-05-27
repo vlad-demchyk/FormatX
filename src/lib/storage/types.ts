@@ -1,12 +1,14 @@
 export type ThemeMode = "light" | "dark";
 export type AppLocale = "uk" | "it" | "en";
-export type TabRoute = "photo" | "documents" | "text";
+export type TabRoute = "photo" | "documents" | "text" | "clipboard";
 
 export interface AppSettings {
   locale: AppLocale;
   theme: ThemeMode;
   pwaInstallDismissed: boolean;
   lastTab: TabRoute;
+  closeToTray: boolean;
+  notificationsEnabled: boolean;
 }
 
 export interface HistoryItem {

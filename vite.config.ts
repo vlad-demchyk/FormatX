@@ -1,4 +1,5 @@
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
 const host = process.env.TAURI_DEV_HOST;
@@ -7,6 +8,7 @@ const isTauri = Boolean(process.env.TAURI_ENV_PLATFORM || process.env.TAURI_DEV_
 
 export default defineConfig({
   plugins: [
+    react(),
     ...(isTauri
       ? []
       : [
