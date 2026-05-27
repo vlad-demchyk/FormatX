@@ -18,6 +18,15 @@
   "toast": { "copied": "Скопійовано!", "saved": "Збережено", "cleared": "Очищено", "error": "Помилка" },
   "sanitizer": {
     "title": "Текст",
+    "mode": "Режим",
+    "modeReplace": "Заміна символів",
+    "modeFormat": "Форматування тексту",
+    "formatMode": "Формат",
+    "formatTitleCase": "Велика перша літера (Ім'я Прізвище)",
+    "formatUppercase": "ВЕЛИКІ ЛІТЕРИ",
+    "formatLowercase": "малі літери",
+    "formatSplitWords": "Розбити на слова",
+    "removeTrailing": "Слів прибрати з кінця",
     "replaceChar": "Символ для заміни",
     "replaceWith": "Замінити на",
     "spacing": "Відступи навколо заміни",
@@ -85,7 +94,8 @@
     "clear": "Очистити буфер",
     "empty": "Буфер порожній",
     "showMore": "Показати ще {{count}}",
-    "showLess": "Згорнути"
+    "showLess": "Згорнути",
+    "desktopOnly": "Історія буфера обміну доступна тільки в настільному додатку."
   },
   "account": {
     "title": "Кабінет",
@@ -93,7 +103,6 @@
     "noHistory": "Історія порожня",
     "clearHistory": "Очистити історію",
     "settings": "Налаштування",
-    "trayLabel": "Згортати в трей замість виходу",
     "notifLabel": "Сповіщення про завершення",
     "pwaHint": "Встанови FormatX як додаток через меню браузера"
   }

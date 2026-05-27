@@ -5,7 +5,6 @@ import { I18nProvider } from "./providers/I18nProvider";
 import { ThemeProvider } from "./providers/ThemeProvider";
 import { ShellLayout } from "../components/ShellLayout";
 import { BootError } from "../components/BootError";
-import { TrayHandler } from "../components/TrayHandler";
 import { requestNotificationPermission } from "../lib/notifications";
 
 export function App() {
@@ -17,7 +16,6 @@ export function App() {
       <StorageProvider>
         <ThemeProvider>
           <I18nProvider>
-            <TrayHandler />
             <ShellLayout />
           </I18nProvider>
         </ThemeProvider>

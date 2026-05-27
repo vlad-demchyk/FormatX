@@ -7,19 +7,10 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "test": "vitest run",
-    "tauri": "node scripts/with-cargo-path.mjs",
-    "tauri:dev": "node scripts/with-cargo-path.mjs dev",
-    "tauri:build": "node scripts/with-cargo-path.mjs build"
+    "test": "vitest run"
   },
   "dependencies": {
     "@matbee/libreoffice-converter": "^2.6.0",
-    "@tauri-apps/api": "^2",
-    "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
-    "@tauri-apps/plugin-notification": "^2.3.3",
-    "@tauri-apps/plugin-opener": "^2",
-    "@tauri-apps/plugin-process": "^2.3.1",
-    "@tauri-apps/plugin-sql": "^2.4.0",
     "docx": "^9.7.1",
     "heic-to": "^1.5.2",
     "i18next": "^26.3.0",

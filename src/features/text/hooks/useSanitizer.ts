@@ -1,10 +1,12 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   sanitize,
   sanitizeClasses,
   trimAndSanitize,
   type SanitizeOptions,
 } from "../../sanitizer/logic";
+import { getSettings, saveSettings } from "../../../lib/storage";
+import type { AppSettings, SanitizerSettings } from "../../../lib/storage";
 
 export interface SanitizerState {
   options: SanitizeOptions;
@@ -14,8 +16,24 @@ export interface SanitizerState {
   classOutput: string;
 }
 
+function optionsFromSettings(s: SanitizerSettings): SanitizeOptions {
+  return { ...s };
+}
+
+function settingsFromOptions(o: SanitizeOptions): SanitizerSettings {
+  return { ...o };
+}
+
 const defaults: SanitizerState = {
-  options: { charToReplace: "/", replaceWith: "space", spacing: "none", removeArgs: 0 },
+  options: {
+    mode: "replace",
+    formatMode: "titleCase",
+    charToReplace: "/",
+    replaceWith: "space",
+    spacing: "none",
+    removeArgs: 0,
+    removeTrailing: 0,
+  },
   input: "",
   output: "",
   classInput: "",
@@ -24,6 +42,34 @@ const defaults: SanitizerState = {
 
 export function useSanitizer() {
   const [state, setState] = useState<SanitizerState>(defaults);
+  const [ready, setReady] = useState(false);
+  const savedTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // Load persisted options on mount
+  useEffect(() => {
+    void getSettings().then((s: AppSettings) => {
+      setState((prev) => {
+        const options = optionsFromSettings(s.sanitizer);
+        return { ...prev, options, output: sanitize(prev.input, options) };
+      });
+      setReady(true);
+    });
+  }, []);
+
+  // Persist options whenever they change (debounced 300ms)
+  useEffect(() => {
+    if (!ready) return;
+    if (savedTimer.current) clearTimeout(savedTimer.current);
+    savedTimer.current = setTimeout(() => {
+      void getSettings().then((s: AppSettings) => {
+        s.sanitizer = settingsFromOptions(state.options);
+        return saveSettings(s);
+      });
+    }, 300);
+    return () => {
+      if (savedTimer.current) clearTimeout(savedTimer.current);
+    };
+  }, [state.options, ready]);
 
   const updateOptions = useCallback((patch: Partial<SanitizeOptions>) => {
     setState((prev) => {
@@ -73,6 +119,7 @@ export function useSanitizer() {
 
   return {
     state,
+    ready,
     updateOptions,
     updateInput,
     updateClassInput,

@@ -1,4 +1,3 @@
-import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../app/providers/ThemeProvider";
 import { logoSvg } from "../app/logo";
@@ -8,27 +7,14 @@ import { AccountPage } from "../features/account/AccountPage";
 import { DocumentsPage } from "../features/documents/DocumentsPage";
 import { PhotoPage } from "../features/photo/PhotoPage";
 import { ClipboardPage } from "../features/clipboard/ClipboardPage";
-import { ClipboardToast } from "../features/clipboard/ClipboardToast";
-import { useClipboardMonitor } from "../features/clipboard/hooks/useClipboardMonitor";
-import type { ClipboardEntry } from "../features/clipboard/storage";
 import { useAppRoute, type Page } from "../app/hooks/useAppRoute";
+import { useIsTauri } from "../app/hooks/useIsTauri";
 
 export function ShellLayout() {
   const { t } = useTranslation();
   const { toggle } = useTheme();
   const { page, setPage, ready } = useAppRoute();
-
-  const { entries, latestEntry } = useClipboardMonitor();
-  const [toastEntry, setToastEntry] = useState<ClipboardEntry | null>(null);
-  const lastToastIdRef = useRef<string>("");
-
-  // Show toast only for genuinely new entries (not on tab re-focus)
-  useEffect(() => {
-    if (latestEntry && latestEntry.id !== lastToastIdRef.current) {
-      lastToastIdRef.current = latestEntry.id;
-      setToastEntry(latestEntry);
-    }
-  }, [latestEntry]);
+  const isTauri = useIsTauri();
 
   if (!ready) return null;
 
@@ -74,7 +60,7 @@ export function ShellLayout() {
       </header>
       <div className="shell-body">
         <div className="shell-tabs-wrap">
-          <TabBar active={page} onSelect={(p) => setPage(p)} />
+          <TabBar active={page} onSelect={(p) => setPage(p)} showClipboard={isTauri} />
         </div>
         <main className="shell-main">
           {page === "text" && <TextPage />}
@@ -84,11 +70,7 @@ export function ShellLayout() {
           {page === "account" && <AccountPage />}
         </main>
       </div>
-      <ClipboardToast
-        entry={toastEntry}
-        allEntries={entries}
-        onClose={() => setToastEntry(null)}
-      />
     </div>
   );
 }
+

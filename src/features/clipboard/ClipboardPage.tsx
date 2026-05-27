@@ -5,9 +5,27 @@ import { showToast } from "../../app/toast";
 import { loadClipboard, clearClipboard, removeClipboardEntry } from "./storage";
 import type { ClipboardEntry } from "./storage";
 
+function isTauri(): boolean {
+  return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+}
+
 export function ClipboardPage() {
   const { t } = useTranslation();
   const [entries, setEntries] = useState<ClipboardEntry[]>(() => loadClipboard());
+
+  // Web: show desktop-only message
+  if (!isTauri()) {
+    return (
+      <>
+        <h2>{t("clipboard.title")}</h2>
+        <div className="card" style={{ marginTop: 16, padding: "24px 16px", textAlign: "center" }}>
+          <p style={{ color: "var(--text-muted)", fontSize: "1rem", margin: 0 }}>
+            {t("clipboard.desktopOnly")}
+          </p>
+        </div>
+      </>
+    );
+  }
 
   const refresh = useCallback(() => setEntries(loadClipboard()), []);
 

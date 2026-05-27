@@ -18,6 +18,15 @@
   "toast": { "copied": "Copiato!", "saved": "Salvato", "cleared": "Cancellato", "error": "Errore" },
   "sanitizer": {
     "title": "Testo",
+    "mode": "Modalità",
+    "modeReplace": "Sostituzione caratteri",
+    "modeFormat": "Formattazione testo",
+    "formatMode": "Formato",
+    "formatTitleCase": "Titolo (Nome Cognome)",
+    "formatUppercase": "MAIUSCOLO",
+    "formatLowercase": "minuscolo",
+    "formatSplitWords": "Dividi in parole",
+    "removeTrailing": "Parole da rimuovere dalla fine",
     "replaceChar": "Carattere da sostituire",
     "replaceWith": "Sostituisci con",
     "spacing": "Spaziatura intorno",
@@ -85,7 +94,8 @@
     "clear": "Pulisci appunti",
     "empty": "Appunti vuoti",
     "showMore": "Mostra altri {{count}}",
-    "showLess": "Mostra meno"
+    "showLess": "Mostra meno",
+    "desktopOnly": "La cronologia degli appunti è disponibile solo nell'app desktop."
   },
   "account": {
     "title": "Account",
@@ -93,7 +103,6 @@
     "noHistory": "Cronologia vuota",
     "clearHistory": "Svuota cronologia",
     "settings": "Impostazioni",
-    "trayLabel": "Riduci a icona invece di uscire",
     "notifLabel": "Notifiche di completamento",
     "pwaHint": "Installa FormatX dal menu del browser"
   }

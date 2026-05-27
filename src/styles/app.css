@@ -99,6 +99,8 @@ body {
 .shell-tabs-wrap {
   flex-shrink: 0;
   order: 2;
+  position: sticky;
+  bottom: 0;
   background: var(--bg);
   border-top: 1px solid var(--border);
   padding-bottom: env(safe-area-inset-bottom);
@@ -134,7 +136,9 @@ body {
   font-size: 0.68rem;
   font-weight: 600;
   cursor: pointer;
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -326,7 +330,9 @@ body {
   padding: 36px 24px;
   text-align: center;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 
 .images-drop:hover,

@@ -2,7 +2,7 @@ import initSqlJs from "sql.js/dist/sql-wasm.js";
 import type { Database, SqlJsStatic } from "sql.js";
 import wasmUrl from "sql.js/dist/sql-wasm.wasm?url";
 import { MIGRATION_001, MAX_SNIPPETS, RETENTION_DAYS } from "./schema";
-import type { AppSettings, HistoryItem, TextSnippet } from "./types";
+import type { AppSettings, HistoryItem, TextSnippet, SanitizerSettings } from "./types";
 
 const DB_KEY = "formatx-sqljs";
 const SETTINGS_KEY = "formatx-settings";
@@ -36,8 +36,29 @@ function persist(): void {
   localStorage.setItem(DB_KEY, btoa(binary));
 }
 
+function defaultSanitizer(): SanitizerSettings {
+  return {
+    mode: "replace",
+    formatMode: "titleCase",
+    charToReplace: "/",
+    replaceWith: "space",
+    spacing: "none",
+    removeArgs: 0,
+    removeTrailing: 0,
+  };
+}
+
 function defaultSettings(): AppSettings {
-  return { locale: "uk", theme: "light", pwaInstallDismissed: false, lastTab: "photo", closeToTray: true, notificationsEnabled: true };
+  return {
+    locale: "uk",
+    theme: "light",
+    pwaInstallDismissed: false,
+    lastTab: "photo",
+    closeToTray: true,
+    notificationsEnabled: true,
+    sanitizer: defaultSanitizer(),
+    hotkey: "ctrl+shift+v",
+  };
 }
 
 export async function initWebStorage(): Promise<void> {
@@ -48,10 +69,14 @@ export async function initWebStorage(): Promise<void> {
 export async function getSettings(): Promise<AppSettings> {
   const raw = localStorage.getItem(SETTINGS_KEY);
   if (!raw) return defaultSettings();
-  const parsed = { ...defaultSettings(), ...JSON.parse(raw) } as AppSettings;
+  const defaults = defaultSettings();
+  const saved = JSON.parse(raw);
+  const parsed = { ...defaults, ...saved } as AppSettings;
   if (parsed.lastTab !== "photo" && parsed.lastTab !== "text" && parsed.lastTab !== "documents") {
     parsed.lastTab = "photo";
   }
+  // Deep-merge sanitizer settings so new fields get defaults
+  parsed.sanitizer = { ...defaults.sanitizer, ...(saved.sanitizer || {}) };
   return parsed;
 }
 

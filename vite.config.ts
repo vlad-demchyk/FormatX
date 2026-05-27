@@ -2,9 +2,6 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
-const host = process.env.TAURI_DEV_HOST;
-/** PWA service worker breaks Tauri WebView2 (white screen) */
-const isTauri = Boolean(process.env.TAURI_ENV_PLATFORM || process.env.TAURI_DEV_HOST);
 /** GitHub Pages base path */
 const isGithubPages = process.env.GITHUB_PAGES === "true";
 
@@ -12,10 +9,7 @@ export default defineConfig({
   base: isGithubPages ? "/FormatX/" : "/",
   plugins: [
     react(),
-    ...(isTauri
-      ? []
-      : [
-          VitePWA({
+    VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.svg"],
       workbox: {
@@ -34,17 +28,10 @@ export default defineConfig({
         ],
       },
           }),
-        ]),
   ],
   clearScreen: false,
   server: {
     port: 1420,
-    strictPort: true,
-    host: host || false,
-    hmr: host
-      ? { protocol: "ws", host, port: 1421 }
-      : undefined,
-    watch: { ignored: ["**/src-tauri/**"] },
   },
   optimizeDeps: { include: ["sql.js/dist/sql-wasm.js"] },
   assetsInclude: ["**/*.wasm"],

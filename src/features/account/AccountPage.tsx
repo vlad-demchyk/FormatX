@@ -65,7 +65,7 @@ export function AccountPage() {
   );
 
   const handleToggle = useCallback(
-    async (key: "closeToTray" | "notificationsEnabled") => {
+    async (key: "notificationsEnabled") => {
       if (!settings) return;
       const updated = { ...settings, [key]: !settings[key] };
       setSettingsState(updated);
@@ -112,14 +112,6 @@ export function AccountPage() {
           </div>
         </div>
         <div className="settings-toggles">
-          <label className="toggle-row">
-            <span>{t("account.trayLabel")}</span>
-            <input
-              type="checkbox"
-              checked={settings?.closeToTray ?? true}
-              onChange={() => handleToggle("closeToTray")}
-            />
-          </label>
           <label className="toggle-row">
             <span>{t("account.notifLabel")}</span>
             <input

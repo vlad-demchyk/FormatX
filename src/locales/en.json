@@ -18,6 +18,15 @@
   "toast": { "copied": "Copied!", "saved": "Saved", "cleared": "Cleared", "error": "Error" },
   "sanitizer": {
     "title": "Text",
+    "mode": "Mode",
+    "modeReplace": "Character replacement",
+    "modeFormat": "Text formatting",
+    "formatMode": "Format",
+    "formatTitleCase": "Title Case (Name Surname)",
+    "formatUppercase": "UPPERCASE",
+    "formatLowercase": "lowercase",
+    "formatSplitWords": "Split into words",
+    "removeTrailing": "Words to remove from end",
     "replaceChar": "Character to replace",
     "replaceWith": "Replace with",
     "spacing": "Spacing around replacement",
@@ -85,7 +94,8 @@
     "clear": "Clear clipboard",
     "empty": "Clipboard is empty",
     "showMore": "Show {{count}} more",
-    "showLess": "Show less"
+    "showLess": "Show less",
+    "desktopOnly": "Clipboard history is available only in the desktop app."
   },
   "account": {
     "title": "Account",
@@ -93,7 +103,6 @@
     "noHistory": "History is empty",
     "clearHistory": "Clear history",
     "settings": "Settings",
-    "trayLabel": "Close to tray instead of quitting",
     "notifLabel": "Completion notifications",
     "pwaHint": "Install FormatX from your browser menu"
   }

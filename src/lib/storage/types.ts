@@ -2,6 +2,24 @@ export type ThemeMode = "light" | "dark";
 export type AppLocale = "uk" | "it" | "en";
 export type TabRoute = "photo" | "documents" | "text" | "clipboard";
 
+export type SanitizeMode = "replace" | "format";
+export type FormatMode =
+  | "titleCase"
+  | "uppercase"
+  | "lowercase"
+  | "splitWords"
+  | "removeTrailing";
+
+export interface SanitizerSettings {
+  mode: SanitizeMode;
+  formatMode: FormatMode;
+  charToReplace: string;
+  replaceWith: "space" | "dash" | "comma";
+  spacing: "none" | "around";
+  removeArgs: number;
+  removeTrailing: number;
+}
+
 export interface AppSettings {
   locale: AppLocale;
   theme: ThemeMode;
@@ -9,6 +27,8 @@ export interface AppSettings {
   lastTab: TabRoute;
   closeToTray: boolean;
   notificationsEnabled: boolean;
+  sanitizer: SanitizerSettings;
+  hotkey: string;
 }
 
 export interface HistoryItem {

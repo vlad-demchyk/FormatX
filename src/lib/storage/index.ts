@@ -1,4 +1,3 @@
-import * as tauri from "./tauriStorage";
 import type { AppSettings, HistoryItem } from "./types";
 
 export type {
@@ -8,64 +7,56 @@ export type {
   ThemeMode,
   AppLocale,
   TabRoute,
+  SanitizerSettings,
+  SanitizeMode,
+  FormatMode,
 } from "./types";
 
-function isTauri(): boolean {
-  return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
-}
+let webBackend: typeof import("./webStorage") | null = null;
 
-type WebStorage = typeof import("./webStorage");
-
-let webBackend: WebStorage | null = null;
-
-async function web(): Promise<WebStorage> {
+async function web() {
   if (!webBackend) webBackend = await import("./webStorage");
   return webBackend;
 }
 
-async function backend() {
-  return isTauri() ? tauri : web();
-}
-
 export async function initStorage(): Promise<void> {
-  if (isTauri()) await tauri.initTauriStorage();
-  else await (await web()).initWebStorage();
+  return (await web()).initWebStorage();
 }
 
 export async function getSettings(): Promise<AppSettings> {
-  return (await backend()).getSettings();
+  return (await web()).getSettings();
 }
 
 export async function saveSettings(s: AppSettings): Promise<void> {
-  return (await backend()).saveSettings(s);
+  return (await web()).saveSettings(s);
 }
 
 export async function purgeExpired(): Promise<void> {
-  return (await backend()).purgeExpired();
+  return (await web()).purgeExpired();
 }
 
 export async function addHistoryItem(
   item: Omit<HistoryItem, "createdAt" | "expiresAt"> & { createdAt?: number },
 ): Promise<void> {
-  return (await backend()).addHistoryItem(item);
+  return (await web()).addHistoryItem(item);
 }
 
 export async function listHistory(): Promise<HistoryItem[]> {
-  return (await backend()).listHistory();
+  return (await web()).listHistory();
 }
 
 export async function clearHistory(): Promise<void> {
-  return (await backend()).clearHistory();
+  return (await web()).clearHistory();
 }
 
 export async function deleteHistoryItem(id: string): Promise<void> {
-  return (await backend()).deleteHistoryItem(id);
+  return (await web()).deleteHistoryItem(id);
 }
 
 export async function addTextSnippet(input: string, output: string): Promise<void> {
-  return (await backend()).addTextSnippet(input, output);
+  return (await web()).addTextSnippet(input, output);
 }
 
 export async function listTextSnippets() {
-  return (await backend()).listTextSnippets();
+  return (await web()).listTextSnippets();
 }

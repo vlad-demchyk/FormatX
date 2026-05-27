@@ -1,22 +1,16 @@
 /**
- * Сповіщення для FormatX.
- * На десктопі Tauri — нативне сповіщення ОС (Windows Toast).
- * У браузері — через Browser Notification API.
+ * Сповіщення для FormatX (веб-версія).
+ * Використовує Browser Notification API.
  * Поважає налаштування користувача (notificationsEnabled).
  */
 
 import { getSettings } from "./storage";
-
-function isTauri(): boolean {
-  return typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
-}
 
 /**
  * Запитує дозвіл на сповіщення (для браузера).
  * Викликати один раз при старті додатку.
  */
 export function requestNotificationPermission(): void {
-  if (isTauri()) return;
   if (!("Notification" in window)) return;
   if (Notification.permission === "default") {
     void Notification.requestPermission();
@@ -24,7 +18,7 @@ export function requestNotificationPermission(): void {
 }
 
 /**
- * Показує нативне сповіщення ОС (Windows Toast / Browser Notification).
+ * Показує сповіщення через Browser Notification API.
  * Якщо notificationsEnabled = false — нічого не показує.
  */
 export async function showNotification(title: string, body: string): Promise<void> {
@@ -35,18 +29,6 @@ export async function showNotification(title: string, body: string): Promise<voi
     // If settings fail, still try to notify
   }
 
-  if (isTauri()) {
-    // Tauri native notification (Windows Toast)
-    try {
-      const { sendNotification } = await import("@tauri-apps/plugin-notification");
-      sendNotification({ title, body });
-    } catch {
-      // Tauri plugin not available — fall through to browser API
-    }
-    return;
-  }
-
-  // Browser Notification API
   if (!("Notification" in window)) return;
 
   if (Notification.permission === "granted") {
