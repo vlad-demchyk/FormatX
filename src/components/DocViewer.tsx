@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { marked } from "marked";
 
 /* ── Documentation manifest ── */
 
@@ -29,111 +30,57 @@ const DOCS: DocEntry[] = [
 
 const DOCS_BASE = "/docs/uk/";
 
-/* ── Simple markdown → HTML renderer (no dependency needed) ── */
+/*
+ * Custom marked renderer for documentation:
+ *  - Internal links (no extension / .md files) → client-side navigation
+ *  - External links → new tab
+ *  - Tables wrapped for overflow
+ */
+const renderer = new marked.Renderer();
 
-function renderMarkdown(md: string): string {
-  // Escape HTML tags in code blocks first — we handle them separately
+renderer.link = function ({ href, text, tokens }) {
+  const content = tokens ? this.parser.parseInline(tokens) : text;
 
-  let html = md;
+  if (!href) return content;
 
-  // Tables
-  html = html.replace(
-    /^\|(.+)\|\n\|[-| :]+\|\n((?:\|.+\|\n?)*)/gm,
-    (_match: string, headerRow: string, bodyRows: string) => {
-      const headers = headerRow
-        .split("|")
-        .map((s: string) => s.trim())
-        .filter(Boolean)
-        .map((h: string) => `<th>${escapeHtml(h)}</th>`)
-        .join("");
-      const rows = bodyRows
-        .trim()
-        .split("\n")
-        .map((row: string) => {
-          const cells = row
-            .split("|")
-            .map((s: string) => s.trim())
-            .filter(Boolean)
-            .map((c: string) => `<td>${escapeHtml(c)}</td>`)
-            .join("");
-          return `<tr>${cells}</tr>`;
-        })
-        .join("");
-      return `<div class="doc-table-wrap"><table><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table></div>`;
-    },
-  );
-
-  // Code blocks (```lang ... ```)
-  html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_match: string, lang: string, code: string) => {
-    const langClass = lang ? ` class="doc-code-lang-${escapeHtml(lang)}"` : "";
-    return `<pre${langClass}><code>${escapeHtml(code)}</code></pre>`;
-  });
-
-  // Inline code
-  html = html.replace(/`([^`]+)`/g, (_match: string, code: string) => `<code>${escapeHtml(code)}</code>`);
-
-  // Bold + italic ***
-  html = html.replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>");
-  // Bold **
-  html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-  // Italic *
-  html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
-
-  // Images
-  html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" loading="lazy" class="doc-img" />');
-
-  // Links
-  html = html.replace(
-    /\[([^\]]+)\]\(([^)]+)\)/g,
-    '<a href="$2" target="_blank" rel="noopener noreferrer" class="doc-link">$1</a>',
-  );
-
-  // Headings
-  html = html.replace(/^###### (.+)$/gm, '<h6>$1</h6>');
-  html = html.replace(/^##### (.+)$/gm, '<h5>$1</h5>');
-  html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
-  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
-  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
-  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
-
-  // Horizontal rules
-  html = html.replace(/^---$/gm, "<hr />");
-
-  // Unordered lists
-  html = html.replace(/^- (.+)$/gm, "<li>$1</li>");
-  html = html.replace(/(<li>.*<\/li>\n?)+/g, "<ul>$&</ul>");
-
-  // Paragraphs: wrap remaining non-empty lines not already wrapped
-  const lines = html.split("\n");
-  const result: string[] = [];
-  let inList = false;
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) {
-      if (inList) { result.push("</ul>"); inList = false; }
-      continue;
-    }
-    // Skip already wrapped elements
-    if (/^<\/?(h[1-6]|ul|ol|li|table|thead|tbody|tr|th|td|pre|div|hr|a|img)/.test(trimmed)) {
-      if (trimmed.startsWith("<li>") && !inList) { result.push("<ul>"); inList = true; }
-      else if (!trimmed.startsWith("<li>") && inList) { result.push("</ul>"); inList = false; }
-      result.push(trimmed);
-      continue;
-    }
-    if (inList) { result.push("</ul>"); inList = false; }
-    result.push(`<p>${trimmed}</p>`);
+  // Internal doc reference (no path, no extension)
+  if (!href.includes("://") && !href.includes("/") && !href.includes(".")) {
+    return `<a href="#" class="doc-link doc-link--internal" data-doc="${href}">${content}</a>`;
   }
-  if (inList) result.push("</ul>");
 
-  return result.join("\n");
-}
+  // Relative link to a .md file → resolve to doc ID
+  if (!href.includes("://") && href.endsWith(".md")) {
+    const match = DOCS.find((d) => d.file === href || d.file.endsWith("/" + href));
+    if (match) {
+      return `<a href="#" class="doc-link doc-link--internal" data-doc="${match.id}">${content}</a>`;
+    }
+  }
 
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+  // Absolute URL or anchor
+  return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="doc-link">${content}</a>`;
+};
+
+renderer.image = function ({ href, title, text }) {
+  return `<img src="${href}" alt="${text}" title="${title || ""}" loading="lazy" class="doc-img" />`;
+};
+
+renderer.code = function ({ text, lang }) {
+  const langClass = lang ? ` class="lang-${lang}"` : "";
+  return `<pre${langClass}><code>${text}</code></pre>`;
+};
+
+renderer.table = function ({ header, rows }) {
+  const thead = header.map((cell) => `<th>${cell.text}</th>`).join("");
+  const tbody = rows
+    .map((row) => `<tr>${row.map((cell) => (cell.header ? `<th>${cell.text}</th>` : `<td>${cell.text}</td>`)).join("")}</tr>`)
+    .join("");
+  return `<div class="doc-table-wrap"><table><thead><tr>${thead}</tr></thead><tbody>${tbody}</tbody></table></div>`;
+};
+
+marked.setOptions({ renderer, gfm: true, breaks: false });
+
+async function renderMarkdown(md: string): Promise<string> {
+  return (await marked.parse(md, { async: true })) as string;
 }
 
 /* ── Component ── */
@@ -160,7 +107,8 @@ export function DocViewer() {
       const res = await fetch(`${DOCS_BASE}${entry.file}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const md = await res.text();
-      setContent(renderMarkdown(md));
+      const html = await renderMarkdown(md);
+      setContent(html);
     } catch (e) {
       setError(e instanceof Error ? e.message : t("docs.loadError"));
       setContent("");
