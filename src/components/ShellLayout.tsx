@@ -9,13 +9,32 @@ import { PhotoPage } from "../features/photo/PhotoPage";
 import { ClipboardPage } from "../features/clipboard/ClipboardPage";
 import { SupportPage } from "../features/support/SupportPage";
 import { useAppRoute, type Page } from "../app/hooks/useAppRoute";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { addClipboardEntry } from "../features/clipboard/storage";
 import { showToast } from "../app/toast";
 
 export function ShellLayout() {
   const { t } = useTranslation();
   const { toggle } = useTheme();
+
+  // Keep track of last captured text to avoid duplicates
+  const lastCapturedRef = useRef("");
+
+  // Try to read from the system clipboard (works on mobile when native copy is used)
+  async function tryReadSystemClipboard() {
+    try {
+      // Check for clipboard-read permission first (optional, some browsers may reject)
+      const text = await navigator.clipboard.readText();
+      const trimmed = text.trim();
+      if (trimmed && trimmed !== lastCapturedRef.current) {
+        lastCapturedRef.current = trimmed;
+        addClipboardEntry(trimmed);
+        showToast("toast.copied");
+      }
+    } catch {
+      // Silently fail — clipboard read may require user gesture or permission
+    }
+  }
 
   // Global copy/paste capture — works on every tab
   useEffect(() => {
@@ -34,6 +53,7 @@ export function ShellLayout() {
           }
         }
         if (text) {
+          lastCapturedRef.current = text;
           addClipboardEntry(text);
           showToast("toast.copied");
         }
@@ -44,16 +64,29 @@ export function ShellLayout() {
       const text = e.clipboardData?.getData("text/plain")?.trim();
       if (text) {
         setTimeout(() => {
+          lastCapturedRef.current = text;
           addClipboardEntry(text);
           showToast("toast.copied");
         }, 0);
       }
     };
+
+    // On mobile, when user copies via native dialog (long-press → Copy)
+    // the `copy` event may not fire or document.getSelection() may be empty.
+    // Try reading from the system clipboard when the page becomes visible again.
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        tryReadSystemClipboard();
+      }
+    };
+
     window.addEventListener("copy", onCopy, true);
     window.addEventListener("paste", onPaste, true);
+    document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
       window.removeEventListener("copy", onCopy, true);
       window.removeEventListener("paste", onPaste, true);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, []);
   const { page, setPage, ready } = useAppRoute();

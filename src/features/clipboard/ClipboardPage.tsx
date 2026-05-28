@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { copyText } from "../../lib/clipboard";
+import { downloadBlob } from "../../lib/download";
 import { showToast } from "../../app/toast";
 import { closeIcon } from "../../app/icons";
-import { loadClipboard, clearClipboard, removeClipboardEntry } from "./storage";
+import { loadClipboard, clearClipboard, removeClipboardEntry, addClipboardEntry } from "./storage";
 import type { ClipboardEntry } from "./storage";
 import { loadPinned, removePinnedEntry, clearPinned } from "./pinnedStorage";
 import type { PinnedEntry } from "./pinnedStorage";
@@ -64,6 +65,25 @@ export function ClipboardPage() {
     return () => clearInterval(interval);
   }, [refresh]);
 
+  // Try to read from the system clipboard when this page is opened
+  // (user gesture from tab click allows clipboard.readText())
+  useEffect(() => {
+    let cancelled = false;
+    async function tryRead() {
+      try {
+        const text = await navigator.clipboard.readText();
+        if (!cancelled && text.trim()) {
+          const entries = addClipboardEntry(text.trim());
+          setEntries(entries);
+        }
+      } catch {
+        // Silently fail — clipboard read needs permission or user gesture
+      }
+    }
+    tryRead();
+    return () => { cancelled = true; };
+  }, []);
+
   /* ── Clipboard actions ── */
   const handleCopy = useCallback(async (text: string) => {
     if (await copyText(text)) showToast("toast.copied");
@@ -95,6 +115,39 @@ export function ClipboardPage() {
     setPinned([]);
     showToast("toast.cleared");
   }, []);
+
+  /* ── Pinned item actions ── */
+  const handleDownloadPinned = useCallback((entry: PinnedEntry) => {
+    const blob = dataUrlToBlob(entry.content);
+    const ext = entry.mime
+      ? `.${entry.mime.split("/")[1]?.replace("+", ".") || "bin"}`
+      : "";
+    const name = entry.label.includes(".") ? entry.label : `${entry.label}${ext}`;
+    downloadBlob(blob, name);
+  }, []);
+
+  const handleCopyPinned = useCallback(async (entry: PinnedEntry) => {
+    if (entry.type === "text") {
+      if (await copyText(entry.content)) showToast("toast.copied");
+      return;
+    }
+    if (entry.type === "image") {
+      try {
+        const blob = dataUrlToBlob(entry.content);
+        await navigator.clipboard.write([
+          new ClipboardItem({ [blob.type]: blob }),
+        ]);
+        showToast("toast.copied");
+        return;
+      } catch {
+        // Fallback: download if clipboard write fails
+        handleDownloadPinned(entry);
+        return;
+      }
+    }
+    // Documents: download instead of copying raw data URL
+    handleDownloadPinned(entry);
+  }, [handleDownloadPinned]);
 
   const handlePinText = useCallback(async () => {
     const text = pinText.trim();
@@ -276,23 +329,33 @@ export function ClipboardPage() {
                 )}
 
                 <div className="clipboard-item__actions">
-                  <button type="button" className="btn btn-primary btn-sm" onClick={() => handleCopy(entry.content)}>
-                    {t("clipboard.copyBtn")}
+                  <button type="button" className="btn btn-primary btn-sm" onClick={() => handleCopyPinned(entry)}>
+                    {entry.type === "text" ? t("clipboard.copyBtn") : t("images.download")}
                   </button>
                   {(entry.type === "image" || entry.type === "document") && (
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm btn-icon"
-                      title={t("account.preview")}
-                      onClick={() =>
-                        setPreviewItem({
-                          blob: dataUrlToBlob(entry.content),
-                          name: entry.label,
-                        })
-                      }
-                    >
-                      <span dangerouslySetInnerHTML={{ __html: viewIcon }} style={{ display: "flex", width: 18, height: 18 }} />
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm btn-icon"
+                        title={t("account.preview")}
+                        onClick={() =>
+                          setPreviewItem({
+                            blob: dataUrlToBlob(entry.content),
+                            name: entry.label,
+                          })
+                        }
+                      >
+                        <span dangerouslySetInnerHTML={{ __html: viewIcon }} style={{ display: "flex", width: 18, height: 18 }} />
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        title={t("images.download")}
+                        onClick={() => handleDownloadPinned(entry)}
+                      >
+                        {t("images.download")}
+                      </button>
+                    </>
                   )}
                   <button type="button" className="btn btn-ghost btn-sm" onClick={() => handleUnpin(entry.id)}>
                     {t("clipboard.unpinBtn")}

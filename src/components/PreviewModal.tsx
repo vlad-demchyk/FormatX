@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { downloadBlob } from "../lib/download";
 import { closeIcon } from "../app/icons";
+import { PdfPreview } from "./PdfPreview";
 
 interface PreviewItem {
   blob: Blob;
@@ -22,8 +23,41 @@ export function PreviewModal({ item, onClose }: Props) {
   const { t } = useTranslation();
   const [zoom, setZoom] = useState(1);
   const [loaded, setLoaded] = useState(false);
+  const [pdfData, setPdfData] = useState<ArrayBuffer | null>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+
+  // Stable object URL — only re-created when blob changes
+  const objectUrl = useMemo(() => {
+    if (!item) return "";
+    return URL.createObjectURL(item.blob);
+  }, [item?.blob]);
+
+  // Clean up object URL when item changes or component unmounts
+  useEffect(() => {
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [objectUrl]);
+
+  // Read PDF blob as ArrayBuffer for PdfPreview
+  useEffect(() => {
+    if (!item) {
+      setPdfData(null);
+      return;
+    }
+    const isPdf =
+      item.blob.type === "application/pdf" ||
+      item.mime === "application/pdf" ||
+      item.name.endsWith(".pdf");
+
+    if (isPdf) {
+      setLoaded(false);
+      item.blob.arrayBuffer().then((buf) => setPdfData(buf));
+    } else {
+      setPdfData(null);
+    }
+  }, [item]);
 
   // Reset zoom when item changes
   useEffect(() => {
@@ -41,7 +75,7 @@ export function PreviewModal({ item, onClose }: Props) {
     return () => window.removeEventListener("keydown", handler);
   }, [item, onClose]);
 
-  // Wheel zoom
+  // Wheel zoom (images only)
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
     setZoom((z) => {
@@ -61,7 +95,10 @@ export function PreviewModal({ item, onClose }: Props) {
   if (!item) return null;
 
   const isImage = item.blob.type.startsWith("image/");
-  const objectUrl = URL.createObjectURL(item.blob);
+  const isPdf =
+    item.blob.type === "application/pdf" ||
+    item.mime === "application/pdf" ||
+    item.name.endsWith(".pdf");
 
   return (
     <div
@@ -79,34 +116,38 @@ export function PreviewModal({ item, onClose }: Props) {
           {item.name}
         </span>
         <div className="preview-toolbar__actions">
-          <span className="preview-zoom-label">{Math.round(zoom * 100)}%</span>
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm"
-            onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z - ZOOM_STEP))}
-            disabled={zoom <= MIN_ZOOM}
-            title={t("images.preview")}
-          >
-            −
-          </button>
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm"
-            onClick={() => setZoom(1)}
-            title={t("images.preview")}
-          >
-            ↺
-          </button>
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm"
-            onClick={() => setZoom((z) => Math.min(MAX_ZOOM, z + ZOOM_STEP))}
-            disabled={zoom >= MAX_ZOOM}
-            title={t("images.preview")}
-          >
-            +
-          </button>
-          <div className="preview-toolbar__divider" />
+          {!isPdf && (
+            <>
+              <span className="preview-zoom-label">{Math.round(zoom * 100)}%</span>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z - ZOOM_STEP))}
+                disabled={zoom <= MIN_ZOOM}
+                title={t("images.preview")}
+              >
+                −
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => setZoom(1)}
+                title={t("images.preview")}
+              >
+                ↺
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => setZoom((z) => Math.min(MAX_ZOOM, z + ZOOM_STEP))}
+                disabled={zoom >= MAX_ZOOM}
+                title={t("images.preview")}
+              >
+                +
+              </button>
+              <div className="preview-toolbar__divider" />
+            </>
+          )}
           <button
             type="button"
             className="btn btn-primary btn-sm"
@@ -137,22 +178,26 @@ export function PreviewModal({ item, onClose }: Props) {
               transform: `scale(${zoom})`,
               opacity: loaded ? 1 : 0,
             }}
-            onLoad={() => {
-              setLoaded(true);
-              URL.revokeObjectURL(objectUrl);
-            }}
+            onLoad={() => setLoaded(true)}
             onError={() => setLoaded(true)}
           />
+        ) : isPdf ? (
+          pdfData ? (
+            <div className="preview-pdf-wrapper" style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <PdfPreview data={pdfData} fileName={item.name} />
+            </div>
+          ) : (
+            <div className="preview-loading">
+              <p>{t("documents.signLoadingDoc")}</p>
+            </div>
+          )
         ) : (
           <iframe
             src={objectUrl}
             className="preview-iframe"
             title={item.name}
             style={{ opacity: loaded ? 1 : 0 }}
-            onLoad={() => {
-              setLoaded(true);
-              URL.revokeObjectURL(objectUrl);
-            }}
+            onLoad={() => setLoaded(true)}
           />
         )}
       </div>

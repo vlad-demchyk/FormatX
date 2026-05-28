@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { showToast } from "../../../app/toast";
 import { downloadBlob } from "../../../lib/download";
 import { addHistoryItem } from "../../../lib/storage";
+import { addPinnedEntry } from "../../clipboard/pinnedStorage";
+import { pinIcon } from "../../clipboard/pinIcon";
 import { exportSignedDocument } from "./exportSignedDocument";
 import { getSignatureAspect, normalizedSigHeight, signatureDataUrlToBuffer } from "./trimSignature";
 import type { PlacedSignature, SignDocumentSource } from "./types";
@@ -343,6 +345,34 @@ export function SignCanvas({ source, sigDataUrl, onClose }: SignCanvasProps) {
     }
   }, [sigDataUrl, sigs, source]);
 
+  const handlePin = useCallback(async () => {
+    setExporting(true);
+    try {
+      const signaturePng = await signatureDataUrlToBuffer(sigDataUrl);
+      const placed: PlacedSignature[] = sigs.map(({ dataUrl: _, ...rest }) => rest);
+      const result = await exportSignedDocument({ source, signatures: placed, signaturePng });
+
+      const buf = new Uint8Array(await result.blob.arrayBuffer());
+      let binary = "";
+      for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]!);
+      const b64 = btoa(binary);
+      const dataUrl = `data:${result.mime};base64,${b64}`;
+
+      addPinnedEntry({
+        type: "document",
+        label: result.filename,
+        content: dataUrl,
+        mime: result.mime,
+        size: result.blob.size,
+      });
+      showToast("toast.pinned");
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Export failed");
+    } finally {
+      setExporting(false);
+    }
+  }, [sigDataUrl, sigs, source]);
+
   if (!page) return null;
 
   const displayW = page.nativeWidth * zoom;
@@ -455,6 +485,17 @@ export function SignCanvas({ source, sigDataUrl, onClose }: SignCanvasProps) {
           </button>
         )}
         <span style={{ flex: 1 }} />
+        <button
+          type="button"
+          className="btn btn-ghost"
+          onClick={handlePin}
+          disabled={exporting}
+          title={t("clipboard.pinBtn")}
+          style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+        >
+          <span dangerouslySetInnerHTML={{ __html: pinIcon }} style={{ display: "flex", width: 16, height: 16 }} />
+          {t("clipboard.pinBtn")}
+        </button>
         <button type="button" className="btn btn-primary" onClick={handleDownload} disabled={exporting}>
           {exporting ? "…" : t("documents.signDownload")}
         </button>
