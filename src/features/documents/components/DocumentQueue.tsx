@@ -4,8 +4,7 @@ import type { DocumentQueueItem, DocumentFormatId } from "../types";
 import { closeIcon } from "../../../app/icons";
 import rawViewIcon from "/assets/icons/lsicon_view-filled.svg?raw";
 import { pinIcon } from "../../clipboard/pinIcon";
-import { addPinnedEntry } from "../../clipboard/pinnedStorage";
-import { showToast } from "../../../app/toast";
+import { pinWithCheck } from "../../clipboard/pinWithCheck";
 
 const viewIcon = rawViewIcon
   .replace(/fill="#6366F1"/gi, 'fill="var(--brand-accent)"')
@@ -122,14 +121,13 @@ export function DocumentQueue({
                     const blob = item.blobs![0]!;
                     const reader = new FileReader();
                     reader.onload = () => {
-                      addPinnedEntry({
+                      pinWithCheck({
                         type: "document",
                         label: item.file.name,
                         content: reader.result as string,
                         mime: blob.type,
                         size: blob.size,
                       });
-                      showToast("toast.pinned");
                     };
                     reader.readAsDataURL(blob);
                   }}

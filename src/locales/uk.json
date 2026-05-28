@@ -19,7 +19,7 @@
     "credit": "розроблено {{author}}"
   },
   "locale": { "uk": "УК", "it": "IT", "en": "EN" },
-  "toast": { "copied": "Скопійовано!", "saved": "Збережено", "cleared": "Очищено", "error": "Помилка", "pinned": "Закріплено!" },
+  "toast": { "copied": "Скопійовано!", "saved": "Збережено", "cleared": "Очищено", "error": "Помилка", "pinned": "Закріплено!", "cancel": "Скасувати", "ok": "OK", "duplicate": "'{{name}}' вже існує. Зберегти копію?" },
   "sanitizer": {
     "title": "Текст",
     "mode": "Режим",

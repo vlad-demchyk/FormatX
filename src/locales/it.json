@@ -19,7 +19,7 @@
     "credit": "sviluppato da {{author}}"
   },
   "locale": { "uk": "UK", "it": "IT", "en": "EN" },
-  "toast": { "copied": "Copiato!", "saved": "Salvato", "cleared": "Cancellato", "error": "Errore", "pinned": "Fissato!" },
+  "toast": { "copied": "Copiato!", "saved": "Salvato", "cleared": "Cancellato", "error": "Errore", "pinned": "Fissato!", "cancel": "Annulla", "ok": "OK", "duplicate": "'{{name}}' già esistente. Salvare una copia?" },
   "sanitizer": {
     "title": "Testo",
     "mode": "Modalità",

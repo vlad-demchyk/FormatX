@@ -9,10 +9,53 @@ import { PhotoPage } from "../features/photo/PhotoPage";
 import { ClipboardPage } from "../features/clipboard/ClipboardPage";
 import { SupportPage } from "../features/support/SupportPage";
 import { useAppRoute, type Page } from "../app/hooks/useAppRoute";
+import { useEffect } from "react";
+import { addClipboardEntry } from "../features/clipboard/storage";
+import { showToast } from "../app/toast";
 
 export function ShellLayout() {
   const { t } = useTranslation();
   const { toggle } = useTheme();
+
+  // Global copy/paste capture — works on every tab
+  useEffect(() => {
+    const capture = () => {
+      setTimeout(() => {
+        // Try document selection first
+        let text = document.getSelection()?.toString().trim() ?? "";
+        // Fallback: if focus is on input/textarea, read selected range
+        if (!text) {
+          const el = document.activeElement;
+          if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA")) {
+            const input = el as HTMLInputElement | HTMLTextAreaElement;
+            const start = input.selectionStart ?? 0;
+            const end = input.selectionEnd ?? 0;
+            text = input.value.substring(start, end).trim();
+          }
+        }
+        if (text) {
+          addClipboardEntry(text);
+          showToast("toast.copied");
+        }
+      }, 0);
+    };
+    const onCopy = () => capture();
+    const onPaste = (e: ClipboardEvent) => {
+      const text = e.clipboardData?.getData("text/plain")?.trim();
+      if (text) {
+        setTimeout(() => {
+          addClipboardEntry(text);
+          showToast("toast.copied");
+        }, 0);
+      }
+    };
+    window.addEventListener("copy", onCopy, true);
+    window.addEventListener("paste", onPaste, true);
+    return () => {
+      window.removeEventListener("copy", onCopy, true);
+      window.removeEventListener("paste", onPaste, true);
+    };
+  }, []);
   const { page, setPage, ready } = useAppRoute();
 
   if (!ready) return null;

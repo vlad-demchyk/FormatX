@@ -2,8 +2,7 @@ import { useTranslation } from "react-i18next";
 import type { QueueItem } from "../../images/types";
 import rawViewIcon from "/assets/icons/lsicon_view-filled.svg?raw";import { closeIcon } from "../../../app/icons";
 import { pinIcon } from "../../clipboard/pinIcon";
-import { addPinnedEntry } from "../../clipboard/pinnedStorage";
-import { showToast } from "../../../app/toast";
+import { pinWithCheck } from "../../clipboard/pinWithCheck";
 /** Prepare SVG icon: use brand accent color, remove fixed size so it fills the container. */
 const themedViewIcon = rawViewIcon
   .replace(/fill="#6366F1"/gi, 'fill="var(--brand-accent)"')
@@ -96,14 +95,13 @@ export function QueueItemRow({
               const blob = item.blobs![0]!;
               const reader = new FileReader();
               reader.onload = () => {
-                addPinnedEntry({
+                pinWithCheck({
                   type: "image",
                   label: item.file.name,
                   content: reader.result as string,
                   mime: blob.type,
                   size: blob.size,
                 });
-                showToast("toast.pinned");
               };
               reader.readAsDataURL(blob);
             }}

@@ -1,5 +1,10 @@
 import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import rawUploadIcon from "/assets/icons/material-symbols_upload-rounded.svg?raw";
+
+const uploadIcon = rawUploadIcon
+  .replace(/fill="#6366F1"/gi, 'fill="var(--brand-accent)"')
+  .replace(/\s(width|height)="\d+"/g, " ");
 
 interface Props {
   onFiles: (files: FileList) => void;
@@ -60,7 +65,10 @@ export function DropZone({ onFiles }: Props) {
           if (e.dataTransfer.files.length) onFiles(e.dataTransfer.files);
         }}
       >
-        <p><strong>{t("images.drop")}</strong></p>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginBottom: 8 }}>
+          <span style={{ display: "flex", width: 28, height: 28 }} dangerouslySetInnerHTML={{ __html: uploadIcon }} />
+          <strong>{t("images.drop")}</strong>
+        </div>
         <p style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>{t("images.heicHint")}</p>
       </div>
       <input
