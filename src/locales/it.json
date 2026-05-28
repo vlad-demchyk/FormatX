@@ -128,6 +128,7 @@
     "signDesc": "Firma elettronica dei documenti — in arrivo.",
     "signCreate": "Crea firma",
     "signDraw": "Disegna la tua firma qui sotto",
+    "signEmpty": "Disegna prima la firma",
     "signSave": "Salva firma",
     "signRedo": "Cancella e riprova",
     "signDelete": "Elimina firma",
@@ -204,7 +205,27 @@
     "projectTitle": "Informazioni su FormatX",
     "projectDesc": "FormatX è una PWA orientata alla privacy per convertire immagini, documenti ed elaborare testo — tutto localmente nel browser. Nessun upload, nessun server, nessun tracciamento.",
     "projectFeatures": "Conversione di immagini tra formati, conversione documenti (PDF, DOCX, MD, TXT), PDF→SVG, sanitizzazione e trasformazione del testo, gestione degli appunti, firma elettronica dei documenti.",
-    "docs": "Documentazione",
-    "docsHint": "Guide e riferimento API — in arrivo."
+    "docs": "Documentazione"
+  },
+  "docs": {
+    "select": "Seleziona un documento…",
+    "loading": "Caricamento…",
+    "loadError": "Impossibile caricare il documento",
+    "retry": "Riprova",
+    "selectHint": "Seleziona un documento dall'elenco sopra",
+    "readme": "Panoramica",
+    "architecture": "Architettura",
+    "features": "Funzionalità",
+    "libraries": "Librerie",
+    "storage": "Archiviazione",
+    "converter": "Convertitore documenti",
+    "imageConverter": "Convertitore immagini",
+    "sanitizer": "Text Sanitizer",
+    "i18n": "Internazionalizzazione",
+    "styles": "Sistema di design e CSS",
+    "hooks": "Hook e utility",
+    "pwa": "PWA e distribuzione",
+    "signSection": "Firma documenti",
+    "glossary": "Glossario"
   }
 }

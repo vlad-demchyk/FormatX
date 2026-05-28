@@ -92,6 +92,7 @@ export function SignSection() {
                 maxHeight: 80,
                 width: "auto",
                 height: "auto",
+                objectFit: "contain",
                 border: "1px solid var(--border)",
                 borderRadius: 6,
                 display: "block",

@@ -4,13 +4,12 @@ import { showToast } from "../../../app/toast";
 import { downloadBlob } from "../../../lib/download";
 import { addHistoryItem } from "../../../lib/storage";
 import { exportSignedDocument } from "./exportSignedDocument";
-import { signatureDataUrlToBuffer } from "./trimSignature";
+import { getSignatureAspect, normalizedSigHeight, signatureDataUrlToBuffer } from "./trimSignature";
 import type { PlacedSignature, SignDocumentSource } from "./types";
 
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 4;
 const DEFAULT_SIG_W = 0.18;
-const DEFAULT_SIG_H = 0.08;
 
 interface SignCanvasProps {
   source: SignDocumentSource;
@@ -109,7 +108,7 @@ function SignatureOverlay({
         alt=""
         draggable={false}
         onPointerDown={startMove}
-        style={{ width: "100%", height: "100%", objectFit: "contain", pointerEvents: "auto", userSelect: "none" }}
+        style={{ width: "100%", height: "100%", objectFit: "fill", pointerEvents: "auto", userSelect: "none" }}
       />
       {selected && (
         <>
@@ -159,10 +158,15 @@ export function SignCanvas({ source, sigDataUrl, onClose }: SignCanvasProps) {
   const [undoStack, setUndoStack] = useState<(PlacedSignature & { dataUrl: string })[][]>([]);
   const [redoStack, setRedoStack] = useState<(PlacedSignature & { dataUrl: string })[][]>([]);
   const [exporting, setExporting] = useState(false);
+  const [sigAspect, setSigAspect] = useState(2.5);
   const dragRef = useRef<DragState | null>(null);
 
   const page = source.pages[pageIndex];
   const pageSigs = sigs.filter((s) => s.pageIndex === pageIndex);
+
+  useEffect(() => {
+    getSignatureAspect(sigDataUrl).then(setSigAspect).catch(() => setSigAspect(2.5));
+  }, [sigDataUrl]);
 
   const pushUndo = useCallback(() => {
     setSigs((prev) => {
@@ -180,21 +184,24 @@ export function SignCanvas({ source, sigDataUrl, onClose }: SignCanvasProps) {
       const rect = pageRef.current.getBoundingClientRect();
       const nx = (e.clientX - rect.left) / rect.width;
       const ny = (e.clientY - rect.top) / rect.height;
+      const pg = source.pages[pageIndex];
+      if (!pg) return;
+      const sigH = normalizedSigHeight(DEFAULT_SIG_W, sigAspect, pg.nativeWidth, pg.nativeHeight);
       pushUndo();
       const newSig: PlacedSignature & { dataUrl: string } = {
         id: crypto.randomUUID(),
         pageIndex,
         dataUrl: sigDataUrl,
         x: Math.max(0, Math.min(1 - DEFAULT_SIG_W, nx - DEFAULT_SIG_W / 2)),
-        y: Math.max(0, Math.min(1 - DEFAULT_SIG_H, ny - DEFAULT_SIG_H / 2)),
+        y: Math.max(0, Math.min(1 - sigH, ny - sigH / 2)),
         w: DEFAULT_SIG_W,
-        h: DEFAULT_SIG_H,
+        h: sigH,
         rotation: 0,
       };
       setSigs((prev) => [...prev, newSig]);
       setSelectedId(newSig.id);
     },
-    [pageIndex, pushUndo, sigDataUrl],
+    [pageIndex, pushUndo, sigAspect, sigDataUrl, source.pages],
   );
 
   const handlePageClick = useCallback(
@@ -229,9 +236,12 @@ export function SignCanvas({ source, sigDataUrl, onClose }: SignCanvasProps) {
           }
           if (drag.type === "resize") {
             const dx = (e.clientX - drag.startX) / rect.width;
-            const ratio = drag.startSig.h / drag.startSig.w;
+            const pg = source.pages[drag.startSig.pageIndex];
             const newW = Math.max(0.04, Math.min(0.9, drag.startSig.w + dx));
-            return { ...s, w: newW, h: newW * ratio };
+            const newH = pg
+              ? normalizedSigHeight(newW, sigAspect, pg.nativeWidth, pg.nativeHeight)
+              : newW * (drag.startSig.h / drag.startSig.w);
+            return { ...s, w: newW, h: newH };
           }
           if (drag.type === "rotate") {
             const cx = rect.left + (drag.startSig.x + drag.startSig.w / 2) * rect.width;
@@ -254,7 +264,7 @@ export function SignCanvas({ source, sigDataUrl, onClose }: SignCanvasProps) {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
     };
-  }, []);
+  }, [sigAspect, source.pages]);
 
   const onDragStart = useCallback((state: DragState, e: React.PointerEvent) => {
     pushUndo();

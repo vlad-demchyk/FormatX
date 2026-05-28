@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import coffeeRaw from "/assets/icons/line-md_buy-me-a-coffee-filled.svg?raw";
+import { DocViewer } from "../../components/DocViewer";
 
 const coffeeIcon = coffeeRaw
   .replace(/fill="#6366F1"/gi, 'fill="var(--brand-accent)"')
@@ -114,17 +115,10 @@ export function SupportPage() {
         </div>
       </div>
 
-      {/* Docs pagination (placeholder) */}
-      <div className="card" style={{ padding: "24px", marginTop: 16 }}>
-        <h3 style={{ fontSize: "0.95rem", fontWeight: 600, marginBottom: 8 }}>{t("support.docs")}</h3>
-        <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: 16 }}>
-          {t("support.docsHint")}
-        </p>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <button type="button" className="btn btn-ghost" disabled>←</button>
-          <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>1 / 1</span>
-          <button type="button" className="btn btn-ghost" disabled>→</button>
-        </div>
+      {/* Documentation viewer */}
+      <div className="card" style={{ padding: "16px", marginTop: 16 }}>
+        <h3 style={{ fontSize: "0.95rem", fontWeight: 600, margin: "0 0 12px" }}>{t("support.docs")}</h3>
+        <DocViewer />
       </div>
     </>
   );

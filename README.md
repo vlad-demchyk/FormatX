@@ -84,6 +84,7 @@ src/
 | [STYLES.md](docs/uk/STYLES.md) | Дизайн-система та CSS |
 | [HOOKS.md](docs/uk/HOOKS.md) | React хуки та утиліти |
 | [PWA.md](docs/uk/PWA.md) | PWA та деплой |
+| [SIGN_SECTION.md](docs/uk/SIGN_SECTION.md) | Секція підпису документів |
 | [GLOSSARY.md](docs/uk/GLOSSARY.md) | Глосарій термінів |
 
 ### Research & migration docs

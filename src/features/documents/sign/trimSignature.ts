@@ -45,6 +45,23 @@ export async function trimSignaturePng(dataUrl: string): Promise<string> {
   return out.toDataURL("image/png");
 }
 
+/** Width / height of trimmed signature PNG */
+export async function getSignatureAspect(dataUrl: string): Promise<number> {
+  const img = await loadImage(dataUrl);
+  if (!img.naturalWidth || !img.naturalHeight) return 2.5;
+  return img.naturalWidth / img.naturalHeight;
+}
+
+/** Normalized height matching image aspect on a page of given pixel size */
+export function normalizedSigHeight(
+  normalizedW: number,
+  sigAspect: number,
+  pageWidth: number,
+  pageHeight: number,
+): number {
+  return (normalizedW * pageWidth) / (sigAspect * pageHeight);
+}
+
 export async function signatureDataUrlToBuffer(dataUrl: string): Promise<ArrayBuffer> {
   const res = await fetch(dataUrl);
   return res.arrayBuffer();

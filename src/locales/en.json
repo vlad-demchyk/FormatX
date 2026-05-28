@@ -128,6 +128,7 @@
     "signDesc": "Electronic document signing — coming soon.",
     "signCreate": "Create signature",
     "signDraw": "Draw your signature below",
+    "signEmpty": "Please draw your signature first",
     "signSave": "Save signature",
     "signRedo": "Clear & redo",
     "signDelete": "Delete signature",
@@ -204,7 +205,27 @@
     "projectTitle": "About FormatX",
     "projectDesc": "FormatX is a privacy-first PWA for converting images, documents, and processing text — all locally in your browser. No uploads, no servers, no tracking.",
     "projectFeatures": "Image conversion between formats, document conversion (PDF, DOCX, MD, TXT), PDF→SVG, text sanitization & transformation, clipboard management, electronic document signing.",
-    "docs": "Documentation",
-    "docsHint": "Guides and API reference — coming soon."
+    "docs": "Documentation"
+  },
+  "docs": {
+    "select": "Select a document…",
+    "loading": "Loading…",
+    "loadError": "Failed to load document",
+    "retry": "Retry",
+    "selectHint": "Select a document from the list above",
+    "readme": "Overview",
+    "architecture": "Architecture",
+    "features": "Features",
+    "libraries": "Libraries",
+    "storage": "Storage",
+    "converter": "Document Converter",
+    "imageConverter": "Image Converter",
+    "sanitizer": "Text Sanitizer",
+    "i18n": "Internationalization",
+    "styles": "Design System & CSS",
+    "hooks": "Hooks & Utilities",
+    "pwa": "PWA & Deploy",
+    "signSection": "Document Signing",
+    "glossary": "Glossary"
   }
 }

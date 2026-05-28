@@ -1,5 +1,7 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import SignaturePad from "signature_pad";
+import { showToast } from "../../../app/toast";
 import { trimSignaturePng } from "./trimSignature";
 
 interface Props {
@@ -7,56 +9,77 @@ interface Props {
   onCancel: () => void;
 }
 
+function resizeSignatureCanvas(canvas: HTMLCanvasElement, pad: SignaturePad): void {
+  const ratio = Math.max(window.devicePixelRatio || 1, 1);
+  const cssW = canvas.offsetWidth;
+  const cssH = canvas.offsetHeight;
+  if (cssW < 1 || cssH < 1) return;
+
+  const strokes = pad.toData();
+  canvas.width = Math.floor(cssW * ratio);
+  canvas.height = Math.floor(cssH * ratio);
+
+  const ctx = canvas.getContext("2d")!;
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  pad.clear();
+  if (strokes.length > 0) {
+    pad.fromData(strokes);
+  }
+}
+
 export function SignatureDrawer({ onSave, onCancel }: Props) {
   const { t } = useTranslation();
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const drawing = useRef(false);
+  const padRef = useRef<SignaturePad | null>(null);
+  const [isEmpty, setIsEmpty] = useState(true);
 
-  const getPos = (e: React.MouseEvent | React.TouchEvent) => {
-    const canvas = canvasRef.current!;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    if ("touches" in e) {
-      const touch = e.touches[0]!;
-      return { x: (touch.clientX - rect.left) * scaleX, y: (touch.clientY - rect.top) * scaleY };
-    }
-    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
-  };
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const wrapper = wrapperRef.current;
+    if (!canvas || !wrapper) return;
 
-  const startDraw = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    drawing.current = true;
-    const ctx = canvasRef.current!.getContext("2d")!;
-    const pos = getPos(e);
-    ctx.beginPath();
-    ctx.moveTo(pos.x, pos.y);
-  }, []);
+    const pad = new SignaturePad(canvas, {
+      penColor: "#000000",
+      minWidth: 0.8,
+      maxWidth: 3,
+      velocityFilterWeight: 0.7,
+      minDistance: 2,
+      backgroundColor: "rgba(0,0,0,0)",
+    });
+    padRef.current = pad;
 
-  const draw = useCallback((e: React.MouseEvent | React.TouchEvent) => {
-    if (!drawing.current) return;
-    e.preventDefault();
-    const ctx = canvasRef.current!.getContext("2d")!;
-    const pos = getPos(e);
-    ctx.lineWidth = 3;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.strokeStyle = "#000";
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-  }, []);
+    const syncEmpty = () => setIsEmpty(pad.isEmpty());
+    const resize = () => resizeSignatureCanvas(canvas, pad);
 
-  const stopDraw = useCallback(() => {
-    drawing.current = false;
+    requestAnimationFrame(resize);
+    const ro = new ResizeObserver(() => requestAnimationFrame(resize));
+    ro.observe(wrapper);
+
+    canvas.addEventListener("pointerup", syncEmpty);
+    canvas.addEventListener("pointerleave", syncEmpty);
+
+    return () => {
+      ro.disconnect();
+      canvas.removeEventListener("pointerup", syncEmpty);
+      canvas.removeEventListener("pointerleave", syncEmpty);
+      pad.off();
+      padRef.current = null;
+    };
   }, []);
 
   const clearCanvas = useCallback(() => {
-    const canvas = canvasRef.current!;
-    const ctx = canvas.getContext("2d")!;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    padRef.current?.clear();
+    setIsEmpty(true);
   }, []);
 
   const handleSave = useCallback(async () => {
-    const raw = canvasRef.current!.toDataURL("image/png");
+    const pad = padRef.current;
+    if (!pad || pad.isEmpty()) {
+      showToast("documents.signEmpty");
+      return;
+    }
+    const raw = pad.toDataURL("image/png");
     const trimmed = await trimSignaturePng(raw);
     onSave(trimmed);
   }, [onSave]);
@@ -64,33 +87,35 @@ export function SignatureDrawer({ onSave, onCancel }: Props) {
   return (
     <div style={{ marginTop: 12 }}>
       <p style={{ fontSize: "0.9rem", marginBottom: 8 }}>{t("documents.signDraw")}</p>
-      <canvas
-        ref={canvasRef}
-        width={400}
-        height={160}
-        onMouseDown={startDraw}
-        onMouseMove={draw}
-        onMouseUp={stopDraw}
-        onMouseLeave={stopDraw}
-        onTouchStart={startDraw}
-        onTouchMove={draw}
-        onTouchEnd={stopDraw}
+      <div
+        ref={wrapperRef}
         style={{
           width: "100%",
-          aspectRatio: "400 / 160",
+          maxWidth: 420,
+          margin: "0 auto",
+          aspectRatio: "5 / 2",
           border: "2px dashed var(--border)",
           borderRadius: 8,
           background: "repeating-conic-gradient(#f5f5f5 0% 25%, #fff 0% 50%) 50% / 16px 16px",
-          cursor: "crosshair",
           touchAction: "none",
-          display: "block",
         }}
-      />
+      >
+        <canvas
+          ref={canvasRef}
+          style={{
+            display: "block",
+            width: "100%",
+            height: "100%",
+            cursor: "crosshair",
+            touchAction: "none",
+          }}
+        />
+      </div>
       <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-        <button type="button" className="btn btn-primary" onClick={handleSave}>
+        <button type="button" className="btn btn-primary" onClick={handleSave} disabled={isEmpty}>
           {t("documents.signSave")}
         </button>
-        <button type="button" className="btn btn-secondary" onClick={clearCanvas}>
+        <button type="button" className="btn btn-secondary" onClick={clearCanvas} disabled={isEmpty}>
           {t("documents.signRedo")}
         </button>
         <button type="button" className="btn btn-ghost" onClick={onCancel}>
