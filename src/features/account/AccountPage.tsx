@@ -14,6 +14,7 @@ import {
 import { downloadBlob } from "../../lib/download";
 import { showToast } from "../../app/toast";
 import { useStorage } from "../../app/providers/StorageProvider";
+import { PreviewModal } from "../../components/PreviewModal";
 
 function base64ToBlob(b64: string, mime: string): Blob {
   const binary = atob(b64);
@@ -29,6 +30,7 @@ export function AccountPage() {
   const [items, setItems] = useState<HistoryItem[]>([]);
   const [locale, setLocaleState] = useState<AppLocale>("uk");
   const [settings, setSettingsState] = useState<AppSettings | null>(null);
+  const [previewItem, setPreviewItem] = useState<{ blob: Blob; name: string } | null>(null);
 
   useEffect(() => {
     void getSettings().then((s) => {
@@ -218,22 +220,43 @@ export function AccountPage() {
         <div className="account-list">
           {items.map((item) => (
             <div key={item.id} className="account-item">
-              <div>
-                <strong>{item.filename}</strong>
-                <br />
-                <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-                  {new Date(item.createdAt).toLocaleString()} · {(item.size / 1024).toFixed(0)} KB
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontSize: "1.3rem", flexShrink: 0 }}>
+                  {item.type === "document" ? "📄" : "🖼️"}
                 </span>
+                <div>
+                  <strong>{item.filename}</strong>
+                  <br />
+                  <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                    {new Date(item.createdAt).toLocaleString()} · {(item.size / 1024).toFixed(0)} KB
+                  </span>
+                </div>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
                 {item.blobBase64 && (
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={() => downloadBlob(base64ToBlob(item.blobBase64!, item.mime), item.filename)}
-                  >
-                    {t("images.download")}
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn-ghost"
+                      onClick={() =>
+                        setPreviewItem({
+                          blob: base64ToBlob(item.blobBase64!, item.mime),
+                          name: item.filename,
+                        })
+                      }
+                      title={t("account.preview")}
+                      aria-label={t("account.preview")}
+                    >
+                      👁️
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      onClick={() => downloadBlob(base64ToBlob(item.blobBase64!, item.mime), item.filename)}
+                    >
+                      {t("images.download")}
+                    </button>
+                  </>
                 )}
                 <button
                   type="button"
@@ -247,6 +270,7 @@ export function AccountPage() {
           ))}
         </div>
         {!items.length && <p className="empty-state">{t("account.noHistory")}</p>}
+        <PreviewModal item={previewItem} onClose={() => setPreviewItem(null)} />
       </div>
     </>
   );

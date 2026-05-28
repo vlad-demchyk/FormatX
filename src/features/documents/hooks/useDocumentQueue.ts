@@ -145,7 +145,7 @@ export function useDocumentQueue() {
     const b64 = await blobToBase64(blob);
     await addHistoryItem({
       id: crypto.randomUUID(),
-      type: "image",
+      type: "document",
       filename: buildOutputFilename(item.file.name, item.outputFormat),
       mime: "",
       size: blob.size,

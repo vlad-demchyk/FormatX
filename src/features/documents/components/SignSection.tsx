@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { showToast } from "../../../app/toast";
+import { addHistoryItem } from "../../../lib/storage";
 
 const SIGNATURE_KEY = "formatx-signature";
 
@@ -147,17 +148,29 @@ function SignCanvas({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [sigs, setSigs] = useState<PlacedSignature[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [undoStack, setUndoStack] = useState<PlacedSignature[][]>([]);
+  const [redoStack, setRedoStack] = useState<PlacedSignature[][]>([]);
   const imgRef = useRef<HTMLImageElement | null>(null);
   const sigImgRef = useRef<HTMLImageElement | null>(null);
 
   // Drag / resize / rotate state
   const dragRef = useRef<{
     type: "move" | "resize" | "rotate" | null;
+    resizeEdge: "tl" | "tr" | "bl" | "br" | "t" | "b" | "l" | "r" | null;
     sigId: string | null;
     startX: number;
     startY: number;
     startSig: PlacedSignature | null;
-  }>({ type: null, sigId: null, startX: 0, startY: 0, startSig: null });
+    isPending: boolean;
+  }>({ type: null, resizeEdge: null, sigId: null, startX: 0, startY: 0, startSig: null, isPending: false });
+
+  const pushUndo = useCallback(() => {
+    setSigs((prev) => {
+      setUndoStack((u) => [...u.slice(-20), prev]);
+      return prev;
+    });
+  }, []);
 
   // Load document image
   useEffect(() => {
@@ -215,15 +228,95 @@ function SignCanvas({
         ctx.rotate((s.rotation * Math.PI) / 180);
         ctx.drawImage(sigImg, -s.width / 2, -s.height / 2, s.width, s.height);
         ctx.restore();
+
+        // Selection highlight
+        if (s.id === selectedId) {
+          ctx.save();
+          ctx.strokeStyle = "var(--brand-accent, #6366F1)";
+          ctx.lineWidth = 2;
+          ctx.setLineDash([5, 3]);
+          ctx.strokeRect(s.x - 3, s.y - 3, s.width + 6, s.height + 6);
+          ctx.setLineDash([]);
+          ctx.lineWidth = 1;
+
+          // Corner & edge handles
+          const handles = [
+            { x: s.x - 5, y: s.y - 5 },           // tl
+            { x: s.x + s.width - 5, y: s.y - 5 },  // tr
+            { x: s.x - 5, y: s.y + s.height - 5 }, // bl
+            { x: s.x + s.width - 5, y: s.y + s.height - 5 }, // br
+            { x: s.x + s.width / 2 - 4, y: s.y - 5 },        // t
+            { x: s.x + s.width / 2 - 4, y: s.y + s.height - 5 }, // b
+            { x: s.x - 5, y: s.y + s.height / 2 - 4 },       // l
+            { x: s.x + s.width - 5, y: s.y + s.height / 2 - 4 }, // r
+          ];
+          ctx.fillStyle = "#fff";
+          ctx.strokeStyle = "var(--brand-accent, #6366F1)";
+          for (const h of handles) {
+            ctx.fillRect(h.x, h.y, 10, 10);
+            ctx.strokeRect(h.x, h.y, 10, 10);
+          }
+
+          // Rotation handle
+          const rotX = s.x + s.width / 2;
+          const rotY = s.y - 18;
+          ctx.beginPath();
+          ctx.arc(rotX, rotY, 6, 0, Math.PI * 2);
+          ctx.fillStyle = "var(--brand-accent, #6366F1)";
+          ctx.fill();
+          ctx.strokeStyle = "#fff";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.restore();
+        }
       }
     }
-  }, [getCanvasSize, sigs]);
+  }, [getCanvasSize, sigs, selectedId]);
 
   useEffect(() => {
     render();
   }, [render]);
 
-  // Click to place signature
+  // Hit-test: returns the signature id and what part was hit
+  const hitTest = useCallback(
+    (mx: number, my: number): { id: string; part: "rotate" | "resize" | "move" | "inside" } | null => {
+      for (let i = sigs.length - 1; i >= 0; i--) {
+        const s = sigs[i]!;
+        // Rotation handle
+        const rotX = s.x + s.width / 2;
+        const rotY = s.y - 18;
+        if (Math.hypot(mx - rotX, my - rotY) < 10) return { id: s.id, part: "rotate" };
+
+        // Resize handles (8 handles)
+        const handleSize = 12;
+        // Corners + edges
+        const zones = [
+          { x: s.x, y: s.y, part: "resize" as const },
+          { x: s.x + s.width, y: s.y, part: "resize" as const },
+          { x: s.x, y: s.y + s.height, part: "resize" as const },
+          { x: s.x + s.width, y: s.y + s.height, part: "resize" as const },
+          { x: s.x + s.width / 2, y: s.y, part: "resize" as const },
+          { x: s.x + s.width / 2, y: s.y + s.height, part: "resize" as const },
+          { x: s.x, y: s.y + s.height / 2, part: "resize" as const },
+          { x: s.x + s.width, y: s.y + s.height / 2, part: "resize" as const },
+        ];
+        for (const z of zones) {
+          if (Math.abs(mx - z.x) < handleSize && Math.abs(my - z.y) < handleSize) {
+            return { id: s.id, part: "resize" };
+          }
+        }
+
+        // Inside signature body
+        if (mx >= s.x - 4 && mx <= s.x + s.width + 4 && my >= s.y - 4 && my <= s.y + s.height + 4) {
+          return { id: s.id, part: "move" };
+        }
+      }
+      return null;
+    },
+    [sigs],
+  );
+
+  // Click: if hit a signature → select it; else → place new + deselect
   const handleCanvasClick = useCallback(
     (e: React.MouseEvent) => {
       if (dragRef.current.type) return; // ignore if dragging
@@ -231,25 +324,37 @@ function SignCanvas({
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
       const scaleY = canvas.height / rect.height;
-      const x = (e.clientX - rect.left) * scaleX;
-      const y = (e.clientY - rect.top) * scaleY;
+      const mx = (e.clientX - rect.left) * scaleX;
+      const my = (e.clientY - rect.top) * scaleY;
+
+      const hit = hitTest(mx, my);
+      if (hit) {
+        // Clicked on a signature → select it (or deselect if already selected)
+        setSelectedId((prev) => (prev === hit.id ? null : hit.id));
+        containerRef.current?.focus();
+        return;
+      }
+      // Clicked on empty area → place new signature & deselect
+      setSelectedId(null);
+      containerRef.current?.focus();
+      pushUndo();
       const w = 120;
       const h = 50;
       const newSig: PlacedSignature = {
         id: crypto.randomUUID(),
         dataUrl: sigDataUrl,
-        x: x - w / 2,
-        y: y - h / 2,
+        x: mx - w / 2,
+        y: my - h / 2,
         width: w,
         height: h,
         rotation: 0,
       };
       setSigs((prev) => [...prev, newSig]);
     },
-    [sigDataUrl],
+    [sigDataUrl, hitTest, pushUndo],
   );
 
-  // Mouse down on canvas — detect if on a signature for drag/resize/rotate
+  // Mouse down: detect if on handle for resize/rotate, or body for move
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
       const canvas = canvasRef.current!;
@@ -259,37 +364,45 @@ function SignCanvas({
       const mx = (e.clientX - rect.left) * scaleX;
       const my = (e.clientY - rect.top) * scaleY;
 
-      // Check if clicking on a signature (iterate from top)
-      for (let i = sigs.length - 1; i >= 0; i--) {
-        const s = sigs[i]!;
-        // Rotation handle (top-center circle)
-        const rotHandleX = s.x + s.width / 2;
-        const rotHandleY = s.y - 16;
-        if (Math.hypot(mx - rotHandleX, my - rotHandleY) < 12) {
-          dragRef.current = { type: "rotate", sigId: s.id, startX: mx, startY: my, startSig: { ...s } };
-          return;
-        }
-        // Resize handle (bottom-right corner)
-        const resHandleX = s.x + s.width + 8;
-        const resHandleY = s.y + s.height + 8;
-        if (Math.hypot(mx - resHandleX, my - resHandleY) < 12) {
-          dragRef.current = { type: "resize", sigId: s.id, startX: mx, startY: my, startSig: { ...s } };
-          return;
-        }
-        // Inside signature → move
-        if (mx >= s.x && mx <= s.x + s.width && my >= s.y && my <= s.y + s.height) {
-          dragRef.current = { type: "move", sigId: s.id, startX: mx, startY: my, startSig: { ...s } };
-          return;
-        }
+      const hit = hitTest(mx, my);
+      if (!hit) return;
+
+      const sig = sigs.find((s) => s.id === hit.id)!;
+
+      if (hit.part === "resize" || hit.part === "rotate") {
+        // Handles: start drag immediately
+        dragRef.current = {
+          type: hit.part,
+          resizeEdge: null,
+          sigId: hit.id,
+          startX: mx,
+          startY: my,
+          startSig: { ...sig },
+          isPending: false,
+        };
+        setSelectedId(hit.id);
+        containerRef.current?.focus();
+      } else {
+        // Body: mark as pending — wait for mouse move to confirm drag
+        dragRef.current = {
+          type: "move",
+          resizeEdge: null,
+          sigId: hit.id,
+          startX: mx,
+          startY: my,
+          startSig: { ...sig },
+          isPending: true,
+        };
       }
     },
-    [sigs],
+    [sigs, hitTest],
   );
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
       const drag = dragRef.current;
-      if (!drag.type || !drag.sigId || !drag.startSig) return;
+      if (!drag.sigId || !drag.startSig) return;
+
       const canvas = canvasRef.current!;
       const rect = canvas.getBoundingClientRect();
       const scaleX = canvas.width / rect.width;
@@ -298,6 +411,14 @@ function SignCanvas({
       const my = (e.clientY - rect.top) * scaleY;
       const dx = mx - drag.startX;
       const dy = my - drag.startY;
+
+      // Activate pending drag if mouse moved enough
+      if (drag.isPending) {
+        if (Math.abs(dx) < 3 && Math.abs(dy) < 3) return; // not yet a drag
+        dragRef.current = { ...drag, isPending: false };
+        setSelectedId(drag.sigId);
+        containerRef.current?.focus();
+      }
 
       setSigs((prev) =>
         prev.map((s) => {
@@ -324,32 +445,102 @@ function SignCanvas({
   );
 
   const handleMouseUp = useCallback(() => {
-    dragRef.current = { type: null, sigId: null, startX: 0, startY: 0, startSig: null };
+    dragRef.current = { type: null, resizeEdge: null, sigId: null, startX: 0, startY: 0, startSig: null, isPending: false };
   }, []);
 
-  // Delete selected signature (right-click or keyboard)
+  // Keyboard delete
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === "Delete" || e.key === "Backspace") {
-        const active = dragRef.current;
-        if (active.sigId) {
-          setSigs((prev) => prev.filter((s) => s.id !== active.sigId));
-          dragRef.current = { type: null, sigId: null, startX: 0, startY: 0, startSig: null };
-        }
+      if ((e.key === "Delete" || e.key === "Backspace") && selectedId) {
+        pushUndo();
+        setSigs((prev) => prev.filter((s) => s.id !== selectedId));
+        setSelectedId(null);
       }
     },
-    [],
+    [selectedId, pushUndo],
   );
+
+  // Toolbar actions
+  const handleRemoveSelected = useCallback(() => {
+    if (!selectedId) return;
+    pushUndo();
+    setSigs((prev) => prev.filter((s) => s.id !== selectedId));
+    setSelectedId(null);
+  }, [selectedId, pushUndo]);
+
+  const handleUndo = useCallback(() => {
+    setUndoStack((prev) => {
+      if (prev.length === 0) return prev;
+      const prevSigs = prev[prev.length - 1]!;
+      setSigs((current) => {
+        setRedoStack((r) => [...r, current]);
+        return prevSigs;
+      });
+      return prev.slice(0, -1);
+    });
+  }, []);
+
+  const handleRedo = useCallback(() => {
+    setRedoStack((prev) => {
+      if (prev.length === 0) return prev;
+      const nextSigs = prev[prev.length - 1]!;
+      setSigs((current) => {
+        setUndoStack((u) => [...u, current]);
+        return nextSigs;
+      });
+      return prev.slice(0, -1);
+    });
+  }, []);
 
   // Download
   const handleDownload = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const dataUrl = canvas.toDataURL("image/png");
     const link = document.createElement("a");
     link.download = "signed-document.png";
-    link.href = canvas.toDataURL("image/png");
+    link.href = dataUrl;
     link.click();
+
+    // Save to history
+    const b64 = dataUrl.slice(dataUrl.indexOf(",") + 1);
+    const blobSize = Math.round((b64.length * 3) / 4);
+    addHistoryItem({
+      id: crypto.randomUUID(),
+      type: "document",
+      filename: "signed-document.png",
+      mime: "image/png",
+      size: blobSize,
+      blobBase64: b64,
+    }).catch(() => {});
   }, []);
+
+  // Compute cursor style based on what's under the mouse
+  const cursorRef = useRef<string>("crosshair");
+  const handleMouseEnterCanvas = useCallback(
+    (e: React.MouseEvent) => {
+      const canvas = canvasRef.current!;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const mx = (e.clientX - rect.left) * scaleX;
+      const my = (e.clientY - rect.top) * scaleY;
+      const hit = hitTest(mx, my);
+      if (!hit || hit.part === "inside") {
+        cursorRef.current = hit ? "pointer" : "crosshair";
+      } else if (hit.part === "rotate") {
+        cursorRef.current = "grab";
+      } else if (hit.part === "resize") {
+        cursorRef.current = "nwse-resize";
+      } else {
+        cursorRef.current = "move";
+      }
+      if (canvas.style.cursor !== cursorRef.current) {
+        canvas.style.cursor = cursorRef.current;
+      }
+    },
+    [hitTest],
+  );
 
   return (
     <div style={{ marginTop: 12 }}>
@@ -366,7 +557,7 @@ function SignCanvas({
           ref={canvasRef}
           onClick={handleCanvasClick}
           onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
+          onMouseMove={(e) => { handleMouseMove(e); handleMouseEnterCanvas(e); }}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
           style={{
@@ -376,7 +567,33 @@ function SignCanvas({
           }}
         />
       </div>
+
+      {/* Toolbar */}
       <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+        <button
+          type="button"
+          className="btn btn-ghost"
+          onClick={handleUndo}
+          disabled={undoStack.length === 0}
+          title="Undo"
+        >
+          ↩
+        </button>
+        <button
+          type="button"
+          className="btn btn-ghost"
+          onClick={handleRedo}
+          disabled={redoStack.length === 0}
+          title="Redo"
+        >
+          ↪
+        </button>
+        {selectedId && (
+          <button type="button" className="btn btn-secondary" onClick={handleRemoveSelected}>
+            ✕ {t("images.remove")}
+          </button>
+        )}
+        <span style={{ flex: 1 }} />
         <button type="button" className="btn btn-primary" onClick={handleDownload}>
           {t("documents.signDownload")}
         </button>

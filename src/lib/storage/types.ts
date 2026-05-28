@@ -44,7 +44,7 @@ export interface AppSettings {
 
 export interface HistoryItem {
   id: string;
-  type: "image";
+  type: "image" | "document";
   filename: string;
   mime: string;
   size: number;

@@ -154,9 +154,10 @@
   },
   "account": {
     "title": "Account",
-    "history": "Cronologia immagini (fino a 30 giorni)",
+    "history": "Cronologia",
     "noHistory": "Cronologia vuota",
     "clearHistory": "Svuota cronologia",
+    "preview": "Anteprima",
     "settings": "Impostazioni",
     "notifLabel": "Notifiche di completamento",
     "pwaHint": "Installa FormatX dal menu del browser",
@@ -183,6 +184,11 @@
     "author": "Realizzato da Vladyslav Demchyk",
     "role": "Sviluppatore full-stack e designer UI/UX",
     "about": "Creo strumenti che rendono l'elaborazione quotidiana di file e testo più veloce e semplice. FormatX è il mio progetto personale — realizzato con React, TypeScript e molta cura.",
-    "social": "Trovami online"
+    "social": "Trovami online",
+    "projectTitle": "Informazioni su FormatX",
+    "projectDesc": "FormatX è una PWA orientata alla privacy per convertire immagini, documenti ed elaborare testo — tutto localmente nel browser. Nessun upload, nessun server, nessun tracciamento.",
+    "projectFeatures": "Conversione di immagini tra formati, conversione documenti (PDF, DOCX, MD, TXT), PDF→SVG, sanitizzazione e trasformazione del testo, gestione degli appunti, firma elettronica dei documenti.",
+    "docs": "Documentazione",
+    "docsHint": "Guide e riferimento API — in arrivo."
   }
 }

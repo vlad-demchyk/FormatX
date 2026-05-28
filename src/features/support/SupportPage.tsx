@@ -19,6 +19,17 @@ export function SupportPage() {
     <>
       <h2>{t("support.title")}</h2>
 
+      {/* Project description */}
+      <div className="card" style={{ padding: "28px 24px" }}>
+        <h3 style={{ marginBottom: 12 }}>{t("support.projectTitle")}</h3>
+        <p style={{ fontSize: "0.92rem", lineHeight: 1.6, marginBottom: 12 }}>
+          {t("support.projectDesc")}
+        </p>
+        <p style={{ fontSize: "0.85rem", lineHeight: 1.5, color: "var(--text-muted)", margin: 0 }}>
+          {t("support.projectFeatures")}
+        </p>
+      </div>
+
       {/* Buy me a coffee card */}
       <div className="card" style={{ textAlign: "center", padding: "40px 24px" }}>
         <div
@@ -100,6 +111,19 @@ export function SupportPage() {
             <span dangerouslySetInnerHTML={{ __html: telegramIcon }} style={{ width: 22, height: 22, flexShrink: 0 }} />
             Telegram — @whmachine
           </a>
+        </div>
+      </div>
+
+      {/* Docs pagination (placeholder) */}
+      <div className="card" style={{ padding: "24px", marginTop: 16 }}>
+        <h3 style={{ fontSize: "0.95rem", fontWeight: 600, marginBottom: 8 }}>{t("support.docs")}</h3>
+        <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: 16 }}>
+          {t("support.docsHint")}
+        </p>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <button type="button" className="btn btn-ghost" disabled>←</button>
+          <span style={{ fontSize: "0.85rem", color: "var(--text-muted)" }}>1 / 1</span>
+          <button type="button" className="btn btn-ghost" disabled>→</button>
         </div>
       </div>
     </>
