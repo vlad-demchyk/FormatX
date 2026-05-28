@@ -11,9 +11,13 @@
     "documents": "Documents",
     "clipboard": "Clipboard",
     "classes": "Text",
+    "support": "Support",
     "soon": "v1"
   },
   "theme": { "light": "Light", "dark": "Dark", "toggle": "Toggle theme" },
+  "footer": {
+    "credit": "built by {{author}}"
+  },
   "locale": { "uk": "UK", "it": "IT", "en": "EN" },
   "toast": { "copied": "Copied!", "saved": "Saved", "cleared": "Cleared", "error": "Error" },
   "sanitizer": {
@@ -143,5 +147,15 @@
     "settings": "Settings",
     "notifLabel": "Completion notifications",
     "pwaHint": "Install FormatX from your browser menu"
+  },
+  "support": {
+    "title": "Support",
+    "desc": "If you find FormatX useful, consider supporting the developer.",
+    "detail": "Your support helps keep the project alive and growing.",
+    "cta": "Buy me a coffee",
+    "author": "Built by Vladyslav Demchyk",
+    "role": "Full-stack developer & UI/UX designer",
+    "about": "I create tools that make everyday file and text processing faster and simpler. FormatX is my pet project — built with React, TypeScript, and a lot of care.",
+    "social": "Find me online"
   }
 }

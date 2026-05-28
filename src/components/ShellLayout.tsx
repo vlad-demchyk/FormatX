@@ -7,6 +7,7 @@ import { AccountPage } from "../features/account/AccountPage";
 import { DocumentsPage } from "../features/documents/DocumentsPage";
 import { PhotoPage } from "../features/photo/PhotoPage";
 import { ClipboardPage } from "../features/clipboard/ClipboardPage";
+import { SupportPage } from "../features/support/SupportPage";
 import { useAppRoute, type Page } from "../app/hooks/useAppRoute";
 import { useIsTauri } from "../app/hooks/useIsTauri";
 
@@ -24,9 +25,10 @@ export function ShellLayout() {
     text: t("sanitizer.title"),
     clipboard: t("clipboard.title"),
     account: t("account.title"),
+    support: t("support.title"),
   };
 
-  const isTool = page !== "account";
+  const isTool = page !== "account" && page !== "support";
 
   return (
     <div className="shell">
@@ -38,6 +40,9 @@ export function ShellLayout() {
           <span className="shell-header__title">
             {isTool ? titles[page] : t("appName")}
           </span>
+        </div>
+        <div className="shell-header__branding">
+          <span className="shell-header__credit">{t("footer.credit", { author: "vl.demchyk" })}</span>
         </div>
         <div className="shell-header__actions">
           <button
@@ -67,6 +72,7 @@ export function ShellLayout() {
           {page === "photo" && <PhotoPage />}
           {page === "documents" && <DocumentsPage />}
           {page === "clipboard" && <ClipboardPage />}
+          {page === "support" && <SupportPage />}
           {page === "account" && <AccountPage />}
         </main>
       </div>

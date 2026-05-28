@@ -4,15 +4,16 @@ import { tabIcons } from "../app/icons";
 
 interface Props {
   active: string;
-  onSelect: (route: "photo" | "documents" | "text" | "clipboard") => void;
+  onSelect: (route: "photo" | "documents" | "text" | "clipboard" | "support") => void;
   showClipboard?: boolean;
 }
 
-const ALL_TABS: { route: "photo" | "documents" | "text" | "clipboard"; labelKey: string }[] = [
+const ALL_TABS: { route: "photo" | "documents" | "text" | "clipboard" | "support"; labelKey: string }[] = [
   { route: "photo", labelKey: "tiles.photo" },
   { route: "documents", labelKey: "tiles.documents" },
   { route: "clipboard", labelKey: "tiles.clipboard" },
   { route: "text", labelKey: "tiles.classes" },
+  { route: "support", labelKey: "tiles.support" },
 ];
 
 export function TabBar({ active, onSelect, showClipboard }: Props) {

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getSettings, saveSettings, type TabRoute } from "../../lib/storage";
 
-export type Page = "text" | "photo" | "documents" | "clipboard" | "account";
+export type Page = "text" | "photo" | "documents" | "clipboard" | "account" | "support";
 
 const TAB_ROUTES: TabRoute[] = ["photo", "documents", "text", "clipboard"];
 

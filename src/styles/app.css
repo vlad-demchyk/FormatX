@@ -84,6 +84,22 @@ body {
   flex-shrink: 0;
 }
 
+.shell-header__branding {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.shell-header__credit {
+  font-family: "Georgia", "Times New Roman", serif;
+  font-style: italic;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  opacity: 0.55;
+  letter-spacing: 0.03em;
+}
+
 .shell-header__actions .btn.is-active {
   border-color: var(--brand-accent);
   color: var(--brand-accent);
