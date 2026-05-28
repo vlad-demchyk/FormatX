@@ -1,5 +1,6 @@
 import JSZip from "jszip";
 import { MIME_MAP, type QueueItem } from "./types";
+import { rasterizeWithWorker } from "../../lib/workers/imageWorkerManager";
 
 type HeicModule = typeof import("heic-to");
 let heicModulePromise: Promise<HeicModule> | null = null;
@@ -13,7 +14,15 @@ export function extFromMime(m: string): string {
   if (m === "image/jpeg") return "jpg";
   if (m === "image/png") return "png";
   if (m === "image/webp") return "webp";
+  if (m === "image/svg+xml") return "svg";
   return "bin";
+}
+
+/** Check whether a file is an SVG (by name or MIME type). */
+export function isSvg(file: File): boolean {
+  const n = file.name.toLowerCase();
+  const t = (file.type || "").toLowerCase();
+  return n.endsWith(".svg") || t === "image/svg+xml";
 }
 
 export function heicLikely(file: File): boolean {
@@ -65,7 +74,12 @@ export async function convertItem(
 ): Promise<void> {
   item.status = "converting";
   try {
-    if (shouldDecodeAsHeic(item.file, fmtIn)) {
+    if (isSvg(item.file)) {
+      // SVG → raster via Web Worker
+      // Main thread decodes SVG → ImageBitmap (most reliable),
+      // worker draws it on OffscreenCanvas and exports the Blob.
+      item.blobs = [await rasterizeWithWorker({ source: item.file, outMime, quality })];
+    } else if (shouldDecodeAsHeic(item.file, fmtIn)) {
       let heicTo: HeicModule["heicTo"];
       try {
         ({ heicTo } = await loadHeicModule());

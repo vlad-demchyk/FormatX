@@ -66,7 +66,7 @@ export function DropZone({ onFiles }: Props) {
       <input
         ref={inputRef}
         type="file"
-        accept="image/*,.heic,.heif"
+        accept="image/*,.heic,.heif,.svg"
         multiple
         hidden
         onChange={handleChange}

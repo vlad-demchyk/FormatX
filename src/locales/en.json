@@ -100,7 +100,7 @@
   },
   "account": {
     "title": "Account",
-    "history": "Image history (up to 3 days)",
+    "history": "Image history (up to 30 days)",
     "noHistory": "History is empty",
     "clearHistory": "Clear history",
     "settings": "Settings",

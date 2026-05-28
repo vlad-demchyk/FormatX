@@ -16,6 +16,7 @@ export const MIME_MAP: Record<string, string> = {
   jpeg: "image/jpeg",
   jpg: "image/jpeg",
   webp: "image/webp",
+  svg: "image/svg+xml",
   bmp: "image/bmp",
   gif: "image/gif",
   heic: "image/heic",

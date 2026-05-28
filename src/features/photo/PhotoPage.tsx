@@ -95,6 +95,7 @@ export function PhotoPage() {
             <select id="fmtIn" value={fmtIn} onChange={(e) => setFmtIn(e.target.value)}>
               <option value="auto">{t("images.auto")}</option>
               <option value="heic">HEIC</option>
+              <option value="svg">SVG</option>
               <option value="png">PNG</option>
               <option value="jpeg">JPEG</option>
               <option value="webp">WebP</option>

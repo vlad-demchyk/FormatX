@@ -29,5 +29,5 @@ CREATE TABLE IF NOT EXISTS settings (
 );
 `;
 
-export const RETENTION_DAYS = 3;
-export const MAX_SNIPPETS = 10;
+export const RETENTION_DAYS = 30;
+export const MAX_SNIPPETS = 30;

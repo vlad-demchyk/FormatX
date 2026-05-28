@@ -100,7 +100,7 @@
   },
   "account": {
     "title": "Account",
-    "history": "Cronologia immagini (fino a 3 giorni)",
+    "history": "Cronologia immagini (fino a 30 giorni)",
     "noHistory": "Cronologia vuota",
     "clearHistory": "Svuota cronologia",
     "settings": "Impostazioni",
