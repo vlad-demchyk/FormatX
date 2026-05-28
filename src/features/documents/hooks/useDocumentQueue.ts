@@ -1,8 +1,7 @@
 import { useCallback, useRef, useState } from "react";
-import { addHistoryItem } from "../../../lib/storage";
+import { addHistoryItem } from "../../../lib/db";
 import { downloadBlob } from "../../../lib/download";
 import { createQueueItem, buildOutputFilename } from "../logic";
-import { blobToBase64 } from "../../images/logic";
 import type { DocumentQueueItem, DocumentFormatId } from "../types";
 
 const MAX_HISTORY_BLOB = 5 * 1024 * 1024;
@@ -142,14 +141,13 @@ export function useDocumentQueue() {
   const saveToHistory = useCallback(async (item: DocumentQueueItem) => {
     const blob = item.blobs?.[0];
     if (!blob || blob.size > MAX_HISTORY_BLOB) return;
-    const b64 = await blobToBase64(blob);
     await addHistoryItem({
       id: crypto.randomUUID(),
       type: "document",
       filename: buildOutputFilename(item.file.name, item.outputFormat),
       mime: "",
       size: blob.size,
-      blobBase64: b64,
+      blob,
     });
   }, []);
 

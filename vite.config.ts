@@ -14,7 +14,7 @@ export default defineConfig({
       includeAssets: ["favicon.svg"],
       workbox: {
         maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
-        globIgnores: ["**/sql-asm*", "**/sql-asm-debug*", "**/worker.sql-asm*", "**/wasm/**", "**/assets/runtime/**"],
+        globIgnores: ["**/wasm/**", "**/assets/runtime/**"],
       },
       manifest: {
         name: "FormatX",
@@ -46,7 +46,6 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ["sql.js/dist/sql-wasm.js"],
     exclude: ["pdf-into-svg"],
   },
   assetsInclude: ["**/*.wasm"],
@@ -55,7 +54,6 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes("heic-to")) return "heic-to";
-          if (id.includes("sql.js") || id.includes("sql-wasm")) return "sql";
           if (id.includes("@matbee/libreoffice-converter")) return "libreoffice";
           if (id.includes("pdfjs-dist")) return "pdfjs";
         },

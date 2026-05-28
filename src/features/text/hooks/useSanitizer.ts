@@ -5,8 +5,8 @@ import {
   trimAndSanitize,
   type SanitizeOptions,
 } from "../../sanitizer/logic";
-import { getSettings, saveSettings } from "../../../lib/storage";
-import type { AppSettings, SanitizerSettings } from "../../../lib/storage";
+import { getSettings, saveSettings } from "../../../lib/db";
+import type { AppSettings, SanitizerSettings } from "../../../lib/db";
 
 export interface SanitizerState {
   options: SanitizeOptions;

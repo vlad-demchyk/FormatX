@@ -1,3 +1,5 @@
+// Re-export all types — same contract as old lib/storage/types.ts
+
 export type ThemeMode = "light" | "dark";
 export type AppLocale = "uk" | "it" | "en";
 export type TabRoute = "photo" | "documents" | "text" | "clipboard";
@@ -40,22 +42,4 @@ export interface AppSettings {
   sanitizer: SanitizerSettings;
   hotkey: string;
   llm: LlmConfig;
-}
-
-export interface HistoryItem {
-  id: string;
-  type: "image" | "document";
-  filename: string;
-  mime: string;
-  size: number;
-  blobBase64: string | null;
-  createdAt: number;
-  expiresAt: number;
-}
-
-export interface TextSnippet {
-  id: string;
-  inputPreview: string;
-  outputText: string;
-  createdAt: number;
 }

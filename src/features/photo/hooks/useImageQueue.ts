@@ -6,10 +6,9 @@ import {
   buildZipForItems,
   extFromMime,
   baseName,
-  blobToBase64,
 } from "../../images/logic";
 import type { QueueItem, ImageStatus } from "../../images/types";
-import { addHistoryItem } from "../../../lib/storage";
+import { addHistoryItem } from "../../../lib/db";
 import { downloadBlob } from "../../../lib/download";
 
 const MAX_HISTORY_BLOB = 2 * 1024 * 1024;
@@ -141,7 +140,6 @@ export function useImageQueue() {
     async (item: QueueItem, outMime: string) => {
       const blob = item.blobs?.[0];
       if (!blob || blob.size > MAX_HISTORY_BLOB) return;
-      const b64 = await blobToBase64(blob);
       const ext = extFromMime(outMime);
       await addHistoryItem({
         id: crypto.randomUUID(),
@@ -149,7 +147,7 @@ export function useImageQueue() {
         filename: `${baseName(item.file.name)}.${ext}`,
         mime: outMime,
         size: blob.size,
-        blobBase64: b64,
+        blob,
       });
     },
     [],

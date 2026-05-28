@@ -4,7 +4,7 @@
  * Поважає налаштування користувача (notificationsEnabled).
  */
 
-import { getSettings } from "./storage";
+import { getSettings } from "./db";
 
 /**
  * Запитує дозвіл на сповіщення (для браузера).

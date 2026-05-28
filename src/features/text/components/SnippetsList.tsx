@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { listTextSnippets, type TextSnippet } from "../../../lib/storage";
+import { listTextSnippets, type TextSnippet } from "../../../lib/db";
 import { copyText } from "../../../lib/clipboard";
 import { pinIcon } from "../../clipboard/pinIcon";
 import { pinWithCheck } from "../../clipboard/pinWithCheck";

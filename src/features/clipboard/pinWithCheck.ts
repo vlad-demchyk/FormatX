@@ -14,7 +14,7 @@ export async function pinWithCheck(
   entry: Omit<PinnedEntry, "id" | "createdAt">,
 ): Promise<PinnedEntry[] | null> {
   const { loadPinned } = await import("./pinnedStorage");
-  const existing = loadPinned();
+  const existing = await loadPinned();
   const dup = existing.find(
     (e) => e.label === entry.label && e.type === entry.type,
   );
@@ -30,7 +30,7 @@ export async function pinWithCheck(
   }
 
   // Save to pinned
-  const updated = addPinnedEntry(entry);
+  const updated = await addPinnedEntry(entry);
 
   // Also add text content to clipboard
   if (entry.type === "text") {

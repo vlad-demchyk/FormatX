@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { showToast } from "../../../app/toast";
 import { downloadBlob } from "../../../lib/download";
-import { addHistoryItem } from "../../../lib/storage";
+import { addHistoryItem } from "../../../lib/db";
 import { addPinnedEntry } from "../../clipboard/pinnedStorage";
 import { pinIcon } from "../../clipboard/pinIcon";
 import { exportSignedDocument } from "./exportSignedDocument";
@@ -325,17 +325,13 @@ export function SignCanvas({ source, sigDataUrl, onClose }: SignCanvasProps) {
       const result = await exportSignedDocument({ source, signatures: placed, signaturePng });
       downloadBlob(result.blob, result.filename);
 
-      const buf = new Uint8Array(await result.blob.arrayBuffer());
-      let binary = "";
-      for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]!);
-      const b64 = btoa(binary);
       await addHistoryItem({
         id: crypto.randomUUID(),
         type: "document",
         filename: result.filename,
         mime: result.mime,
         size: result.blob.size,
-        blobBase64: b64,
+        blob: result.blob,
       }).catch(() => {});
       showToast("toast.saved");
     } catch (err) {

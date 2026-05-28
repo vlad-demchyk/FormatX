@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { getSettings, saveSettings, type ThemeMode } from "../../lib/storage";
+import { getSettings, saveSettings, type ThemeMode } from "../../lib/db";
 
 interface ThemeContextValue {
   theme: ThemeMode;

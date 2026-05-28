@@ -8,7 +8,7 @@ import { PreviewModal } from "../../components/PreviewModal";
 import { PlaceholderSection } from "../documents/components/PlaceholderSection";
 import type { QueueItem } from "../images/types";
 import { showNotification } from "../../lib/notifications";
-import { listHistory, clearHistory, deleteHistoryItem, type HistoryItem } from "../../lib/storage";
+import { listHistory, clearHistory, deleteHistoryItem, type HistoryItem } from "../../lib/db";
 import { downloadBlob } from "../../lib/download";
 import { showToast } from "../../app/toast";
 import { closeIcon } from "../../app/icons";
@@ -33,13 +33,6 @@ const SECTIONS: { id: PhotoSection; labelKey: string; descKey: string; icon: str
   { id: "history",  labelKey: "images.sectionHistory",  descKey: "images.sectionHistoryDesc",  icon: themedIcon(historyRaw) },
   { id: "metadata", labelKey: "images.sectionMetadata", descKey: "images.sectionMetadataDesc", icon: themedIcon(metadataRaw) },
 ];
-
-function base64ToBlob(b64: string, mime: string): Blob {
-  const binary = atob(b64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return new Blob([bytes], { type: mime });
-}
 
 export function PhotoPage() {
   const { t, i18n } = useTranslation();
@@ -181,9 +174,9 @@ export function PhotoPage() {
   }, []);
 
   const handleHistoryPreview = useCallback((item: HistoryItem) => {
-    if (item.blobBase64) {
+    if (item.blob) {
       setPreviewItem({
-        blob: base64ToBlob(item.blobBase64, item.mime),
+        blob: item.blob,
         name: item.filename,
       });
     }
@@ -312,7 +305,7 @@ export function PhotoPage() {
                       </div>
                     </div>
                     <div style={{ display: "flex", gap: 8 }}>
-                      {item.blobBase64 && (
+                      {item.blob && (
                         <>
                           <button
                             type="button"
@@ -337,7 +330,7 @@ export function PhotoPage() {
                           <button
                             type="button"
                             className="btn btn-primary"
-                            onClick={() => downloadBlob(base64ToBlob(item.blobBase64!, item.mime), item.filename)}
+                            onClick={() => downloadBlob(item.blob!, item.filename)}
                           >
                             {t("images.download")}
                           </button>

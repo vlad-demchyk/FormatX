@@ -3,7 +3,7 @@ import LanguageDetector from "i18next-browser-languagedetector";
 import uk from "../locales/uk.json";
 import en from "../locales/en.json";
 import it from "../locales/it.json";
-import type { AppLocale } from "../lib/storage/types";
+import type { AppLocale } from "../lib/db/types";
 
 const resources = {
   uk: { translation: uk },

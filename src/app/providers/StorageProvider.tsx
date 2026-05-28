@@ -13,7 +13,7 @@ import {
   type AppSettings,
   type HistoryItem,
   type TextSnippet,
-} from "../../lib/storage";
+} from "../../lib/db";
 
 interface StorageContextValue {
   ready: boolean;

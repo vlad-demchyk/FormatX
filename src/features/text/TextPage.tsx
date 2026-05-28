@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { copyText } from "../../lib/clipboard";
-import { addTextSnippet } from "../../lib/storage";
+import { addTextSnippet } from "../../lib/db";
 import { showToast } from "../../app/toast";
 import { SanitizerForm } from "./components/SanitizerForm";
 import { ClassConverter } from "./components/ClassConverter";

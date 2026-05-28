@@ -5,7 +5,7 @@ import {
   type AppLocale,
   type AppSettings,
   type LlmProvider,
-} from "../../lib/storage";
+} from "../../lib/db";
 import { showToast } from "../../app/toast";
 import { useStorage } from "../../app/providers/StorageProvider";
 

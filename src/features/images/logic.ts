@@ -208,11 +208,3 @@ export async function buildZipForItems(
   if (added === 0) return null;
   return zip.generateAsync({ type: "blob" });
 }
-
-export async function blobToBase64(blob: Blob): Promise<string> {
-  const buf = await blob.arrayBuffer();
-  const bytes = new Uint8Array(buf);
-  let binary = "";
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]!);
-  return btoa(binary);
-}

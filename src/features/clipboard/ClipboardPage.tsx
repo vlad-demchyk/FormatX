@@ -6,7 +6,7 @@ import { showToast } from "../../app/toast";
 import { closeIcon } from "../../app/icons";
 import { loadClipboard, clearClipboard, removeClipboardEntry, addClipboardEntry } from "./storage";
 import type { ClipboardEntry } from "./storage";
-import { loadPinned, removePinnedEntry, clearPinned } from "./pinnedStorage";
+import { loadPinned, removePinnedEntry, clearPinned, getPinnedBlob } from "./pinnedStorage";
 import type { PinnedEntry } from "./pinnedStorage";
 import { PreviewModal } from "../../components/PreviewModal";
 import rawViewIcon from "/assets/icons/lsicon_view-filled.svg?raw";
@@ -36,31 +36,45 @@ const textIcon = themedSvg(rawTextIcon);
 
 type ClipTab = "clipboard" | "pinned";
 
+type PinnedDisplay = PinnedEntry & { thumbUrl?: string };
+
 export function ClipboardPage() {
   const { t } = useTranslation();
   const [tab, setTab] = useState<ClipTab>("clipboard");
   const [entries, setEntries] = useState<ClipboardEntry[]>(() => loadClipboard());
-  const [pinned, setPinned] = useState<PinnedEntry[]>(() => loadPinned());
+  const [pinned, setPinned] = useState<PinnedDisplay[]>([]);
   const [previewItem, setPreviewItem] = useState<{ blob: Blob; name: string } | null>(null);
   const [pinText, setPinText] = useState("");
   const pinFileRef = useRef<HTMLInputElement>(null);
 
-  function dataUrlToBlob(dataUrl: string): Blob {
-    const [header, b64] = dataUrl.split(",", 2);
-    const mime = header?.split(":")[1]?.split(";")[0] || "application/octet-stream";
-    const raw = atob(b64 || "");
-    const buf = new Uint8Array(raw.length);
-    for (let i = 0; i < raw.length; i++) buf[i] = raw.charCodeAt(i);
-    return new Blob([buf], { type: mime });
-  }
-
-  const refresh = useCallback(() => {
+  const refresh = useCallback(async () => {
     setEntries(loadClipboard());
-    setPinned(loadPinned());
+    const p = await loadPinned();
+
+    // Load thumbnails for image entries
+    const display: PinnedDisplay[] = await Promise.all(
+      p.map(async (entry) => {
+        if (entry.type === "image") {
+          const blob = await getPinnedBlob(entry.id);
+          if (blob) {
+            return { ...entry, thumbUrl: URL.createObjectURL(blob) };
+          }
+        }
+        return entry;
+      }),
+    );
+
+    // Revoke old thumbnail URLs
+    setPinned((prev) => {
+      for (const old of prev) {
+        if (old.thumbUrl) URL.revokeObjectURL(old.thumbUrl);
+      }
+      return display;
+    });
   }, []);
 
   useEffect(() => {
-    refresh();
+    void refresh();
     const interval = setInterval(refresh, 2000);
     return () => clearInterval(interval);
   }, [refresh]);
@@ -105,20 +119,28 @@ export function ClipboardPage() {
     if (updated) setPinned(updated);
   }, []);
 
-  const handleUnpin = useCallback((id: string) => {
-    setPinned(removePinnedEntry(id));
+  const handleUnpin = useCallback(async (id: string) => {
+    const updated = await removePinnedEntry(id);
+    setPinned(updated);
     showToast("toast.cleared");
   }, []);
 
-  const handleClearPinned = useCallback(() => {
-    clearPinned();
+  const handleClearPinned = useCallback(async () => {
+    await clearPinned();
     setPinned([]);
     showToast("toast.cleared");
   }, []);
 
   /* ── Pinned item actions ── */
-  const handleDownloadPinned = useCallback((entry: PinnedEntry) => {
-    const blob = dataUrlToBlob(entry.content);
+  const handleDownloadPinned = useCallback(async (entry: PinnedEntry) => {
+    let blob: Blob;
+    if (entry.type === "text") {
+      blob = new Blob([entry.content], { type: "text/plain" });
+    } else {
+      const b = await getPinnedBlob(entry.id);
+      if (!b) return;
+      blob = b;
+    }
     const ext = entry.mime
       ? `.${entry.mime.split("/")[1]?.replace("+", ".") || "bin"}`
       : "";
@@ -133,21 +155,28 @@ export function ClipboardPage() {
     }
     if (entry.type === "image") {
       try {
-        const blob = dataUrlToBlob(entry.content);
+        const blob = await getPinnedBlob(entry.id);
+        if (!blob) return;
         await navigator.clipboard.write([
           new ClipboardItem({ [blob.type]: blob }),
         ]);
         showToast("toast.copied");
         return;
       } catch {
-        // Fallback: download if clipboard write fails
-        handleDownloadPinned(entry);
+        void handleDownloadPinned(entry);
         return;
       }
     }
-    // Documents: download instead of copying raw data URL
-    handleDownloadPinned(entry);
+    void handleDownloadPinned(entry);
   }, [handleDownloadPinned]);
+
+  const handlePreviewPinned = useCallback(async (entry: PinnedEntry) => {
+    if (entry.type === "text") return;
+    const blob = await getPinnedBlob(entry.id);
+    if (blob) {
+      setPreviewItem({ blob, name: entry.label });
+    }
+  }, []);
 
   const handlePinText = useCallback(async () => {
     const text = pinText.trim();
@@ -291,15 +320,10 @@ export function ClipboardPage() {
                       cursor: "pointer", background: "var(--surface)",
                       display: "flex", alignItems: "center", justifyContent: "center",
                     }}
-                    onClick={() =>
-                      setPreviewItem({
-                        blob: dataUrlToBlob(entry.content),
-                        name: entry.label,
-                      })
-                    }
+                    onClick={() => handlePreviewPinned(entry)}
                   >
                     <img
-                      src={entry.content}
+                      src={entry.thumbUrl || entry.content}
                       alt={entry.label}
                       style={{ height: "100%", width: "auto", display: "block", borderRadius: 6, objectFit: "contain" }}
                     />
@@ -311,12 +335,7 @@ export function ClipboardPage() {
                       display: "flex", alignItems: "center", gap: 8,
                       padding: "8px 0", cursor: "pointer",
                     }}
-                    onClick={() =>
-                      setPreviewItem({
-                        blob: dataUrlToBlob(entry.content),
-                        name: entry.label,
-                      })
-                    }
+                    onClick={() => handlePreviewPinned(entry)}
                   >
                     <span style={{ display: "flex", width: 24, height: 24, flexShrink: 0 }} dangerouslySetInnerHTML={{ __html: docsIcon }} />
                     <span style={{ fontSize: "0.85rem", color: "var(--text-muted)", wordBreak: "break-all" }}>
@@ -338,12 +357,7 @@ export function ClipboardPage() {
                         type="button"
                         className="btn btn-ghost btn-sm btn-icon"
                         title={t("account.preview")}
-                        onClick={() =>
-                          setPreviewItem({
-                            blob: dataUrlToBlob(entry.content),
-                            name: entry.label,
-                          })
-                        }
+                        onClick={() => handlePreviewPinned(entry)}
                       >
                         <span dangerouslySetInnerHTML={{ __html: viewIcon }} style={{ display: "flex", width: 18, height: 18 }} />
                       </button>

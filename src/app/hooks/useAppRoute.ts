@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { getSettings, saveSettings, type TabRoute } from "../../lib/storage";
+import { getSettings, saveSettings, type TabRoute } from "../../lib/db";
 
 export type Page = "text" | "photo" | "documents" | "clipboard" | "account" | "support";
 

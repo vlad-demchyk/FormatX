@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
 import { i18n, initI18n } from "../i18n";
-import { getSettings } from "../../lib/storage";
+import { getSettings } from "../../lib/db";
 
 interface Props {
   children: ReactNode;
