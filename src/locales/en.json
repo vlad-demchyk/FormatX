@@ -95,7 +95,8 @@
     "statusConverting": "Converting…",
     "statusPending": "Pending",
     "noReadyZip": "No ready files for ZIP",
-    "auto": "Auto"
+    "auto": "Auto",
+    "cancel": "Cancel"
   },
   "documents": {
     "title": "Documents",
@@ -122,6 +123,18 @@
     "summarizeDesc": "Automatic document summarization — coming soon.",
     "translateDesc": "Document translation — coming soon.",
     "signDesc": "Electronic document signing — coming soon.",
+    "signCreate": "Create signature",
+    "signDraw": "Draw your signature below",
+    "signSave": "Save signature",
+    "signRedo": "Clear & redo",
+    "signDelete": "Delete signature",
+    "signSaved": "Signature saved!",
+    "signDeleted": "Signature deleted",
+    "signAddDoc": "Add document to sign",
+    "signDrop": "Drop an image or click to browse",
+    "signCanvasTitle": "Sign the document",
+    "signPlace": "Click on the document to place your signature",
+    "signDownload": "Download signed document",
     "pdf2svgTitle": "PDF → SVG",
     "pdf2svgDesc": "Convert PDF pages to vector SVG. Images stay sharp at any zoom level.",
     "pdf2svgDrop": "Drop a PDF file or click to browse",

@@ -95,7 +95,8 @@
     "statusConverting": "Conversione…",
     "statusPending": "In attesa",
     "noReadyZip": "Nessun file pronto per ZIP",
-    "auto": "Auto"
+    "auto": "Auto",
+    "cancel": "Annulla"
   },
   "documents": {
     "title": "Documenti",
@@ -122,6 +123,18 @@
     "summarizeDesc": "Riassunto automatico dei documenti — in arrivo.",
     "translateDesc": "Traduzione documenti — in arrivo.",
     "signDesc": "Firma elettronica dei documenti — in arrivo.",
+    "signCreate": "Crea firma",
+    "signDraw": "Disegna la tua firma qui sotto",
+    "signSave": "Salva firma",
+    "signRedo": "Cancella e riprova",
+    "signDelete": "Elimina firma",
+    "signSaved": "Firma salvata!",
+    "signDeleted": "Firma eliminata",
+    "signAddDoc": "Aggiungi documento da firmare",
+    "signDrop": "Trascina un'immagine o clicca per scegliere",
+    "signCanvasTitle": "Firma il documento",
+    "signPlace": "Clicca sul documento per posizionare la firma",
+    "signDownload": "Scarica documento firmato",
     "pdf2svgTitle": "PDF → SVG",
     "pdf2svgDesc": "Converti pagine PDF in SVG vettoriale. Le immagini rimangono nitide a qualsiasi ingrandimento.",
     "pdf2svgDrop": "Trascina un PDF o clicca per scegliere",

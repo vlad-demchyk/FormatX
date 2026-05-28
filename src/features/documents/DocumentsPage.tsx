@@ -6,19 +6,34 @@ import { DocumentQueue } from "./components/DocumentQueue";
 import { DocumentToolbar } from "./components/DocumentToolbar";
 import { PdfToSvgSection } from "./components/PdfToSvgSection";
 import { PlaceholderSection } from "./components/PlaceholderSection";
+import { SignSection } from "./components/SignSection";
 import { PreviewModal } from "../../components/PreviewModal";
 import { convertDocument, findConverter } from "./converter/registry";
 import { allOutputFormats, formatLabel } from "./formatRegistry";
 import type { DocumentQueueItem, DocumentFormatId } from "./types";
 
+import convertRaw from "/assets/icons/streamline-ultimate_coding-apps-website-data-conversion-documents-1.svg?raw";
+import summarizeRaw from "/assets/icons/material-symbols_summarize-outline.svg?raw";
+import signRaw from "/assets/icons/mdi_sign.svg?raw";
+import frame4Raw from "/assets/icons/Frame 4.svg?raw";
+import translateRaw from "/assets/icons/ant-design_global-outlined.svg?raw";
+
+function themedIcon(raw: string): string {
+  return raw
+    .replace(/fill="#6366F1"/gi, 'fill="currentColor"')
+    .replace(/stroke="#6366F1"/gi, 'stroke="currentColor"')
+    .replace(/fill="black"/gi, 'fill="currentColor"')
+    .replace(/stroke="black"/gi, 'stroke="currentColor"');
+}
+
 type DocSection = "convert" | "summarize" | "translate" | "sign" | "pdf2svg";
 
 const SECTIONS: { id: DocSection; labelKey: string; descKey: string; icon: string }[] = [
-  { id: "convert",   labelKey: "documents.sectionConvert",   descKey: "documents.sectionConvertDesc",   icon: "🔄" },
-  { id: "summarize", labelKey: "documents.sectionSummarize", descKey: "documents.sectionSummarizeDesc", icon: "📝" },
-  { id: "translate", labelKey: "documents.sectionTranslate", descKey: "documents.sectionTranslateDesc", icon: "🌐" },
-  { id: "sign",      labelKey: "documents.sectionSign",      descKey: "documents.sectionSignDesc",      icon: "✍️" },
-  { id: "pdf2svg",   labelKey: "documents.sectionPdf2Svg",   descKey: "documents.sectionPdf2SvgDesc",   icon: "📄→🖼️" },
+  { id: "convert",   labelKey: "documents.sectionConvert",   descKey: "documents.sectionConvertDesc",   icon: themedIcon(convertRaw) },
+  { id: "summarize", labelKey: "documents.sectionSummarize", descKey: "documents.sectionSummarizeDesc", icon: themedIcon(summarizeRaw) },
+  { id: "translate", labelKey: "documents.sectionTranslate", descKey: "documents.sectionTranslateDesc", icon: themedIcon(translateRaw) },
+  { id: "sign",      labelKey: "documents.sectionSign",      descKey: "documents.sectionSignDesc",      icon: themedIcon(signRaw) },
+  { id: "pdf2svg",   labelKey: "documents.sectionPdf2Svg",   descKey: "documents.sectionPdf2SvgDesc",   icon: themedIcon(frame4Raw) },
 ];
 
 export function DocumentsPage() {
@@ -126,7 +141,7 @@ export function DocumentsPage() {
               className="doc-card"
               onClick={() => setSection(s.id)}
             >
-              <span className="doc-card__icon" aria-hidden="true">{s.icon}</span>
+              <span className="doc-card__icon" aria-hidden="true" dangerouslySetInnerHTML={{ __html: s.icon }} />
               <span className="doc-card__title">{t(s.labelKey)}</span>
               <span className="doc-card__desc">{t(s.descKey)}</span>
             </button>
@@ -222,9 +237,7 @@ export function DocumentsPage() {
             </div>
           )}
           {section === "sign" && (
-            <div className="card">
-              <PlaceholderSection titleKey="documents.sectionSign" descKey="documents.signDesc" icon="✍️" />
-            </div>
+            <SignSection />
           )}
         </>
       )}

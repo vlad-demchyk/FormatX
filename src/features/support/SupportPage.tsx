@@ -81,7 +81,7 @@ export function SupportPage() {
             GitHub — vlad-demchyk
           </a>
           <a
-            href="https://www.linkedin.com/in/vladyslav-demchyk"
+            href="https://www.linkedin.com/in/vlad-demchyk-1a75b3327/"
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-ghost"
@@ -91,14 +91,14 @@ export function SupportPage() {
             LinkedIn
           </a>
           <a
-            href="https://t.me/vl_demchyk"
+            href="https://t.me/whmachine"
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-ghost"
             style={{ display: "inline-flex", alignItems: "center", gap: 10, justifyContent: "flex-start", textDecoration: "none", padding: "10px 14px" }}
           >
             <span dangerouslySetInnerHTML={{ __html: telegramIcon }} style={{ width: 22, height: 22, flexShrink: 0 }} />
-            Telegram — @vl_demchyk
+            Telegram — @whmachine
           </a>
         </div>
       </div>
