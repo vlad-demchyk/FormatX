@@ -7,6 +7,7 @@ export type DocStatus = "pending" | "converting" | "ready" | "error";
 export interface DocumentQueueItem {
   id: string;
   file: File;
+  data: ArrayBuffer;
   inputFormat: DocumentFormatId;
   outputFormat: DocumentFormatId;
   status: DocStatus;
@@ -18,6 +19,7 @@ export interface DocumentQueueItem {
 export interface ConversionRequest {
   id: string;
   file: File;
+  data: ArrayBuffer;
   inputFormat: DocumentFormatId;
   outputFormat: DocumentFormatId;
 }

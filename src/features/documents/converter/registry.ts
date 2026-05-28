@@ -5,6 +5,9 @@ import { PdfJsAdapter } from "./pdfJsAdapter";
 import { MarkedAdapter } from "./markedAdapter";
 import { XlsxAdapter } from "./xlsxAdapter";
 import { PdfToDocxAdapter } from "./pdfToDocxAdapter";
+import { TextToMarkdownAdapter } from "./textToMarkdownAdapter";
+import { MarkdownToDocxAdapter } from "./markdownToDocxAdapter";
+import { MarkdownToPdfAdapter } from "./markdownToPdfAdapter";
 import type { DocumentFormatId, ConversionRequest, ConversionResult } from "../types";
 
 const converters: DocumentConverter[] = [
@@ -14,6 +17,9 @@ const converters: DocumentConverter[] = [
   new PdfJsAdapter(),
   new MarkedAdapter(),
   new XlsxAdapter(),
+  new TextToMarkdownAdapter(),
+  new MarkdownToDocxAdapter(),
+  new MarkdownToPdfAdapter(),
 ];
 
 /** Find the first converter that can handle this conversion */

@@ -5,11 +5,12 @@ import { DocumentDropZone } from "./components/DocumentDropZone";
 import { DocumentQueue } from "./components/DocumentQueue";
 import { DocumentToolbar } from "./components/DocumentToolbar";
 import { convertDocument, findConverter } from "./converter/registry";
-import type { DocumentFormatId, DocumentQueueItem } from "./types";
+import { allOutputFormats, formatLabel } from "./formatRegistry";
+import type { DocumentQueueItem, DocumentFormatId } from "./types";
 
 export function DocumentsPage() {
   const { t } = useTranslation();
-  const [defaultOutput, setDefaultOutput] = useState<DocumentFormatId>("pdf");
+  const [globalFormat, setGlobalFormat] = useState<DocumentFormatId>("md");
 
   const {
     queue,
@@ -20,6 +21,7 @@ export function DocumentsPage() {
     selectNone,
     toggleSelect,
     updateOutputFormat,
+    updateOutputFormatForSelected,
     markReady,
     markError,
     markConverting,
@@ -27,7 +29,7 @@ export function DocumentsPage() {
     saveToHistory,
   } = useDocumentQueue();
 
-  const handleFiles = useCallback((files: FileList) => addFiles(files, defaultOutput), [addFiles, defaultOutput]);
+  const handleFiles = useCallback((files: FileList) => addFiles(files, "md"), [addFiles]);
 
   const handleConvert = useCallback(async (item: DocumentQueueItem) => {
     console.log("[FormatX] Convert started", { file: item.file.name, size: item.file.size, from: item.inputFormat, to: item.outputFormat });
@@ -47,6 +49,7 @@ export function DocumentsPage() {
       const result = await convertDocument({
         id: item.id,
         file: item.file,
+        data: item.data,
         inputFormat: item.inputFormat,
         outputFormat: item.outputFormat,
       });
@@ -91,21 +94,28 @@ export function DocumentsPage() {
       <h2>{t("documents.title")}</h2>
 
       <div className="card">
-        <div className="images-row">
-          <div className="field">
-            <label>{t("documents.outputFormat")}</label>
-            <select
-              value={defaultOutput}
-              onChange={(e) => setDefaultOutput(e.target.value as DocumentFormatId)}
-            >
-              <option value="html">HTML (перегляд)</option>
-              <option value="txt">TXT (текст)</option>
-              <option value="docx">DOCX (Word)</option>
-              <option value="csv">CSV (таблиці)</option>
-            </select>
-          </div>
-        </div>
         <DocumentDropZone onFiles={handleFiles} />
+        {queue.length > 1 && (
+          <div className="format-bar">
+            <span className="format-bar__label">{t("documents.outputFormat")}</span>
+            <select
+              value={globalFormat}
+              onChange={(e) => setGlobalFormat(e.target.value as DocumentFormatId)}
+            >
+              {allOutputFormats().map((fmt) => (
+                <option key={fmt} value={fmt}>{formatLabel(fmt)}</option>
+              ))}
+            </select>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => updateOutputFormatForSelected(globalFormat)}
+              style={{ fontSize: "0.8rem", padding: "4px 10px" }}
+            >
+              {t("documents.applyToSelected")}
+            </button>
+          </div>
+        )}
         <DocumentToolbar
           queue={queue}
           onConvertAll={handleConvertAll}

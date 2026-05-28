@@ -14,7 +14,7 @@ export class MarkedAdapter implements DocumentConverter {
   }
 
   async convert(request: ConversionRequest): Promise<ConversionResult> {
-    const text = await request.file.text();
+    const text = new TextDecoder().decode(request.data);
     const stem = request.file.name.replace(/\.[^.]+$/, "");
 
     if (request.outputFormat === "txt") {

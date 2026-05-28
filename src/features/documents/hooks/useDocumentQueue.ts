@@ -11,11 +11,16 @@ export function useDocumentQueue() {
   const [queue, setQueue] = useState<DocumentQueueItem[]>([]);
   const queueRef = useRef<DocumentQueueItem[]>([]);
 
-  const addFiles = useCallback((fileList: FileList, outputFormat: DocumentFormatId) => {
+  const addFiles = useCallback(async (fileList: FileList, outputFormat: DocumentFormatId) => {
+    // Start ALL reads synchronously before any await. This ensures the
+    // browser begins reading each file before the event handler returns,
+    // preventing NotReadableError from invalidated file references.
+    const files = Array.from(fileList);
+    const reads = files.map((f) => f.arrayBuffer());
+    const buffers = await Promise.all(reads);
     const newItems: DocumentQueueItem[] = [];
-    for (const file of Array.from(fileList)) {
-      const item = createQueueItem(file, outputFormat);
-      // Don't validate on add — error shows only on Convert click
+    for (let i = 0; i < files.length; i++) {
+      const item = createQueueItem(files[i]!, buffers[i]!, outputFormat);
       newItems.push(item);
     }
     setQueue((prev) => {
@@ -71,6 +76,7 @@ export function useDocumentQueue() {
         const err = validateItem({
           id: item.id,
           file: item.file,
+          data: item.data,
           inputFormat: item.inputFormat,
           outputFormat,
         });
@@ -82,6 +88,30 @@ export function useDocumentQueue() {
           blobs: null,
         };
         return updated;
+      });
+      queueRef.current = next;
+      return next;
+    });
+  }, []);
+
+  const updateOutputFormatForSelected = useCallback((outputFormat: DocumentFormatId) => {
+    setQueue((prev) => {
+      const next = prev.map((item) => {
+        if (!item.selected) return item;
+        const err = validateItem({
+          id: item.id,
+          file: item.file,
+          data: item.data,
+          inputFormat: item.inputFormat,
+          outputFormat,
+        });
+        return {
+          ...item,
+          outputFormat,
+          status: err ? "error" as const : "pending" as const,
+          error: err,
+          blobs: null,
+        };
       });
       queueRef.current = next;
       return next;
@@ -147,6 +177,7 @@ export function useDocumentQueue() {
     selectNone,
     toggleSelect,
     updateOutputFormat,
+    updateOutputFormatForSelected,
     markReady,
     markError,
     markConverting,

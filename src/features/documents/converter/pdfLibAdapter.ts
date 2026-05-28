@@ -14,8 +14,7 @@ export class PdfLibAdapter implements DocumentConverter {
   }
 
   async convert(request: ConversionRequest): Promise<ConversionResult> {
-    const buf = await request.file.arrayBuffer();
-    const srcDoc = await PDFDocument.load(buf);
+    const srcDoc = await PDFDocument.load(request.data);
 
     // If single PDF, return as-is (copy)
     const pdfBytes = await srcDoc.save();

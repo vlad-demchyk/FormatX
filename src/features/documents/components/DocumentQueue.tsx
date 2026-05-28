@@ -38,21 +38,18 @@ export function DocumentQueue({
               checked={item.selected}
               onChange={() => onToggleSelect(item.id)}
             />
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ flex: 1, minWidth: 0, gridColumn: "2 / 4" }}>
               <div style={{ fontWeight: 600, wordBreak: "break-all", fontSize: "0.9rem" }}>
                 {item.file.name}
               </div>
               <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: 4 }}>
                 {formatLabel(item.inputFormat)} · {(item.file.size / 1024).toFixed(0)} KB
               </div>
-              <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 8 }}>
-                <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                  {t("documents.to")}
-                </span>
+              <div className="format-per-file">
+                <span className="format-per-file__label">{t("documents.to")}</span>
                 <select
                   value={item.outputFormat}
                   onChange={(e) => onOutputFormatChange(item.id, e.target.value as DocumentFormatId)}
-                  style={{ fontSize: "0.8rem", padding: "2px 6px", borderRadius: 4 }}
                 >
                   {outFormats.map((fmt: DocumentFormatId) => (
                     <option key={fmt} value={fmt}>{formatLabel(fmt)}</option>
@@ -97,7 +94,7 @@ export function DocumentQueue({
               >
                 {t("images.download")}
               </button>
-              {onPreview && item.outputFormat === "html" && item.status === "ready" && item.blobs?.[0] && (
+              {onPreview && (item.outputFormat === "html" || item.outputFormat === "md") && item.status === "ready" && item.blobs?.[0] && (
                 <button
                   type="button"
                   className="btn btn-secondary"

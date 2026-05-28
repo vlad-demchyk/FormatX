@@ -3,7 +3,7 @@ import type { DocumentFormatId, ConversionRequest, ConversionResult } from "../t
 import type { DocumentConverter } from "./interface";
 
 /**
- * pdf.js adapter: extract text from PDF documents, render as HTML preview.
+ * pdf.js adapter: extract text from PDF documents, render as HTML/Markdown/TXT.
  * Lightweight (~1.5 MB), no WASM needed.
  */
 export class PdfJsAdapter implements DocumentConverter {
@@ -11,7 +11,7 @@ export class PdfJsAdapter implements DocumentConverter {
   private workerSrcSet = false;
 
   canConvert(from: DocumentFormatId, to: DocumentFormatId): boolean {
-    return from === "pdf" && (to === "txt" || to === "html");
+    return from === "pdf" && (to === "txt" || to === "html" || to === "md");
   }
 
   async convert(request: ConversionRequest): Promise<ConversionResult> {
@@ -20,8 +20,7 @@ export class PdfJsAdapter implements DocumentConverter {
       this.workerSrcSet = true;
     }
 
-    const arrayBuffer = await request.file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const pdf = await pdfjsLib.getDocument({ data: request.data }).promise;
     const pages: string[] = [];
     const stem = request.file.name.replace(/\.[^.]+$/, "");
 
@@ -35,6 +34,17 @@ export class PdfJsAdapter implements DocumentConverter {
     }
 
     const fullText = pages.join("\n\n---\n\n");
+
+    if (request.outputFormat === "md") {
+      const md = pages
+        .map((text, i) => `## Page ${i + 1}\n\n${text}`)
+        .join("\n\n---\n\n");
+      return {
+        blob: new Blob([md], { type: "text/markdown" }),
+        mime: "text/markdown",
+        filename: `${stem}.md`,
+      };
+    }
 
     if (request.outputFormat === "html") {
       const body = pages

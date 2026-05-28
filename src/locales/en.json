@@ -83,6 +83,7 @@
     "to": "→",
     "drop": "Drop files here or click to browse",
     "preview": "Preview",
+    "applyToSelected": "Apply to selected",
     "wasmLoading": "Loading conversion module…",
     "wasmError": "Failed to load conversion module"
   },

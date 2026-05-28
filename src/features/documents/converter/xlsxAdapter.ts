@@ -1,9 +1,10 @@
 import * as XLSX from "xlsx";
 import type { DocumentFormatId, ConversionRequest, ConversionResult } from "../types";
 import type { DocumentConverter } from "./interface";
+import { htmlToMarkdown } from "./htmlToMarkdown";
 
 /**
- * xlsx adapter: Excel → HTML table, CSV, TXT.
+ * xlsx adapter: Excel → HTML table, CSV, TXT, Markdown.
  * Uses SheetJS (xlsx) — lightweight, no WASM.
  */
 export class XlsxAdapter implements DocumentConverter {
@@ -11,12 +12,11 @@ export class XlsxAdapter implements DocumentConverter {
 
   canConvert(from: DocumentFormatId, to: DocumentFormatId): boolean {
     if (from !== "xlsx" && from !== "xls" && from !== "csv") return false;
-    return to === "html" || to === "csv" || to === "txt";
+    return to === "html" || to === "csv" || to === "txt" || to === "md";
   }
 
   async convert(request: ConversionRequest): Promise<ConversionResult> {
-    const arrayBuffer = await request.file.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer, { type: "array" });
+    const workbook = XLSX.read(request.data, { type: "array" });
     const stem = request.file.name.replace(/\.[^.]+$/, "");
 
     if (request.outputFormat === "csv") {
@@ -25,6 +25,21 @@ export class XlsxAdapter implements DocumentConverter {
         blob: new Blob([csv], { type: "text/csv" }),
         mime: "text/csv",
         filename: `${stem}.csv`,
+      };
+    }
+
+    if (request.outputFormat === "md") {
+      const rows: string[] = [];
+      for (const name of workbook.SheetNames) {
+        const sheet = workbook.Sheets[name]!;
+        const html = XLSX.utils.sheet_to_html(sheet, { id: `sheet-${name}` });
+        const md = htmlToMarkdown(html);
+        rows.push(`## ${name}\n\n${md}`);
+      }
+      return {
+        blob: new Blob([rows.join("\n\n")], { type: "text/markdown" }),
+        mime: "text/markdown",
+        filename: `${stem}.md`,
       };
     }
 

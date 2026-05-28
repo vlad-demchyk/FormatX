@@ -35,22 +35,31 @@ for (const f of FORMATS) {
  */
 export const ALLOWED_EDGES: ConversionEdge[] = [
   ["pdf", "pdf"],
+  ["pdf", "md"],
   ["docx", "txt"],
   ["docx", "html"],
   ["docx", "pdf"],
+  ["docx", "md"],
   ["pdf", "txt"],
   ["pdf", "docx"],
   ["pdf", "html"],
   ["md", "html"],
   ["md", "txt"],
+  ["md", "docx"],
+  ["md", "pdf"],
+  ["html", "md"],
+  ["txt", "md"],
   ["xlsx", "html"],
   ["xlsx", "csv"],
   ["xlsx", "txt"],
+  ["xlsx", "md"],
   ["xls", "html"],
   ["xls", "csv"],
   ["xls", "txt"],
+  ["xls", "md"],
   ["csv", "html"],
   ["csv", "txt"],
+  ["csv", "md"],
 ];
 
 export function canConvert(from: DocumentFormatId, to: DocumentFormatId): boolean {
@@ -88,4 +97,9 @@ export function inputFormatsFor(output: DocumentFormatId): DocumentFormatId[] {
 export function allInputFormats(): DocumentFormatId[] {
   const set = new Set(ALLOWED_EDGES.map(([from]) => from));
   return Array.from(set);
+}
+
+/** All output formats available for the global selector */
+export function allOutputFormats(): DocumentFormatId[] {
+  return (["pdf", "docx", "html", "md", "txt", "csv"] as DocumentFormatId[]);
 }

@@ -24,9 +24,8 @@ export class PdfToDocxAdapter implements DocumentConverter {
       this.workerSrcSet = true;
     }
 
-    const arrayBuffer = await request.file.arrayBuffer();
-    console.log("[FormatX] Loading PDF, size:", arrayBuffer.byteLength);
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    console.log("[FormatX] Loading PDF, size:", request.data.byteLength);
+    const pdf = await pdfjsLib.getDocument({ data: request.data }).promise;
     console.log("[FormatX] PDF loaded, pages:", pdf.numPages);
     const stem = request.file.name.replace(/\.[^.]+$/, "");
 

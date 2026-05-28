@@ -1,4 +1,4 @@
-import { detectFormat, canConvert, formatMime } from "./formatRegistry";
+import { detectFormat, canConvert, formatMime, outputFormatsFor } from "./formatRegistry";
 import type { DocumentFormatId, DocumentQueueItem, ConversionRequest, ConversionResult } from "./types";
 
 export function baseName(name: string): string {
@@ -13,6 +13,7 @@ export function extFromFormat(id: DocumentFormatId): string {
   if (id === "rtf") return "rtf";
   if (id === "html") return "html";
   if (id === "txt") return "txt";
+  if (id === "md") return "md";
   return "bin";
 }
 
@@ -28,12 +29,21 @@ export function validateItem(item: ConversionRequest): string | null {
   return null;
 }
 
-export function createQueueItem(file: File, outputFormat: DocumentFormatId): DocumentQueueItem {
+export function createQueueItem(file: File, data: ArrayBuffer, outputFormat: DocumentFormatId): DocumentQueueItem {
+  const inputFormat = detectFormat(file);
+  // If the input format equals the chosen output format, pick the first
+  // available alternative so we never default to input→input.
+  let resolvedOutput = outputFormat;
+  if (inputFormat === resolvedOutput || !canConvert(inputFormat, resolvedOutput)) {
+    const alternatives = outputFormatsFor(inputFormat);
+    resolvedOutput = alternatives.length > 0 ? alternatives[0]! : resolvedOutput;
+  }
   return {
     id: crypto.randomUUID(),
     file,
-    inputFormat: detectFormat(file),
-    outputFormat,
+    data,
+    inputFormat,
+    outputFormat: resolvedOutput,
     status: "pending",
     error: null,
     blobs: null,

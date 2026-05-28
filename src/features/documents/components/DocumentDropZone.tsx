@@ -49,13 +49,12 @@ export function DocumentDropZone({ onFiles }: Props) {
       >
         <p><strong>{t("documents.drop")}</strong></p>
         <p style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>
-          PDF, DOCX, ODT, RTF, TXT, HTML
+          PDF, DOCX, ODT, RTF, TXT, HTML, Markdown — усі формати
         </p>
       </div>
       <input
         ref={inputRef}
         type="file"
-        accept=".pdf,.docx,.doc,.odt,.rtf,.txt,.html,.htm,.md,.markdown,.xlsx,.xls,.csv"
         multiple
         hidden
         onChange={handleChange}

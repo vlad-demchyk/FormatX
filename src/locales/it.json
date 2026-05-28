@@ -83,6 +83,7 @@
     "to": "→",
     "drop": "Trascina i file o clicca per scegliere",
     "preview": "Anteprima",
+    "applyToSelected": "Applica ai selezionati",
     "wasmLoading": "Caricamento modulo conversione…",
     "wasmError": "Caricamento modulo conversione fallito"
   },
