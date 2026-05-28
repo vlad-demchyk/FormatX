@@ -1,11 +1,9 @@
-import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { tabIcons } from "../app/icons";
 
 interface Props {
   active: string;
   onSelect: (route: "photo" | "documents" | "text" | "clipboard" | "support") => void;
-  showClipboard?: boolean;
 }
 
 const ALL_TABS: { route: "photo" | "documents" | "text" | "clipboard" | "support"; labelKey: string }[] = [
@@ -16,16 +14,12 @@ const ALL_TABS: { route: "photo" | "documents" | "text" | "clipboard" | "support
   { route: "support", labelKey: "tiles.support" },
 ];
 
-export function TabBar({ active, onSelect, showClipboard }: Props) {
+export function TabBar({ active, onSelect }: Props) {
   const { t } = useTranslation();
-  const tabs = useMemo(
-    () => (showClipboard ? ALL_TABS : ALL_TABS.filter((t) => t.route !== "clipboard")),
-    [showClipboard],
-  );
 
   return (
     <nav className="shell-tabs" role="tablist" aria-label={t("nav.tools")}>
-      {tabs.map((tab) => (
+      {ALL_TABS.map((tab) => (
         <button
           key={tab.route}
           type="button"

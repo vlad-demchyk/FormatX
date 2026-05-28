@@ -19,7 +19,7 @@
     "credit": "built by {{author}}"
   },
   "locale": { "uk": "UK", "it": "IT", "en": "EN" },
-  "toast": { "copied": "Copied!", "saved": "Saved", "cleared": "Cleared", "error": "Error" },
+  "toast": { "copied": "Copied!", "saved": "Saved", "cleared": "Cleared", "error": "Error", "pinned": "Pinned!" },
   "sanitizer": {
     "title": "Text",
     "mode": "Mode",
@@ -53,7 +53,7 @@
     "replaceComma": "Comma (,)",
     "spacingNone": "No spacing",
     "spacingAround": "Space before and after",
-    "back": "← Back to sections",
+    "back": "Back to sections",
     "sectionFormat": "Text formatting",
     "sectionFormatDesc": "Change case, format text",
     "sectionReplace": "Character replacement",
@@ -64,6 +64,9 @@
     "sectionTranslateDesc": "Translate text to other languages",
     "sectionSummarize": "Summarize text",
     "sectionSummarizeDesc": "Automatic text summarization",
+    "sectionGenerate": "Generate text",
+    "sectionGenerateDesc": "AI-powered text generation",
+    "generateDesc": "AI text generation — coming soon.",
     "translateDesc": "Text translation — coming soon.",
     "summarizeDesc": "Automatic text summarization — coming soon.",
     "dualMode": "Dual mode",
@@ -100,7 +103,7 @@
   },
   "documents": {
     "title": "Documents",
-    "back": "← Back to sections",
+    "back": "Back to sections",
     "tools": "Document tools",
     "coming": "PDF, Word and text conversion — in v1",
     "outputFormat": "Output format",
@@ -143,14 +146,20 @@
   },
   "clipboard": {
     "title": "Clipboard",
-    "hint": "Last 20 copied texts. Monitors Ctrl+C.",
+    "hint": "Paste or type text here to save it…",
     "copied": "Copied to clipboard!",
     "copyBtn": "Copy",
     "clear": "Clear clipboard",
     "empty": "Clipboard is empty",
     "showMore": "Show {{count}} more",
     "showLess": "Show less",
-    "desktopOnly": "Clipboard history is available only in the desktop app."
+    "pinnedTab": "Pinned",
+    "pinnedEmpty": "No pinned items yet",
+    "pinnedHint": "Saved items live here. Use Save from other tools to keep things for later.",
+    "pinBtn": "Pin",
+    "unpinBtn": "Unpin",
+    "tabClipboard": "Clipboard",
+    "tabPinned": "Pinned"
   },
   "account": {
     "title": "Account",

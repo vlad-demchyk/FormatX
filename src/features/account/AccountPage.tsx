@@ -15,6 +15,12 @@ import { downloadBlob } from "../../lib/download";
 import { showToast } from "../../app/toast";
 import { useStorage } from "../../app/providers/StorageProvider";
 import { PreviewModal } from "../../components/PreviewModal";
+import rawViewIcon from "/assets/icons/lsicon_view-filled.svg?raw";
+
+const previewIcon = rawViewIcon
+  .replace(/fill="#6366F1"/gi, 'fill="var(--brand-accent)"')
+  .replace(/stroke="#6366F1"/gi, 'stroke="var(--brand-accent)"')
+  .replace(/\s(width|height)="\d+"/g, " ");
 
 function base64ToBlob(b64: string, mime: string): Blob {
   const binary = atob(b64);
@@ -218,12 +224,19 @@ export function AccountPage() {
           </button>
         </div>
         <div className="account-list">
-          {items.map((item) => (
+          {items.map((item) => {
+            const ext = item.filename.split(".").pop()?.toLowerCase() || "";
+            const icon =
+              ext === "pdf" ? "📕" :
+              ext === "docx" || ext === "doc" ? "📘" :
+              ext === "zip" ? "📦" :
+              ext === "html" ? "🌐" :
+              item.mime.startsWith("image/") ? "🖼️" :
+              item.type === "document" ? "📄" : "🖼️";
+            return (
             <div key={item.id} className="account-item">
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: "1.3rem", flexShrink: 0 }}>
-                  {item.type === "document" ? "📄" : "🖼️"}
-                </span>
+                <span style={{ fontSize: "1.3rem", flexShrink: 0 }}>{icon}</span>
                 <div>
                   <strong>{item.filename}</strong>
                   <br />
@@ -237,7 +250,7 @@ export function AccountPage() {
                   <>
                     <button
                       type="button"
-                      className="btn btn-ghost"
+                      className="btn btn-ghost btn-sm btn-icon"
                       onClick={() =>
                         setPreviewItem({
                           blob: base64ToBlob(item.blobBase64!, item.mime),
@@ -247,7 +260,7 @@ export function AccountPage() {
                       title={t("account.preview")}
                       aria-label={t("account.preview")}
                     >
-                      👁️
+                      <span dangerouslySetInnerHTML={{ __html: previewIcon }} style={{ display: "flex", width: 20, height: 20 }} />
                     </button>
                     <button
                       type="button"
@@ -267,7 +280,8 @@ export function AccountPage() {
                 </button>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
         {!items.length && <p className="empty-state">{t("account.noHistory")}</p>}
         <PreviewModal item={previewItem} onClose={() => setPreviewItem(null)} />

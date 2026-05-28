@@ -19,7 +19,7 @@
     "credit": "sviluppato da {{author}}"
   },
   "locale": { "uk": "UK", "it": "IT", "en": "EN" },
-  "toast": { "copied": "Copiato!", "saved": "Salvato", "cleared": "Cancellato", "error": "Errore" },
+  "toast": { "copied": "Copiato!", "saved": "Salvato", "cleared": "Cancellato", "error": "Errore", "pinned": "Fissato!" },
   "sanitizer": {
     "title": "Testo",
     "mode": "Modalità",
@@ -53,7 +53,7 @@
     "replaceComma": "Virgola (,)",
     "spacingNone": "Nessuna spaziatura",
     "spacingAround": "Spazio prima e dopo",
-    "back": "← Torna alle sezioni",
+    "back": "Torna alle sezioni",
     "sectionFormat": "Formattazione testo",
     "sectionFormatDesc": "Cambia maiuscole/minuscole, formatta testo",
     "sectionReplace": "Sostituzione caratteri",
@@ -64,6 +64,9 @@
     "sectionTranslateDesc": "Traduci testo in altre lingue",
     "sectionSummarize": "Riassumi testo",
     "sectionSummarizeDesc": "Riassunto automatico del testo",
+    "sectionGenerate": "Genera testo",
+    "sectionGenerateDesc": "Generazione testo tramite AI",
+    "generateDesc": "Generazione testo AI — in arrivo.",
     "translateDesc": "Traduzione testo — in arrivo.",
     "summarizeDesc": "Riassunto automatico del testo — in arrivo.",
     "dualMode": "Doppia modalità",
@@ -100,7 +103,7 @@
   },
   "documents": {
     "title": "Documenti",
-    "back": "← Torna alle sezioni",
+    "back": "Torna alle sezioni",
     "tools": "Strumenti documenti",
     "coming": "Conversione PDF, Word e testo — in v1",
     "outputFormat": "Formato output",
@@ -143,14 +146,20 @@
   },
   "clipboard": {
     "title": "Appunti",
-    "hint": "Ultimi 20 testi copiati. Monitora Ctrl+C.",
+    "hint": "Incolla o digita il testo da salvare…",
     "copied": "Copiato negli appunti!",
     "copyBtn": "Copia",
     "clear": "Pulisci appunti",
     "empty": "Appunti vuoti",
     "showMore": "Mostra altri {{count}}",
     "showLess": "Mostra meno",
-    "desktopOnly": "La cronologia degli appunti è disponibile solo nell'app desktop."
+    "pinnedTab": "Fissati",
+    "pinnedEmpty": "Nessun elemento fissato ancora",
+    "pinnedHint": "Gli elementi salvati vivono qui. Usa Salva da altri strumenti per conservare le cose per dopo.",
+    "pinBtn": "Fissa",
+    "unpinBtn": "Rimuovi",
+    "tabClipboard": "Appunti",
+    "tabPinned": "Fissati"
   },
   "account": {
     "title": "Account",

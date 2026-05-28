@@ -1,6 +1,9 @@
 import { useTranslation } from "react-i18next";
 import type { QueueItem } from "../../images/types";
 import rawViewIcon from "/assets/icons/lsicon_view-filled.svg?raw";import { closeIcon } from "../../../app/icons";
+import { pinIcon } from "../../clipboard/pinIcon";
+import { addPinnedEntry } from "../../clipboard/pinnedStorage";
+import { showToast } from "../../../app/toast";
 /** Prepare SVG icon: use brand accent color, remove fixed size so it fills the container. */
 const themedViewIcon = rawViewIcon
   .replace(/fill="#6366F1"/gi, 'fill="var(--brand-accent)"')
@@ -84,6 +87,30 @@ export function QueueItemRow({
         >
           {t("images.download")}
         </button>
+        {item.status === "ready" && item.blobs?.[0] && (
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm btn-icon"
+            title="Pin"
+            onClick={() => {
+              const blob = item.blobs![0]!;
+              const reader = new FileReader();
+              reader.onload = () => {
+                addPinnedEntry({
+                  type: "image",
+                  label: item.file.name,
+                  content: reader.result as string,
+                  mime: blob.type,
+                  size: blob.size,
+                });
+                showToast("toast.pinned");
+              };
+              reader.readAsDataURL(blob);
+            }}
+          >
+            <span dangerouslySetInnerHTML={{ __html: pinIcon }} style={{ display: "flex", width: 16, height: 16 }} />
+          </button>
+        )}
         {item.status === "ready" && item.blobs?.[0] && (
           <button
             type="button"

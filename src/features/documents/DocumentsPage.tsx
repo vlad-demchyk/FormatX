@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDocumentQueue } from "./hooks/useDocumentQueue";
 import { DocumentDropZone } from "./components/DocumentDropZone";
@@ -11,6 +11,7 @@ import { PreviewModal } from "../../components/PreviewModal";
 import { convertDocument, findConverter } from "./converter/registry";
 import { allOutputFormats, formatLabel } from "./formatRegistry";
 import type { DocumentQueueItem, DocumentFormatId } from "./types";
+import { hashFor } from "../../app/hooks/useAppRoute";
 
 import convertRaw from "/assets/icons/streamline-ultimate_coding-apps-website-data-conversion-documents-1.svg?raw";
 import summarizeRaw from "/assets/icons/material-symbols_summarize-outline.svg?raw";
@@ -38,9 +39,33 @@ const SECTIONS: { id: DocSection; labelKey: string; descKey: string; icon: strin
 
 export function DocumentsPage() {
   const { t } = useTranslation();
-  const [section, setSection] = useState<DocSection | null>(null);
+
+  // Read section from URL hash
+  const sectionFromHash = (): DocSection | null => {
+    const parts = window.location.hash.replace(/^#\/?/, "").split("/");
+    const valid: DocSection[] = ["convert", "summarize", "translate", "sign", "pdf2svg"];
+    return parts.length > 1 && valid.includes(parts[1] as DocSection) ? (parts[1] as DocSection) : null;
+  };
+
+  const [section, setSectionState] = useState<DocSection | null>(() => sectionFromHash());
   const [previewItem, setPreviewItem] = useState<{ blob: Blob; name: string } | null>(null);
   const [globalFormat, setGlobalFormat] = useState<DocumentFormatId>("md");
+
+  const setSection = useCallback((s: DocSection | null) => {
+    setSectionState(s);
+    if (s) {
+      window.location.hash = hashFor("documents", s);
+    } else {
+      window.location.hash = hashFor("documents");
+    }
+  }, []);
+
+  // Sync section when hash changes externally
+  useEffect(() => {
+    const onHash = () => setSectionState(sectionFromHash());
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
 
   const {
     queue,

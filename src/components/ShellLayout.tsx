@@ -9,13 +9,11 @@ import { PhotoPage } from "../features/photo/PhotoPage";
 import { ClipboardPage } from "../features/clipboard/ClipboardPage";
 import { SupportPage } from "../features/support/SupportPage";
 import { useAppRoute, type Page } from "../app/hooks/useAppRoute";
-import { useIsTauri } from "../app/hooks/useIsTauri";
 
 export function ShellLayout() {
   const { t } = useTranslation();
   const { toggle } = useTheme();
   const { page, setPage, ready } = useAppRoute();
-  const isTauri = useIsTauri();
 
   if (!ready) return null;
 
@@ -65,7 +63,7 @@ export function ShellLayout() {
       </header>
       <div className="shell-body">
         <div className="shell-tabs-wrap">
-          <TabBar active={page} onSelect={(p) => setPage(p)} showClipboard={isTauri} />
+          <TabBar active={page} onSelect={(p) => setPage(p)} />
         </div>
         <main className="shell-main">
           {page === "text" && <TextPage />}

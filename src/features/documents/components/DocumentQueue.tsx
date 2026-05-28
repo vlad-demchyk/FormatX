@@ -3,6 +3,9 @@ import { formatLabel, outputFormatsFor } from "../formatRegistry";
 import type { DocumentQueueItem, DocumentFormatId } from "../types";
 import { closeIcon } from "../../../app/icons";
 import rawViewIcon from "/assets/icons/lsicon_view-filled.svg?raw";
+import { pinIcon } from "../../clipboard/pinIcon";
+import { addPinnedEntry } from "../../clipboard/pinnedStorage";
+import { showToast } from "../../../app/toast";
 
 const viewIcon = rawViewIcon
   .replace(/fill="#6366F1"/gi, 'fill="var(--brand-accent)"')
@@ -108,6 +111,30 @@ export function DocumentQueue({
                   onClick={() => onPreview(item)}
                 >
                   <span dangerouslySetInnerHTML={{ __html: viewIcon }} />
+                </button>
+              )}
+              {item.status === "ready" && item.blobs?.[0] && (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm btn-icon"
+                  title="Pin"
+                  onClick={() => {
+                    const blob = item.blobs![0]!;
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      addPinnedEntry({
+                        type: "document",
+                        label: item.file.name,
+                        content: reader.result as string,
+                        mime: blob.type,
+                        size: blob.size,
+                      });
+                      showToast("toast.pinned");
+                    };
+                    reader.readAsDataURL(blob);
+                  }}
+                >
+                  <span dangerouslySetInnerHTML={{ __html: pinIcon }} style={{ display: "flex", width: 16, height: 16 }} />
                 </button>
               )}
               <button

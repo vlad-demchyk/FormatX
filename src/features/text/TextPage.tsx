@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { copyText } from "../../lib/clipboard";
 import { addTextSnippet } from "../../lib/storage";
@@ -8,8 +8,9 @@ import { ClassConverter } from "./components/ClassConverter";
 import { SnippetsList } from "./components/SnippetsList";
 import { PlaceholderSection } from "../documents/components/PlaceholderSection";
 import { useSanitizer } from "./hooks/useSanitizer";
+import { hashFor } from "../../app/hooks/useAppRoute";
 
-type TextSection = "format" | "replace" | "classes" | "translate" | "summarize";
+type TextSection = "format" | "replace" | "classes" | "translate" | "summarize" | "generate";
 
 const SECTIONS: { id: TextSection; labelKey: string; descKey: string; icon: string }[] = [
   { id: "format",    labelKey: "sanitizer.sectionFormat",    descKey: "sanitizer.sectionFormatDesc",    icon: "🔤" },
@@ -17,6 +18,7 @@ const SECTIONS: { id: TextSection; labelKey: string; descKey: string; icon: stri
   { id: "classes",   labelKey: "sanitizer.sectionClasses",   descKey: "sanitizer.sectionClassesDesc",   icon: "🎨" },
   { id: "translate", labelKey: "sanitizer.sectionTranslate", descKey: "sanitizer.sectionTranslateDesc", icon: "🌐" },
   { id: "summarize", labelKey: "sanitizer.sectionSummarize", descKey: "sanitizer.sectionSummarizeDesc", icon: "📝" },
+  { id: "generate",  labelKey: "sanitizer.sectionGenerate",  descKey: "sanitizer.sectionGenerateDesc",  icon: "🤖" },
 ];
 
 /** One half of the dual-mode layout — independent card grid + section view. */
@@ -125,11 +127,11 @@ function TextPanel({
         </div>
       )}
 
-      {(section === "translate" || section === "summarize") && (
+      {(section === "translate" || section === "summarize" || section === "generate") && (
         <PlaceholderSection
-          titleKey={`sanitizer.section${section === "translate" ? "Translate" : "Summarize"}`}
+          titleKey={`sanitizer.section${section === "translate" ? "Translate" : section === "summarize" ? "Summarize" : "Generate"}`}
           descKey={`sanitizer.${section}Desc`}
-          icon={section === "translate" ? "🌐" : "📝"}
+          icon={section === "translate" ? "🌐" : section === "summarize" ? "📝" : "🤖"}
         />
       )}
     </div>
@@ -139,7 +141,29 @@ function TextPanel({
 export function TextPage() {
   const { t } = useTranslation();
   const [dualMode, setDualMode] = useState(false);
-  const [singleSection, setSingleSection] = useState<TextSection | null>(null);
+
+  // Read single section from URL hash
+  const sectionFromHash = (): TextSection | null => {
+    const parts = window.location.hash.replace(/^#\/?/, "").split("/");
+    const valid: TextSection[] = ["format", "replace", "classes", "translate", "summarize", "generate"];
+    return parts.length > 1 && parts[0] === "text" && valid.includes(parts[1] as TextSection)
+      ? (parts[1] as TextSection)
+      : null;
+  };
+
+  const [singleSection, setSingleSectionState] = useState<TextSection | null>(() => sectionFromHash());
+
+  const setSingleSection = useCallback((s: TextSection | null) => {
+    setSingleSectionState(s);
+    window.location.hash = s ? hashFor("text", s) : hashFor("text");
+  }, []);
+
+  // Sync section when hash changes externally
+  useEffect(() => {
+    const onHash = () => setSingleSectionState(sectionFromHash());
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
 
   // Independent state for left & right panels in dual mode
   const [leftSection, setLeftSection] = useState<TextSection | null>(null);
@@ -281,12 +305,12 @@ export function TextPage() {
             </div>
           )}
 
-          {(singleSection === "translate" || singleSection === "summarize") && (
+          {(singleSection === "translate" || singleSection === "summarize" || singleSection === "generate") && (
             <div className="card">
               <PlaceholderSection
-                titleKey={`sanitizer.section${singleSection === "translate" ? "Translate" : "Summarize"}`}
+                titleKey={`sanitizer.section${singleSection === "translate" ? "Translate" : singleSection === "summarize" ? "Summarize" : "Generate"}`}
                 descKey={`sanitizer.${singleSection}Desc`}
-                icon={singleSection === "translate" ? "🌐" : "📝"}
+                icon={singleSection === "translate" ? "🌐" : singleSection === "summarize" ? "📝" : "🤖"}
               />
             </div>
           )}
