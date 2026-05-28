@@ -12,6 +12,8 @@ export type {
   FormatMode,
   LlmConfig,
   LlmProvider,
+  LlmMode,
+  AiPromptCustom,
 } from "./types";
 
 export { getSettings, saveSettings } from "./settings";

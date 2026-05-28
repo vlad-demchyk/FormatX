@@ -16,11 +16,19 @@ function defaultSanitizer(): SanitizerSettings {
 
 function defaultLlm(): LlmConfig {
   return {
+    mode: "cloud",
+    enabled: false,
+    fallbackToCloud: true,
+
+    localModel: "Xenova/nllb-200-distilled-600M",
+    localModelReady: false,
+
     provider: "ollama",
     endpoint: "http://localhost:11434",
     apiKey: "",
     model: "llama3.2",
-    enabled: false,
+
+    prompts: [],
   };
 }
 

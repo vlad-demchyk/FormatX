@@ -1,12 +1,16 @@
 # AI Integration Plan for FormatX
 
-> **Status:** DB Migration in progress -> see [DBChange.md](./DBChange.md)
-> **Version:** 0.2 - updated storage architecture
+> **Status:** DB Migration ✅ — LlmConfig updated ✅ — Ready for Step 1
+> **Version:** 0.3 — storage migrated, types ready
 
-## CURRENT: DB Migration (SQL.js -> Dexie + OPFS)
+## COMPLETED: DB Migration (SQL.js -> Dexie + OPFS)
 
-Switching from SQL.js+localStorage to IndexedDB (Dexie) for main DB and OPFS for AI models.
-Detailed plan: [DBChange.md](./DBChange.md)
+**Done ✅:**
+- SQL.js removed, IndexedDB (Dexie) in place for main DB
+- `history_items` + `text_snippets` + `pinnedBlobs` + `aiChats` + `aiPrompts` tables
+- Blobs stored natively (no base64)
+- Pinned file items in IndexedDB (text stays in localStorage)
+- LlmConfig expanded with `mode`, `localModel`, `fallbackToCloud`, `prompts`
 
 ---
 
@@ -23,26 +27,26 @@ Detailed plan: [DBChange.md](./DBChange.md)
 
 **Rationale:** SQL.js + localStorage had 5 MB limit, double base64 overhead, and full serialization on every write. IndexedDB stores Blobs natively, OPFS is Worker-accessible for AI models.
 
-### 0.2 Current LLM Config
+### 0.2 Current LLM Config ✅ (updated)
 
 ```typescript
-// types.ts — поточний стан
+// types.ts — оновлений стан
 export type LlmProvider = "ollama" | "openai" | "anthropic" | "custom";
+export type LlmMode = "local" | "cloud";
+
 export interface LlmConfig {
+  mode: LlmMode;
+  enabled: boolean;
+  fallbackToCloud: boolean;
+  localModel: string;
+  localModelReady: boolean;
   provider: LlmProvider;
   endpoint: string;
   apiKey: string;
   model: string;
-  enabled: boolean;
+  prompts: AiPromptCustom[];
 }
 ```
-
-**Що потрібно додати:**
-- `mode: "local" | "cloud"` — локальний vs хмарний AI
-- `localModel: string` — назва моделі для локального виконання (Transformers.js / WebLLM)
-- `localModelReady: boolean` — чи завантажена локальна модель
-- `fallbackToCloud: boolean` — чи пробувати хмару при локальній помилці
-- `prompts` — масив AI-промтів (див. крок 3)
 
 ---
 
@@ -212,16 +216,16 @@ AccountPage
     └── Translate tab — редагування translate-промту
 ```
 
-### 3.3 Збереження кастомних промптів
+### 3.3 Збереження кастомних промптів ✅
 
 ```typescript
-// Зберігаються в localStorage + синхронізуються з Settings
+// Вже в types.ts
 interface AiPromptCustom {
   id: string;
   task: AiTask;
-  label: string;           // назва для селектора
+  label: string;
   systemPrompt: string;
-  userPrompt: string;      // з плейсхолдером {input}
+  userPrompt: string;
   isDefault: boolean;
 }
 ```
@@ -379,7 +383,8 @@ function AiResponse({ text, isLoading, error }: AiResponseProps) {
 
 ### Крок 0 — Підготовка архітектури (1-2 дні)
 
-- [ ] Встановити `zustand`, `@xenova/transformers`, `dexie`
+- [x] ✅ Встановити `dexie`
+- [ ] Встановити `zustand`, `@xenova/transformers`
 - [ ] Створити `src/lib/ai/` з базовою структурою
 - [ ] Оновити `package.json` з новими залежностями
 - [ ] Перевірити Tauri/safari сумісність Web Workers + WASM
@@ -459,26 +464,19 @@ function AiResponse({ text, isLoading, error }: AiResponseProps) {
 
 ---
 
-## 8. Розширений LlmConfig (після змін)
+## 8. Розширений LlmConfig ✅ (вже впроваджено)
 
 ```typescript
 interface LlmConfig {
-  // Mode
   mode: "local" | "cloud";
   enabled: boolean;
   fallbackToCloud: boolean;
-
-  // Local
-  localModel: "Xenova/nllb-200-distilled-600M" | "Xenova/gemma-2b-it" | string;
+  localModel: string;
   localModelReady: boolean;
-
-  // Cloud
-  provider: LlmProvider;      // "ollama" | "openai" | "anthropic" | "custom"
+  provider: LlmProvider;
   endpoint: string;
   apiKey: string;
   model: string;
-
-  // Prompts
   prompts: AiPromptCustom[];
 }
 ```
@@ -497,14 +495,8 @@ interface LlmConfig {
 
 ---
 
-## 10. Залежності для встановлення
+## 10. Залежності
 
-```json
-{
-  "@xenova/transformers": "^2.17.2",
-  "zustand": "^5.0.3",
-  "dexie": "^4.1.0"
-}
-```
-
-> **Примітка:** `@xenova/transformers` для локального AI (translate, summarize). `zustand` для AI-стану. `dexie` для IndexedDB обгортки (AI історія).
+| Встановлено | Потрібно встановити |
+|-------------|---------------------|
+| `dexie` ✅  | `zustand`, `@xenova/transformers` |

@@ -14,12 +14,36 @@ export type FormatMode =
 
 export type LlmProvider = "ollama" | "openai" | "anthropic" | "custom";
 
+export type LlmMode = "local" | "cloud";
+
+export interface AiPromptCustom {
+  id: string;
+  task: "generate" | "summarize" | "translate";
+  label: string;
+  systemPrompt: string;
+  userPrompt: string;
+  isDefault: boolean;
+}
+
 export interface LlmConfig {
+  /** Local vs cloud AI mode */
+  mode: LlmMode;
+  enabled: boolean;
+  /** Try cloud if local AI fails */
+  fallbackToCloud: boolean;
+
+  // Local
+  localModel: string;
+  localModelReady: boolean;
+
+  // Cloud
   provider: LlmProvider;
   endpoint: string;
   apiKey: string;
   model: string;
-  enabled: boolean;
+
+  // Custom prompts
+  prompts: AiPromptCustom[];
 }
 
 export interface SanitizerSettings {
