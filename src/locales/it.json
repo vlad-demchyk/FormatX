@@ -7,10 +7,10 @@
   },
   "tiles": {
     "text": "Testo",
-    "photo": "Foto",
+    "photo": "Immagini",
     "documents": "Documenti",
     "clipboard": "Appunti",
-    "classes": "Classi → CSS",
+    "classes": "Testo",
     "soon": "v1"
   },
   "theme": { "light": "Chiaro", "dark": "Scuro", "toggle": "Cambia tema" },
@@ -48,7 +48,23 @@
     "replaceDash": "Trattino (-)",
     "replaceComma": "Virgola (,)",
     "spacingNone": "Nessuna spaziatura",
-    "spacingAround": "Spazio prima e dopo"
+    "spacingAround": "Spazio prima e dopo",
+    "back": "← Torna alle sezioni",
+    "sectionFormat": "Formattazione testo",
+    "sectionFormatDesc": "Cambia maiuscole/minuscole, formatta testo",
+    "sectionReplace": "Sostituzione caratteri",
+    "sectionReplaceDesc": "Sostituisci caratteri nel testo",
+    "sectionClasses": "Elaborazione classi CSS",
+    "sectionClassesDesc": "Converti classi in selettori CSS",
+    "sectionTranslate": "Traduci testo",
+    "sectionTranslateDesc": "Traduci testo in altre lingue",
+    "sectionSummarize": "Riassumi testo",
+    "sectionSummarizeDesc": "Riassunto automatico del testo",
+    "translateDesc": "Traduzione testo — in arrivo.",
+    "summarizeDesc": "Riassunto automatico del testo — in arrivo.",
+    "dualMode": "Doppia modalità",
+    "panelLeft": "Pannello 1",
+    "panelRight": "Pannello 2"
   },
   "images": {
     "title": "Foto",
@@ -78,6 +94,8 @@
   },
   "documents": {
     "title": "Documenti",
+    "back": "← Torna alle sezioni",
+    "tools": "Strumenti documenti",
     "coming": "Conversione PDF, Word e testo — in v1",
     "outputFormat": "Formato output",
     "to": "→",
@@ -85,7 +103,18 @@
     "preview": "Anteprima",
     "applyToSelected": "Applica ai selezionati",
     "wasmLoading": "Caricamento modulo conversione…",
-    "wasmError": "Caricamento modulo conversione fallito"
+    "wasmError": "Caricamento modulo conversione fallito",
+    "sectionConvert": "Conversione",
+    "sectionConvertDesc": "Converti PDF, DOCX, MD e altri formati",
+    "sectionSummarize": "Riassunto",
+    "sectionSummarizeDesc": "Riassunto automatico dei documenti",
+    "sectionTranslate": "Traduci",
+    "sectionTranslateDesc": "Traduzione documenti",
+    "sectionSign": "Firma",
+    "sectionSignDesc": "Firma elettronica dei documenti",
+    "summarizeDesc": "Riassunto automatico dei documenti — in arrivo.",
+    "translateDesc": "Traduzione documenti — in arrivo.",
+    "signDesc": "Firma elettronica dei documenti — in arrivo."
   },
   "clipboard": {
     "title": "Appunti",

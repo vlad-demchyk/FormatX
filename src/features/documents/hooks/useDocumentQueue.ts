@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { addHistoryItem } from "../../../lib/storage";
 import { downloadBlob } from "../../../lib/download";
-import { createQueueItem, validateItem, buildOutputFilename } from "../logic";
+import { createQueueItem, buildOutputFilename } from "../logic";
 import { blobToBase64 } from "../../images/logic";
 import type { DocumentQueueItem, DocumentFormatId } from "../types";
 
@@ -73,21 +73,13 @@ export function useDocumentQueue() {
     setQueue((prev) => {
       const next = prev.map((item) => {
         if (item.id !== id) return item;
-        const err = validateItem({
-          id: item.id,
-          file: item.file,
-          data: item.data,
-          inputFormat: item.inputFormat,
-          outputFormat,
-        });
-        const updated: DocumentQueueItem = {
+        return {
           ...item,
           outputFormat,
-          status: err ? "error" : "pending",
-          error: err,
+          status: "pending" as const,
+          error: null,
           blobs: null,
         };
-        return updated;
       });
       queueRef.current = next;
       return next;
@@ -98,18 +90,11 @@ export function useDocumentQueue() {
     setQueue((prev) => {
       const next = prev.map((item) => {
         if (!item.selected) return item;
-        const err = validateItem({
-          id: item.id,
-          file: item.file,
-          data: item.data,
-          inputFormat: item.inputFormat,
-          outputFormat,
-        });
         return {
           ...item,
           outputFormat,
-          status: err ? "error" as const : "pending" as const,
-          error: err,
+          status: "pending" as const,
+          error: null,
           blobs: null,
         };
       });

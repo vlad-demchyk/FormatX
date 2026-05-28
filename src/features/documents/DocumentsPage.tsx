@@ -4,12 +4,23 @@ import { useDocumentQueue } from "./hooks/useDocumentQueue";
 import { DocumentDropZone } from "./components/DocumentDropZone";
 import { DocumentQueue } from "./components/DocumentQueue";
 import { DocumentToolbar } from "./components/DocumentToolbar";
+import { PlaceholderSection } from "./components/PlaceholderSection";
 import { convertDocument, findConverter } from "./converter/registry";
 import { allOutputFormats, formatLabel } from "./formatRegistry";
 import type { DocumentQueueItem, DocumentFormatId } from "./types";
 
+type DocSection = "convert" | "summarize" | "translate" | "sign";
+
+const SECTIONS: { id: DocSection; labelKey: string; descKey: string; icon: string }[] = [
+  { id: "convert",   labelKey: "documents.sectionConvert",   descKey: "documents.sectionConvertDesc",   icon: "🔄" },
+  { id: "summarize", labelKey: "documents.sectionSummarize", descKey: "documents.sectionSummarizeDesc", icon: "📝" },
+  { id: "translate", labelKey: "documents.sectionTranslate", descKey: "documents.sectionTranslateDesc", icon: "🌐" },
+  { id: "sign",      labelKey: "documents.sectionSign",      descKey: "documents.sectionSignDesc",      icon: "✍️" },
+];
+
 export function DocumentsPage() {
   const { t } = useTranslation();
+  const [section, setSection] = useState<DocSection | null>(null);
   const [globalFormat, setGlobalFormat] = useState<DocumentFormatId>("md");
 
   const {
@@ -33,8 +44,11 @@ export function DocumentsPage() {
 
   const handleConvert = useCallback(async (item: DocumentQueueItem) => {
     console.log("[FormatX] Convert started", { file: item.file.name, size: item.file.size, from: item.inputFormat, to: item.outputFormat });
-    if (item.status === "error") return;
-    
+    if (item.status === "error") {
+      // Reset error so user can retry
+      markConverting(item.id);
+    }
+
     const conv = findConverter(item.inputFormat, item.outputFormat);
     if (!conv) {
       const msg = `No converter for ${item.inputFormat} → ${item.outputFormat}`;
@@ -44,12 +58,19 @@ export function DocumentsPage() {
     }
     console.log("[FormatX] Using converter:", conv.name);
 
+    // Re-read file data if the ArrayBuffer was detached by a previous conversion
+    let data = item.data;
+    if (data.byteLength === 0) {
+      console.log("[FormatX] ArrayBuffer detached, re-reading file");
+      data = await item.file.arrayBuffer();
+    }
+
     markConverting(item.id);
     try {
       const result = await convertDocument({
         id: item.id,
         file: item.file,
-        data: item.data,
+        data,
         inputFormat: item.inputFormat,
         outputFormat: item.outputFormat,
       });
@@ -93,54 +114,107 @@ export function DocumentsPage() {
     <>
       <h2>{t("documents.title")}</h2>
 
-      <div className="card">
-        <DocumentDropZone onFiles={handleFiles} />
-        {queue.length > 1 && (
-          <div className="format-bar">
-            <span className="format-bar__label">{t("documents.outputFormat")}</span>
-            <select
-              value={globalFormat}
-              onChange={(e) => setGlobalFormat(e.target.value as DocumentFormatId)}
-            >
-              {allOutputFormats().map((fmt) => (
-                <option key={fmt} value={fmt}>{formatLabel(fmt)}</option>
-              ))}
-            </select>
+      {section === null && (
+        /* ── Card grid (home) ── */
+        <div className="doc-cards">
+          {SECTIONS.map((s) => (
             <button
+              key={s.id}
               type="button"
-              className="btn btn-secondary"
-              onClick={() => updateOutputFormatForSelected(globalFormat)}
-              style={{ fontSize: "0.8rem", padding: "4px 10px" }}
+              className="doc-card"
+              onClick={() => setSection(s.id)}
             >
-              {t("documents.applyToSelected")}
+              <span className="doc-card__icon" aria-hidden="true">{s.icon}</span>
+              <span className="doc-card__title">{t(s.labelKey)}</span>
+              <span className="doc-card__desc">{t(s.descKey)}</span>
             </button>
-          </div>
-        )}
-        <DocumentToolbar
-          queue={queue}
-          onConvertAll={handleConvertAll}
-          onConvertSelected={handleConvertSelected}
-          onSelectAll={selectAll}
-          onSelectNone={selectNone}
-          onClear={clearQueue}
-        />
-      </div>
-      <div className="card" style={{ marginTop: 16 }}>
-        <h3>
-          {t("images.queue")}
-          <span className="badge" style={{ marginLeft: 8 }}>{queue.length}</span>
-        </h3>
-        <DocumentQueue
-          items={queue}
-          onConvert={handleConvert}
-          onDownload={downloadItem}
-          onPreview={handlePreview}
-          onRemove={removeItem}
-          onToggleSelect={toggleSelect}
-          onOutputFormatChange={updateOutputFormat}
-        />
-        {!queue.length && <p className="empty-state">{t("images.empty")}</p>}
-      </div>
+          ))}
+        </div>
+      )}
+
+      {section !== null && (
+        /* ── Active section view ── */
+        <>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => setSection(null)}
+            style={{ marginBottom: 12 }}
+          >
+            ← {t("documents.back")}
+          </button>
+
+          {/* Conversion */}
+          {section === "convert" && (
+            <>
+              <div className="card">
+                <DocumentDropZone onFiles={handleFiles} />
+                {queue.length > 1 && (
+                  <div className="format-bar">
+                    <span className="format-bar__label">{t("documents.outputFormat")}</span>
+                    <select
+                      value={globalFormat}
+                      onChange={(e) => setGlobalFormat(e.target.value as DocumentFormatId)}
+                    >
+                      {allOutputFormats().map((fmt) => (
+                        <option key={fmt} value={fmt}>{formatLabel(fmt)}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => updateOutputFormatForSelected(globalFormat)}
+                      style={{ fontSize: "0.8rem", padding: "4px 10px" }}
+                    >
+                      {t("documents.applyToSelected")}
+                    </button>
+                  </div>
+                )}
+                <DocumentToolbar
+                  queue={queue}
+                  onConvertAll={handleConvertAll}
+                  onConvertSelected={handleConvertSelected}
+                  onSelectAll={selectAll}
+                  onSelectNone={selectNone}
+                  onClear={clearQueue}
+                />
+              </div>
+              <div className="card" style={{ marginTop: 16 }}>
+                <h3>
+                  {t("images.queue")}
+                  <span className="badge" style={{ marginLeft: 8 }}>{queue.length}</span>
+                </h3>
+                <DocumentQueue
+                  items={queue}
+                  onConvert={handleConvert}
+                  onDownload={downloadItem}
+                  onPreview={handlePreview}
+                  onRemove={removeItem}
+                  onToggleSelect={toggleSelect}
+                  onOutputFormatChange={updateOutputFormat}
+                />
+                {!queue.length && <p className="empty-state">{t("images.empty")}</p>}
+              </div>
+            </>
+          )}
+
+          {section === "summarize" && (
+            <div className="card">
+              <PlaceholderSection titleKey="documents.sectionSummarize" descKey="documents.summarizeDesc" icon="📝" />
+            </div>
+          )}
+          {section === "translate" && (
+            <div className="card">
+              <PlaceholderSection titleKey="documents.sectionTranslate" descKey="documents.translateDesc" icon="🌐" />
+            </div>
+          )}
+          {section === "sign" && (
+            <div className="card">
+              <PlaceholderSection titleKey="documents.sectionSign" descKey="documents.signDesc" icon="✍️" />
+            </div>
+          )}
+        </>
+      )}
     </>
   );
 }

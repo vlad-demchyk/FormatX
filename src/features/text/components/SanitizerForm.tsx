@@ -4,6 +4,7 @@ import type { SanitizeOptions, FormatMode } from "../../sanitizer/logic";
 interface Props {
   options: SanitizeOptions;
   onChange: (patch: Partial<SanitizeOptions>) => void;
+  mode?: "format" | "replace";
 }
 
 const formatOptions: { value: FormatMode; labelKey: string }[] = [
@@ -13,25 +14,30 @@ const formatOptions: { value: FormatMode; labelKey: string }[] = [
   { value: "splitWords", labelKey: "sanitizer.formatSplitWords" },
 ];
 
-export function SanitizerForm({ options, onChange }: Props) {
+export function SanitizerForm({ options, onChange, mode }: Props) {
   const { t } = useTranslation();
+
+  // Determine which mode to show
+  const effectiveMode = mode ?? options.mode;
 
   return (
     <>
-      {/* Mode selector */}
-      <div className="field">
-        <label htmlFor="mode">{t("sanitizer.mode")}</label>
-        <select
-          id="mode"
-          value={options.mode}
-          onChange={(e) => onChange({ mode: e.target.value as SanitizeOptions["mode"] })}
-        >
-          <option value="replace">{t("sanitizer.modeReplace")}</option>
-          <option value="format">{t("sanitizer.modeFormat")}</option>
-        </select>
-      </div>
+      {/* Mode selector — only show when not filtered by parent */}
+      {!mode && (
+        <div className="field">
+          <label htmlFor="mode">{t("sanitizer.mode")}</label>
+          <select
+            id="mode"
+            value={options.mode}
+            onChange={(e) => onChange({ mode: e.target.value as SanitizeOptions["mode"] })}
+          >
+            <option value="replace">{t("sanitizer.modeReplace")}</option>
+            <option value="format">{t("sanitizer.modeFormat")}</option>
+          </select>
+        </div>
+      )}
 
-      {options.mode === "replace" ? (
+      {effectiveMode === "replace" ? (
         /* ── Replace mode ─────────────────────────── */
         <>
           <div className="field">
@@ -107,7 +113,6 @@ export function SanitizerForm({ options, onChange }: Props) {
               ))}
             </select>
           </div>
-
         </>
       )}
     </>

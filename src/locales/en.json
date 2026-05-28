@@ -7,10 +7,10 @@
   },
   "tiles": {
     "text": "Text",
-    "photo": "Photo",
+    "photo": "Images",
     "documents": "Documents",
     "clipboard": "Clipboard",
-    "classes": "Classes → CSS",
+    "classes": "Text",
     "soon": "v1"
   },
   "theme": { "light": "Light", "dark": "Dark", "toggle": "Toggle theme" },
@@ -48,7 +48,23 @@
     "replaceDash": "Dash (-)",
     "replaceComma": "Comma (,)",
     "spacingNone": "No spacing",
-    "spacingAround": "Space before and after"
+    "spacingAround": "Space before and after",
+    "back": "← Back to sections",
+    "sectionFormat": "Text formatting",
+    "sectionFormatDesc": "Change case, format text",
+    "sectionReplace": "Character replacement",
+    "sectionReplaceDesc": "Replace characters in text",
+    "sectionClasses": "CSS class processing",
+    "sectionClassesDesc": "Convert classes to CSS selectors",
+    "sectionTranslate": "Translate text",
+    "sectionTranslateDesc": "Translate text to other languages",
+    "sectionSummarize": "Summarize text",
+    "sectionSummarizeDesc": "Automatic text summarization",
+    "translateDesc": "Text translation — coming soon.",
+    "summarizeDesc": "Automatic text summarization — coming soon.",
+    "dualMode": "Dual mode",
+    "panelLeft": "Panel 1",
+    "panelRight": "Panel 2"
   },
   "images": {
     "title": "Photo",
@@ -78,6 +94,8 @@
   },
   "documents": {
     "title": "Documents",
+    "back": "← Back to sections",
+    "tools": "Document tools",
     "coming": "PDF, Word and text conversion — in v1",
     "outputFormat": "Output format",
     "to": "→",
@@ -85,7 +103,18 @@
     "preview": "Preview",
     "applyToSelected": "Apply to selected",
     "wasmLoading": "Loading conversion module…",
-    "wasmError": "Failed to load conversion module"
+    "wasmError": "Failed to load conversion module",
+    "sectionConvert": "Conversion",
+    "sectionConvertDesc": "Convert PDF, DOCX, MD and other formats",
+    "sectionSummarize": "Summarize",
+    "sectionSummarizeDesc": "Automatic document summarization",
+    "sectionTranslate": "Translate",
+    "sectionTranslateDesc": "Document translation",
+    "sectionSign": "Sign",
+    "sectionSignDesc": "Electronic document signing",
+    "summarizeDesc": "Automatic document summarization — coming soon.",
+    "translateDesc": "Document translation — coming soon.",
+    "signDesc": "Electronic document signing — coming soon."
   },
   "clipboard": {
     "title": "Clipboard",
