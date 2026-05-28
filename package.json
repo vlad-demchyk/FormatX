@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "postinstall": "node scripts/copy-lo-wasm.mjs"
+    "postinstall": "node scripts/copy-lo-wasm.mjs && node scripts/copy-pdf2svg-runtime.mjs"
   },
   "dependencies": {
     "@matbee/libreoffice-converter": "^2.6.0",

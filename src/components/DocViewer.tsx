@@ -28,7 +28,7 @@ const DOCS: DocEntry[] = [
   { id: "GLOSSARY",       titleKey: "docs.glossary",       file: "GLOSSARY.md",       icon: "📚" },
 ];
 
-const DOCS_BASE = "/docs/uk/";
+const DOCS_BASE = `${import.meta.env.BASE_URL}docs/uk/`;
 
 /*
  * Custom marked renderer for documentation:

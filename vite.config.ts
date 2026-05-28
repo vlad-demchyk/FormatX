@@ -14,7 +14,7 @@ export default defineConfig({
       includeAssets: ["favicon.svg"],
       workbox: {
         maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
-        globIgnores: ["**/sql-asm*", "**/sql-asm-debug*", "**/worker.sql-asm*", "**/wasm/**"],
+        globIgnores: ["**/sql-asm*", "**/sql-asm-debug*", "**/worker.sql-asm*", "**/wasm/**", "**/assets/runtime/**"],
       },
       manifest: {
         name: "FormatX",
