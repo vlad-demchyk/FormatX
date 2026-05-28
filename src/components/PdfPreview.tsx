@@ -93,7 +93,6 @@ export function PdfPreview({ data, fileName }: Props) {
   }
 
   const displayW = Math.round(page.nativeWidth * zoom);
-  const displayH = Math.round(page.nativeHeight * zoom);
 
   return (
     <div className="pdf-preview">

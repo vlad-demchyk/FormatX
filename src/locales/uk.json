@@ -99,7 +99,13 @@
     "statusPending": "Очікує",
     "noReadyZip": "Немає готових файлів для ZIP",
     "auto": "Автовизначення",
-    "cancel": "Скасувати"
+    "cancel": "Скасувати",
+    "sectionConvert": "Конвертація",
+    "sectionConvertDesc": "Конвертуйте зображення між форматами",
+    "sectionHistory": "Історія",
+    "sectionHistoryDesc": "Перегляд раніше конвертованих файлів",
+    "sectionMetadata": "Очищення метаданих",
+    "sectionMetadataDesc": "Видалення EXIF та інших прихованих даних"
   },
   "documents": {
     "title": "Документи",

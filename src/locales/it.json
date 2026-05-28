@@ -99,7 +99,13 @@
     "statusPending": "In attesa",
     "noReadyZip": "Nessun file pronto per ZIP",
     "auto": "Auto",
-    "cancel": "Annulla"
+    "cancel": "Annulla",
+    "sectionConvert": "Conversione",
+    "sectionConvertDesc": "Converti immagini tra formati",
+    "sectionHistory": "Cronologia",
+    "sectionHistoryDesc": "Visualizza file convertiti in precedenza",
+    "sectionMetadata": "Pulizia metadati",
+    "sectionMetadataDesc": "Rimuovi EXIF e altri dati nascosti"
   },
   "documents": {
     "title": "Documenti",

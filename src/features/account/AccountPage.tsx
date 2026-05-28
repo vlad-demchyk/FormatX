@@ -1,42 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../app/providers/ThemeProvider";
-import { closeIcon } from "../../app/icons";
 import {
-  clearHistory,
-  deleteHistoryItem,
-  listHistory,
   type AppLocale,
   type AppSettings,
-  type HistoryItem,
   type LlmProvider,
 } from "../../lib/storage";
-import { downloadBlob } from "../../lib/download";
 import { showToast } from "../../app/toast";
 import { useStorage } from "../../app/providers/StorageProvider";
-import { PreviewModal } from "../../components/PreviewModal";
-import rawViewIcon from "/assets/icons/lsicon_view-filled.svg?raw";
-
-const previewIcon = rawViewIcon
-  .replace(/fill="#6366F1"/gi, 'fill="var(--brand-accent)"')
-  .replace(/stroke="#6366F1"/gi, 'stroke="var(--brand-accent)"')
-  .replace(/\s(width|height)="\d+"/g, " ");
-
-function base64ToBlob(b64: string, mime: string): Blob {
-  const binary = atob(b64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return new Blob([bytes], { type: mime });
-}
 
 export function AccountPage() {
   const { t, i18n } = useTranslation();
   const { theme, setTheme } = useTheme();
   const { getSettings, saveSettings } = useStorage();
-  const [items, setItems] = useState<HistoryItem[]>([]);
   const [locale, setLocaleState] = useState<AppLocale>("uk");
   const [settings, setSettingsState] = useState<AppSettings | null>(null);
-  const [previewItem, setPreviewItem] = useState<{ blob: Blob; name: string } | null>(null);
 
   useEffect(() => {
     void getSettings().then((s) => {
@@ -44,14 +22,6 @@ export function AccountPage() {
       setSettingsState(s);
     });
   }, [getSettings]);
-
-  const refreshHistory = useCallback(async () => {
-    setItems(await listHistory());
-  }, []);
-
-  useEffect(() => {
-    void refreshHistory();
-  }, [refreshHistory]);
 
   const handleTheme = useCallback(
     async (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -105,20 +75,6 @@ export function AccountPage() {
       await saveSettings(updated);
     },
     [settings, saveSettings],
-  );
-
-  const handleClearHistory = useCallback(async () => {
-    await clearHistory();
-    showToast("toast.cleared");
-    await refreshHistory();
-  }, [refreshHistory]);
-
-  const handleDelete = useCallback(
-    async (id: string) => {
-      await deleteHistoryItem(id);
-      await refreshHistory();
-    },
-    [refreshHistory],
   );
 
   return (
@@ -215,76 +171,6 @@ export function AccountPage() {
             </div>
           </div>
         )}
-      </div>
-      <div className="card" style={{ marginTop: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          <h3 style={{ margin: 0 }}>{t("account.history")}</h3>
-          <button type="button" className="btn btn-secondary" onClick={handleClearHistory}>
-            {t("account.clearHistory")}
-          </button>
-        </div>
-        <div className="account-list">
-          {items.map((item) => {
-            const ext = item.filename.split(".").pop()?.toLowerCase() || "";
-            const icon =
-              ext === "pdf" ? "📕" :
-              ext === "docx" || ext === "doc" ? "📘" :
-              ext === "zip" ? "📦" :
-              ext === "html" ? "🌐" :
-              item.mime.startsWith("image/") ? "🖼️" :
-              item.type === "document" ? "📄" : "🖼️";
-            return (
-            <div key={item.id} className="account-item">
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: "1.3rem", flexShrink: 0 }}>{icon}</span>
-                <div>
-                  <strong>{item.filename}</strong>
-                  <br />
-                  <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-                    {new Date(item.createdAt).toLocaleString()} · {(item.size / 1024).toFixed(0)} KB
-                  </span>
-                </div>
-              </div>
-              <div style={{ display: "flex", gap: 8 }}>
-                {item.blobBase64 && (
-                  <>
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm btn-icon"
-                      onClick={() =>
-                        setPreviewItem({
-                          blob: base64ToBlob(item.blobBase64!, item.mime),
-                          name: item.filename,
-                        })
-                      }
-                      title={t("account.preview")}
-                      aria-label={t("account.preview")}
-                    >
-                      <span dangerouslySetInnerHTML={{ __html: previewIcon }} style={{ display: "flex", width: 20, height: 20 }} />
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-primary"
-                      onClick={() => downloadBlob(base64ToBlob(item.blobBase64!, item.mime), item.filename)}
-                    >
-                      {t("images.download")}
-                    </button>
-                  </>
-                )}
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-icon"
-                  onClick={() => handleDelete(item.id)}
-                >
-                  <span dangerouslySetInnerHTML={{ __html: closeIcon }} />
-                </button>
-              </div>
-            </div>
-            );
-          })}
-        </div>
-        {!items.length && <p className="empty-state">{t("account.noHistory")}</p>}
-        <PreviewModal item={previewItem} onClose={() => setPreviewItem(null)} />
       </div>
     </>
   );
