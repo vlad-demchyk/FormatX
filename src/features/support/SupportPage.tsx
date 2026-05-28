@@ -20,7 +20,7 @@ export function SupportPage() {
       <h2>{t("support.title")}</h2>
 
       {/* Project description */}
-      <div className="card" style={{ padding: "28px 24px" }}>
+      <div className="card" style={{ padding: "28px 24px", marginTop: 16 }}>
         <h3 style={{ marginBottom: 12 }}>{t("support.projectTitle")}</h3>
         <p style={{ fontSize: "0.92rem", lineHeight: 1.6, marginBottom: 12 }}>
           {t("support.projectDesc")}
@@ -31,7 +31,7 @@ export function SupportPage() {
       </div>
 
       {/* Buy me a coffee card */}
-      <div className="card" style={{ textAlign: "center", padding: "40px 24px" }}>
+      <div className="card" style={{ textAlign: "center", padding: "40px 24px", marginTop: 16 }}>
         <div
           style={{ width: 80, height: 80, margin: "0 auto 20px", color: "var(--brand-accent)" }}
           dangerouslySetInnerHTML={{ __html: coffeeIcon }}

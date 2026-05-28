@@ -12,6 +12,7 @@ import { convertDocument, findConverter } from "./converter/registry";
 import { allOutputFormats, formatLabel } from "./formatRegistry";
 import type { DocumentQueueItem, DocumentFormatId } from "./types";
 import { hashFor } from "../../app/hooks/useAppRoute";
+import { logger } from "../../lib/logger";
 
 import convertRaw from "/assets/icons/streamline-ultimate_coding-apps-website-data-conversion-documents-1.svg?raw";
 import summarizeRaw from "/assets/icons/material-symbols_summarize-outline.svg?raw";
@@ -87,7 +88,7 @@ export function DocumentsPage() {
   const handleFiles = useCallback((files: FileList) => addFiles(files, "md"), [addFiles]);
 
   const handleConvert = useCallback(async (item: DocumentQueueItem) => {
-    console.log("[FormatX] Convert started", { file: item.file.name, size: item.file.size, from: item.inputFormat, to: item.outputFormat });
+    logger.log("Convert started", { file: item.file.name, size: item.file.size, from: item.inputFormat, to: item.outputFormat });
     if (item.status === "error") {
       // Reset error so user can retry
       markConverting(item.id);
@@ -96,16 +97,16 @@ export function DocumentsPage() {
     const conv = findConverter(item.inputFormat, item.outputFormat);
     if (!conv) {
       const msg = `No converter for ${item.inputFormat} → ${item.outputFormat}`;
-      console.error("[FormatX]", msg);
+      logger.error(msg);
       markError(item.id, msg);
       return;
     }
-    console.log("[FormatX] Using converter:", conv.name);
+    logger.log("Using converter:", conv.name);
 
     // Re-read file data if the ArrayBuffer was detached by a previous conversion
     let data = item.data;
     if (data.byteLength === 0) {
-      console.log("[FormatX] ArrayBuffer detached, re-reading file");
+      logger.log("ArrayBuffer detached, re-reading file");
       data = await item.file.arrayBuffer();
     }
 
@@ -118,12 +119,12 @@ export function DocumentsPage() {
         inputFormat: item.inputFormat,
         outputFormat: item.outputFormat,
       });
-      console.log("[FormatX] Convert success:", result.filename, result.mime, result.blob.size);
+      logger.log("Convert success:", result.filename, result.mime, result.blob.size);
       markReady(item.id, [result.blob]);
       await saveToHistory({ ...item, blobs: [result.blob] });
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Conversion failed";
-      console.error("[FormatX] Convert error:", msg, e);
+      logger.error("Document convert error:", msg, e);
       markError(item.id, msg);
     }
   }, [markConverting, markReady, markError, saveToHistory]);
@@ -131,10 +132,10 @@ export function DocumentsPage() {
   const handlePreview = useCallback((item: DocumentQueueItem) => {
     const blob = item.blobs?.[0];
     if (!blob) {
-      console.warn("[FormatX] Preview: no blob");
+      logger.warn("Preview: no blob");
       return;
     }
-    console.log("[FormatX] Preview:", item.file.name, blob.type, blob.size);
+    logger.log("Preview:", item.file.name, blob.type, blob.size);
     setPreviewItem({ blob, name: item.file.name });
   }, []);
 

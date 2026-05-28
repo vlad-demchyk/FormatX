@@ -63,6 +63,31 @@ src/
 
 ## Documentation
 
+| Language | Directory |
+|----------|-----------|
+| 🇺🇦 Українська | [docs/uk/](docs/uk/) |
+| 🇬🇧 English | [docs/](docs/) — research & migration docs |
+
+### Ukrainian docs (`docs/uk/`)
+
+| Документ | Опис |
+|----------|------|
+| [README.md](docs/uk/README.md) | Головна документація |
+| [ARCHITECTURE.md](docs/uk/ARCHITECTURE.md) | Архітектура проекту |
+| [FEATURES.md](docs/uk/FEATURES.md) | Опис модулів та функцій |
+| [LIBRARIES.md](docs/uk/LIBRARIES.md) | Бібліотеки та залежності |
+| [STORAGE.md](docs/uk/STORAGE.md) | Система зберігання даних |
+| [CONVERTER.md](docs/uk/CONVERTER.md) | Конвертація документів |
+| [IMAGE_CONVERTER.md](docs/uk/IMAGE_CONVERTER.md) | Конвертація зображень |
+| [SANITIZER.md](docs/uk/SANITIZER.md) | Текстовий санітайзер |
+| [I18N.md](docs/uk/I18N.md) | Інтернаціоналізація |
+| [STYLES.md](docs/uk/STYLES.md) | Дизайн-система та CSS |
+| [HOOKS.md](docs/uk/HOOKS.md) | React хуки та утиліти |
+| [PWA.md](docs/uk/PWA.md) | PWA та деплой |
+| [GLOSSARY.md](docs/uk/GLOSSARY.md) | Глосарій термінів |
+
+### Research & migration docs
+
 | Topic | File |
 |-------|------|
 | Documents module (formats, engines, architecture) | [docs/documents-module-research.md](docs/documents-module-research.md) |

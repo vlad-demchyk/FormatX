@@ -1,6 +1,7 @@
 import JSZip from "jszip";
 import { MIME_MAP, type QueueItem } from "./types";
 import { rasterizeWithWorker } from "../../lib/workers/imageWorkerManager";
+import { logger } from "../../lib/logger";
 
 type HeicModule = typeof import("heic-to");
 let heicModulePromise: Promise<HeicModule> | null = null;
@@ -48,7 +49,45 @@ export function shouldDecodeAsHeic(file: File, fmtIn: string): boolean {
 }
 
 async function rasterToBlob(file: File, outMime: string, quality: number): Promise<Blob> {
-  const bitmap = await createImageBitmap(file);
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(file);
+  } catch (e) {
+    logger.error("createImageBitmap failed, trying fallback:", e);
+    // Fallback: load via <img>
+    const url = URL.createObjectURL(file);
+    try {
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const el = new Image();
+        el.onload = () => resolve(el);
+        el.onerror = () => reject(new Error("Failed to decode image via &lt;img&gt;"));
+        el.src = url;
+      });
+      const w = img.naturalWidth || img.width || 300;
+      const h = img.naturalHeight || img.height || 150;
+      const c = document.createElement("canvas");
+      c.width = w;
+      c.height = h;
+      const ctx = c.getContext("2d")!;
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, w, h);
+      ctx.drawImage(img, 0, 0);
+      // Use canvas.toBlob directly instead of createImageBitmap(c)
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        c.toBlob(
+          (b) => (b ? resolve(b) : reject(new Error("toBlob from canvas failed"))),
+          outMime,
+          outMime === "image/png" ? undefined : Math.min(1, Math.max(0.4, quality / 100)),
+        );
+      });
+      URL.revokeObjectURL(url);
+      return blob;
+    } catch (e2) {
+      logger.error("Fallback image decode failed:", e2);
+      URL.revokeObjectURL(url);
+      throw e2;
+    }
+  }
   const canvas = document.createElement("canvas");
   canvas.width = bitmap.width;
   canvas.height = bitmap.height;
@@ -84,9 +123,10 @@ export async function convertItem(
       try {
         ({ heicTo } = await loadHeicModule());
       } catch {
-        throw new Error(
-          "HEIC decoder failed to load. Use http://localhost (not file://).",
-        );
+          logger.error("HEIC module load failed");
+          throw new Error(
+            "HEIC decoder failed to load. Use http://localhost (not file://).",
+          );
       }
             const qc = Math.min(1, Math.max(0.1, quality / 100));
             const heicOut =
@@ -111,6 +151,7 @@ export async function convertItem(
       item.heicPreview = false;
     }
   } catch (e) {
+    logger.error("Convert failed:", e);
     item.status = "error";
     let msg = e instanceof Error ? e.message : String(e);
     if (/ERR_LIBHEIF|libheif|format not supported|HEIF processing error/i.test(msg)) {

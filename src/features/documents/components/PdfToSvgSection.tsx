@@ -2,6 +2,7 @@ import { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { initialize, convertPdfToSvg } from "pdf-into-svg";
 import { downloadBlob } from "../../../lib/download";
+import { logger } from "../../../lib/logger";
 
 export function PdfToSvgSection() {
   const { t } = useTranslation();
@@ -80,7 +81,7 @@ export function PdfToSvgSection() {
       setPreviewUrl(URL.createObjectURL(blob));
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Conversion failed";
-      console.error("[FormatX] PDF→SVG error:", msg, e);
+      logger.error("PDF→SVG error:", msg, e);
       setError(msg);
     } finally {
       setLoading(false);

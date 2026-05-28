@@ -14,6 +14,9 @@ node_modules
 dist
 dist-ssr
 
+# LibreOffice WASM (copied on postinstall)
+public/wasm/
+
 # Local env
 *.local
 

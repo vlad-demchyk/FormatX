@@ -14,7 +14,7 @@ export default defineConfig({
       includeAssets: ["favicon.svg"],
       workbox: {
         maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
-        globIgnores: ["**/sql-asm*", "**/sql-asm-debug*", "**/worker.sql-asm*"],
+        globIgnores: ["**/sql-asm*", "**/sql-asm-debug*", "**/worker.sql-asm*", "**/wasm/**"],
       },
       manifest: {
         name: "FormatX",
@@ -29,9 +29,18 @@ export default defineConfig({
       },
           }),
   ],
-  clearScreen: false,
+  preview: {
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Embedder-Policy": "require-corp",
+    },
+  },
   server: {
     port: 1420,
+    headers: {
+      "Cross-Origin-Opener-Policy": "same-origin",
+      "Cross-Origin-Embedder-Policy": "require-corp",
+    },
     fs: {
       allow: [".", "../node_modules/pdf-into-svg/runtime"],
     },
@@ -47,6 +56,8 @@ export default defineConfig({
         manualChunks(id) {
           if (id.includes("heic-to")) return "heic-to";
           if (id.includes("sql.js") || id.includes("sql-wasm")) return "sql";
+          if (id.includes("@matbee/libreoffice-converter")) return "libreoffice";
+          if (id.includes("pdfjs-dist")) return "pdfjs";
         },
       },
     },

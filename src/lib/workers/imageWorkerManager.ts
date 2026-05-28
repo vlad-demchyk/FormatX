@@ -11,6 +11,7 @@
  */
 
 import { WorkerPool } from "./workerPool";
+import { logger } from "../logger";
 
 let pool: WorkerPool | null = null;
 let taskSeq = 0;
@@ -44,22 +45,57 @@ async function decodeToBitmap(source: Blob): Promise<ImageBitmap> {
     (source instanceof File && source.name.toLowerCase().endsWith(".svg"));
 
   if (!isSvgBlob) {
-    // Raster formats → fast path
-    return createImageBitmap(source);
+    try {
+      return await createImageBitmap(source);
+    } catch (e) {
+      // createImageBitmap can fail for some formats (e.g. some WebP variants).
+      // Fallback to <img> decode.
+      logger.warn("createImageBitmap failed, trying <img> fallback:", e);
+      return decodeViaImage(source);
+    }
   }
 
-  // SVG → slow but reliable path via <img>
-  const url = URL.createObjectURL(source);
+  // SVG path via <img>
+  try {
+    return await decodeViaImage(source);
+  } catch {
+    // If <img> fails, try reading SVG as text and creating a sanitized blob
+    const text = await source.text();
+    const cleaned = text
+      .replace(/<!--[\s\S]*?-->/g, "") // strip comments
+      .replace(/<\?xml[\s\S]*?\?>/, "") // strip XML declaration
+      .trim();
+    // Ensure xmlns
+    const withNs = cleaned.includes('xmlns="http://www.w3.org/2000/svg"')
+      ? cleaned
+      : cleaned.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg"');
+    // Ensure explicit width/height if viewBox exists
+    const hasSize = /width\s*=|height\s*=/.test(withNs);
+    const finalSvg = hasSize
+      ? withNs
+      : withNs.replace("<svg", '<svg width="300" height="150"');
+    const fixedBlob = new Blob([finalSvg], { type: "image/svg+xml;charset=utf-8" });
+    return decodeViaImage(fixedBlob);
+  }
+}
+
+/** Load an image via <img> element and return an ImageBitmap. */
+async function decodeViaImage(blob: Blob): Promise<ImageBitmap> {
+  const url = URL.createObjectURL(blob);
   try {
     const img = await new Promise<HTMLImageElement>((resolve, reject) => {
       const el = new Image();
       el.onload = () => resolve(el);
-      el.onerror = () => reject(new Error("The source image could not be decoded."));
+      el.onerror = () => reject(new Error(`The source image could not be decoded (blob type: ${blob.type}).`));
       el.src = url;
     });
-    const canvas = new OffscreenCanvas(img.naturalWidth || img.width, img.naturalHeight || img.height);
+    const w = img.naturalWidth || img.width || 300;
+    const h = img.naturalHeight || img.height || 150;
+    const canvas = new OffscreenCanvas(w, h);
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Canvas 2D context unavailable");
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, w, h);
     ctx.drawImage(img, 0, 0);
     return canvas.transferToImageBitmap();
   } finally {
