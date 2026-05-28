@@ -2,6 +2,7 @@ import docsRaw from "../../assets/icons/material-symbols_docs.svg?raw";
 import photoRaw from "../../assets/icons/tabler_photo.svg?raw";
 import textRaw from "../../assets/icons/solar_text-bold.svg?raw";
 import clipboardRaw from "../../assets/icons/clipboard-list.svg?raw";
+import closeRaw from "../../assets/icons/iconamoon_close-bold.svg?raw";
 
 /** Brand hex in source SVGs → theme-aware currentColor */
 function themedIcon(raw: string): string {
@@ -16,3 +17,6 @@ export const tabIcons = {
   documents: themedIcon(docsRaw),
   clipboard: themedIcon(clipboardRaw),
 } as const;
+
+/** Themed close (×) icon — inherits current color. */
+export const closeIcon = themedIcon(closeRaw);

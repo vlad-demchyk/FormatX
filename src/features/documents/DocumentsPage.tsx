@@ -6,6 +6,7 @@ import { DocumentQueue } from "./components/DocumentQueue";
 import { DocumentToolbar } from "./components/DocumentToolbar";
 import { PdfToSvgSection } from "./components/PdfToSvgSection";
 import { PlaceholderSection } from "./components/PlaceholderSection";
+import { PreviewModal } from "../../components/PreviewModal";
 import { convertDocument, findConverter } from "./converter/registry";
 import { allOutputFormats, formatLabel } from "./formatRegistry";
 import type { DocumentQueueItem, DocumentFormatId } from "./types";
@@ -23,6 +24,7 @@ const SECTIONS: { id: DocSection; labelKey: string; descKey: string; icon: strin
 export function DocumentsPage() {
   const { t } = useTranslation();
   const [section, setSection] = useState<DocSection | null>(null);
+  const [previewItem, setPreviewItem] = useState<{ blob: Blob; name: string } | null>(null);
   const [globalFormat, setGlobalFormat] = useState<DocumentFormatId>("md");
 
   const {
@@ -93,9 +95,7 @@ export function DocumentsPage() {
       return;
     }
     console.log("[FormatX] Preview:", item.file.name, blob.type, blob.size);
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank");
-    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    setPreviewItem({ blob, name: item.file.name });
   }, []);
 
   const handleConvertAll = useCallback(async () => {
@@ -197,6 +197,11 @@ export function DocumentsPage() {
                 />
                 {!queue.length && <p className="empty-state">{t("images.empty")}</p>}
               </div>
+
+              <PreviewModal
+                item={previewItem}
+                onClose={() => setPreviewItem(null)}
+              />
             </>
           )}
 

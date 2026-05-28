@@ -375,12 +375,29 @@ body {
   border-radius: 10px;
 }
 
+.images-item .images-item__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 @media (max-width: 640px) {
   .images-item {
-    grid-template-columns: auto 56px 1fr;
+    grid-template-columns: auto 48px 1fr;
+    gap: 8px;
+    padding: 10px 12px;
   }
   .images-item .images-item__actions {
     grid-column: 1 / -1;
+  }
+  .images-item > :nth-child(4) {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .images-item .images-item__actions .btn {
+    font-size: 0.78rem;
+    padding: 6px 10px;
   }
 }
 
@@ -424,32 +441,19 @@ body {
 }
 
 .format-per-file {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  padding: 8px 10px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-}
-
-.format-per-file__label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  white-space: nowrap;
+  margin-top: 6px;
 }
 
 .format-per-file select {
-  font-size: 0.8rem;
-  padding: 4px 8px;
+  font-size: 0.78rem;
+  padding: 3px 6px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--bg);
   color: var(--text);
   font: inherit;
   cursor: pointer;
+  max-width: 120px;
 }
 
 .format-per-file select:focus {
@@ -458,21 +462,21 @@ body {
 }
 
 .images-thumb {
-  width: 72px;
-  height: 72px;
-  border-radius: 8px;
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
   object-fit: cover;
   border: 1px solid var(--border);
   background: var(--surface);
 }
 
 .images-thumb-ph {
-  width: 72px;
-  height: 72px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 700;
   color: var(--text-muted);
   border: 1px solid var(--border);

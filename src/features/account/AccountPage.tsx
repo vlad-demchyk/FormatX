@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "../../app/providers/ThemeProvider";
+import { closeIcon } from "../../app/icons";
 import {
   clearHistory,
   deleteHistoryItem,
@@ -152,10 +153,10 @@ export function AccountPage() {
                 )}
                 <button
                   type="button"
-                  className="btn btn-ghost"
+                  className="btn btn-ghost btn-icon"
                   onClick={() => handleDelete(item.id)}
                 >
-                  ×
+                  <span dangerouslySetInnerHTML={{ __html: closeIcon }} />
                 </button>
               </div>
             </div>

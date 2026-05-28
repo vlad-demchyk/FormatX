@@ -84,6 +84,7 @@
     "clear": "Clear list",
     "convert": "Convert",
     "download": "Download",
+    "preview": "Preview",
     "remove": "Remove",
     "statusReady": "Ready",
     "statusError": "Error",

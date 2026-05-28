@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { copyText } from "../../lib/clipboard";
 import { showToast } from "../../app/toast";
+import { closeIcon } from "../../app/icons";
 import { loadClipboard, clearClipboard, removeClipboardEntry } from "./storage";
 import type { ClipboardEntry } from "./storage";
 
@@ -84,10 +85,10 @@ export function ClipboardPage() {
               </button>
               <button
                 type="button"
-                className="btn btn-ghost btn-sm"
+                className="btn btn-ghost btn-sm btn-icon"
                 onClick={() => handleDelete(entry.id)}
               >
-                ×
+                <span dangerouslySetInnerHTML={{ __html: closeIcon }} />
               </button>
             </div>
           </div>

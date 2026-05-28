@@ -4,6 +4,7 @@ import { useImageQueue } from "./hooks/useImageQueue";
 import { DropZone } from "./components/DropZone";
 import { QueueList } from "./components/QueueList";
 import { Toolbar } from "./components/Toolbar";
+import { PreviewModal } from "../../components/PreviewModal";
 import type { QueueItem } from "../images/types";
 import { showNotification } from "../../lib/notifications";
 
@@ -12,6 +13,7 @@ export function PhotoPage() {
   const [fmtIn, setFmtIn] = useState("auto");
   const [fmtOut, setFmtOut] = useState("image/png");
   const [quality, setQuality] = useState(92);
+  const [previewItem, setPreviewItem] = useState<{ blob: Blob; name: string } | null>(null);
   const convertingRef = useRef(false);
 
   const {
@@ -85,6 +87,12 @@ export function PhotoPage() {
     [downloadZip, fmtOut],
   );
 
+  const handlePreview = useCallback((item: QueueItem) => {
+    const blob = item.blobs?.[0];
+    if (!blob) return;
+    setPreviewItem({ blob, name: item.file.name });
+  }, []);
+
   return (
     <>
       <h2>{t("images.title")}</h2>
@@ -142,11 +150,17 @@ export function PhotoPage() {
           queue={queue}
           onConvert={handleConvertOne}
           onDownload={(item) => downloadItem(item, fmtOut)}
+          onPreview={handlePreview}
           onRemove={removeItem}
           onToggleSelect={toggleSelect}
         />
         {!queue.length && <p className="empty-state">{t("images.empty")}</p>}
       </div>
+
+      <PreviewModal
+        item={previewItem}
+        onClose={() => setPreviewItem(null)}
+      />
     </>
   );
 }

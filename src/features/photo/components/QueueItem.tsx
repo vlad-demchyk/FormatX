@@ -1,10 +1,17 @@
 import { useTranslation } from "react-i18next";
 import type { QueueItem } from "../../images/types";
+import rawViewIcon from "/assets/icons/lsicon_view-filled.svg?raw";import { closeIcon } from "../../../app/icons";
+/** Prepare SVG icon: use brand accent color, remove fixed size so it fills the container. */
+const themedViewIcon = rawViewIcon
+  .replace(/fill="#6366F1"/gi, 'fill="var(--brand-accent)"')
+  .replace(/stroke="#6366F1"/gi, 'stroke="var(--brand-accent)"')
+  .replace(/\s(width|height)="\d+"/g, " ");
 
 interface Props {
   item: QueueItem;
   onConvert: (item: QueueItem) => void;
   onDownload: (item: QueueItem) => void;
+  onPreview: (item: QueueItem) => void;
   onRemove: (id: string) => void;
   onToggleSelect: (id: string) => void;
 }
@@ -13,6 +20,7 @@ export function QueueItemRow({
   item,
   onConvert,
   onDownload,
+  onPreview,
   onRemove,
   onToggleSelect,
 }: Props) {
@@ -35,7 +43,7 @@ export function QueueItemRow({
         )}
       </div>
       <div>
-        <div style={{ fontWeight: 600, wordBreak: "break-all" }}>{item.file.name}</div>
+        <div style={{ fontWeight: 600, wordBreak: "break-all", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 200 }}>{item.file.name}</div>
         <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
           {(item.file.size / 1024 / 1024).toFixed(2)} MB · {detectedFormat}
         </div>
@@ -76,13 +84,23 @@ export function QueueItemRow({
         >
           {t("images.download")}
         </button>
+        {item.status === "ready" && item.blobs?.[0] && (
+          <button
+            type="button"
+            className="btn btn-ghost btn-sm btn-icon"
+            title={t("images.preview")}
+            onClick={() => onPreview(item)}
+          >
+            <span dangerouslySetInnerHTML={{ __html: themedViewIcon }} style={{ display: "flex", width: 20, height: 20 }} />
+          </button>
+        )}
         <button
           type="button"
-          className="btn btn-ghost"
+          className="btn btn-ghost btn-icon"
           title={t("images.remove")}
           onClick={() => onRemove(item.id)}
         >
-          ×
+          <span dangerouslySetInnerHTML={{ __html: closeIcon }} />
         </button>
       </div>
     </div>

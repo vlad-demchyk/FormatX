@@ -5,6 +5,7 @@ interface Props {
   queue: QueueItem[];
   onConvert: (item: QueueItem) => void;
   onDownload: (item: QueueItem) => void;
+  onPreview: (item: QueueItem) => void;
   onRemove: (id: string) => void;
   onToggleSelect: (id: string) => void;
 }
@@ -13,6 +14,7 @@ export function QueueList({
   queue,
   onConvert,
   onDownload,
+  onPreview,
   onRemove,
   onToggleSelect,
 }: Props) {
@@ -26,6 +28,7 @@ export function QueueList({
           item={item}
           onConvert={onConvert}
           onDownload={onDownload}
+          onPreview={onPreview}
           onRemove={onRemove}
           onToggleSelect={onToggleSelect}
         />

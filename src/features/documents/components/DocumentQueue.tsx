@@ -1,6 +1,13 @@
 import { useTranslation } from "react-i18next";
 import { formatLabel, outputFormatsFor } from "../formatRegistry";
 import type { DocumentQueueItem, DocumentFormatId } from "../types";
+import { closeIcon } from "../../../app/icons";
+import rawViewIcon from "/assets/icons/lsicon_view-filled.svg?raw";
+
+const viewIcon = rawViewIcon
+  .replace(/fill="#6366F1"/gi, 'fill="var(--brand-accent)"')
+  .replace(/stroke="#6366F1"/gi, 'stroke="var(--brand-accent)"')
+  .replace(/\s(width|height)="\d+"/g, " ");
 
 interface Props {
   items: DocumentQueueItem[];
@@ -46,7 +53,6 @@ export function DocumentQueue({
                 {formatLabel(item.inputFormat)} · {(item.file.size / 1024).toFixed(0)} KB
               </div>
               <div className="format-per-file">
-                <span className="format-per-file__label">{t("documents.to")}</span>
                 <select
                   value={item.outputFormat}
                   onChange={(e) => onOutputFormatChange(item.id, e.target.value as DocumentFormatId)}
@@ -97,19 +103,20 @@ export function DocumentQueue({
               {onPreview && (item.outputFormat === "html" || item.outputFormat === "md") && item.status === "ready" && item.blobs?.[0] && (
                 <button
                   type="button"
-                  className="btn btn-secondary"
+                  className="btn btn-ghost btn-sm btn-icon"
+                  title={t("documents.preview")}
                   onClick={() => onPreview(item)}
                 >
-                  {t("documents.preview")}
+                  <span dangerouslySetInnerHTML={{ __html: viewIcon }} />
                 </button>
               )}
               <button
                 type="button"
-                className="btn btn-ghost"
+                className="btn btn-ghost btn-icon"
                 title={t("images.remove")}
                 onClick={() => onRemove(item.id)}
               >
-                ×
+                <span dangerouslySetInnerHTML={{ __html: closeIcon }} />
               </button>
             </div>
           </div>
