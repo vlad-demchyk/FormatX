@@ -10,6 +10,16 @@ export type FormatMode =
   | "splitWords"
   | "removeTrailing";
 
+export type LlmProvider = "ollama" | "openai" | "anthropic" | "custom";
+
+export interface LlmConfig {
+  provider: LlmProvider;
+  endpoint: string;
+  apiKey: string;
+  model: string;
+  enabled: boolean;
+}
+
 export interface SanitizerSettings {
   mode: SanitizeMode;
   formatMode: FormatMode;
@@ -29,6 +39,7 @@ export interface AppSettings {
   notificationsEnabled: boolean;
   sanitizer: SanitizerSettings;
   hotkey: string;
+  llm: LlmConfig;
 }
 
 export interface HistoryItem {

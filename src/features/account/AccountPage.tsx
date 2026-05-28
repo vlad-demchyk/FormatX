@@ -9,6 +9,7 @@ import {
   type AppLocale,
   type AppSettings,
   type HistoryItem,
+  type LlmProvider,
 } from "../../lib/storage";
 import { downloadBlob } from "../../lib/download";
 import { showToast } from "../../app/toast";
@@ -66,12 +67,34 @@ export function AccountPage() {
   );
 
   const handleToggle = useCallback(
-    async (key: "notificationsEnabled") => {
+    async (key: "notificationsEnabled" | "llm") => {
       if (!settings) return;
-      const updated = { ...settings, [key]: !settings[key] };
+      if (key === "llm") {
+        const updated = {
+          ...settings,
+          llm: { ...settings.llm, enabled: !settings.llm.enabled },
+        };
+        setSettingsState(updated);
+        await saveSettings(updated);
+      } else {
+        const updated = { ...settings, [key]: !settings[key] };
+        setSettingsState(updated);
+        await saveSettings(updated);
+      }
+      showToast("toast.saved");
+    },
+    [settings, saveSettings],
+  );
+
+  const handleLlmChange = useCallback(
+    async (field: "provider" | "endpoint" | "apiKey" | "model" | "enabled", value: string | boolean) => {
+      if (!settings) return;
+      const updated = {
+        ...settings,
+        llm: { ...settings.llm, [field]: value },
+      };
       setSettingsState(updated);
       await saveSettings(updated);
-      showToast("toast.saved");
     },
     [settings, saveSettings],
   );
@@ -123,6 +146,67 @@ export function AccountPage() {
           </label>
         </div>
         <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>{t("account.pwaHint")}</p>
+      </div>
+      <div className="card" style={{ marginTop: 16 }}>
+        <h3>{t("account.llm")}</h3>
+        <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: 16, lineHeight: 1.5 }}>
+          {t("account.llmDesc")}
+        </p>
+        <label className="toggle-row" style={{ marginBottom: 16 }}>
+          <span>{t("account.llmEnable")}</span>
+          <input
+            type="checkbox"
+            checked={settings?.llm.enabled ?? false}
+            onChange={() => handleToggle("llm")}
+          />
+        </label>
+        {settings?.llm.enabled && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div className="field">
+              <label htmlFor="llmProvider">{t("account.llmProvider")}</label>
+              <select
+                id="llmProvider"
+                value={settings.llm.provider}
+                onChange={(e) => handleLlmChange("provider", e.target.value as LlmProvider)}
+              >
+                <option value="ollama">{t("account.llmProviderOllama")}</option>
+                <option value="openai">{t("account.llmProviderOpenai")}</option>
+                <option value="anthropic">{t("account.llmProviderAnthropic")}</option>
+                <option value="custom">{t("account.llmProviderCustom")}</option>
+              </select>
+            </div>
+            <div className="field">
+              <label htmlFor="llmEndpoint">{t("account.llmEndpoint")}</label>
+              <input
+                id="llmEndpoint"
+                type="text"
+                value={settings.llm.endpoint}
+                placeholder={t("account.llmEndpointPlaceholder")}
+                onChange={(e) => handleLlmChange("endpoint", e.target.value)}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="llmApiKey">{t("account.llmApiKey")}</label>
+              <input
+                id="llmApiKey"
+                type="password"
+                value={settings.llm.apiKey}
+                placeholder={t("account.llmApiKeyPlaceholder")}
+                onChange={(e) => handleLlmChange("apiKey", e.target.value)}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="llmModel">{t("account.llmModel")}</label>
+              <input
+                id="llmModel"
+                type="text"
+                value={settings.llm.model}
+                placeholder={t("account.llmModelPlaceholder")}
+                onChange={(e) => handleLlmChange("model", e.target.value)}
+              />
+            </div>
+          </div>
+        )}
       </div>
       <div className="card" style={{ marginTop: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>

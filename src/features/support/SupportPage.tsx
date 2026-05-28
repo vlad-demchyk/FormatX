@@ -32,7 +32,7 @@ export function SupportPage() {
           {t("support.detail")}
         </p>
         <a
-          href="https://www.buymeacoffee.com/vl.demchyk"
+          href="https://www.buymeacoffee.com/widget/page/vl.demchyk?color=5F7FFF"
           target="_blank"
           rel="noopener noreferrer"
           className="btn btn-primary"

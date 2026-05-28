@@ -10,6 +10,8 @@ export type {
   SanitizerSettings,
   SanitizeMode,
   FormatMode,
+  LlmConfig,
+  LlmProvider,
 } from "./types";
 
 let webBackend: typeof import("./webStorage") | null = null;

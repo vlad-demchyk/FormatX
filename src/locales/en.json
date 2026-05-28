@@ -146,7 +146,21 @@
     "clearHistory": "Clear history",
     "settings": "Settings",
     "notifLabel": "Completion notifications",
-    "pwaHint": "Install FormatX from your browser menu"
+    "pwaHint": "Install FormatX from your browser menu",
+    "llm": "AI assistant",
+    "llmDesc": "Configure a local or cloud AI model for additional features (summarization, translation, etc.).",
+    "llmEnable": "Enable AI features",
+    "llmProvider": "Provider",
+    "llmProviderOllama": "Ollama (local)",
+    "llmProviderOpenai": "OpenAI",
+    "llmProviderAnthropic": "Anthropic Claude",
+    "llmProviderCustom": "Custom (OpenAI-compatible)",
+    "llmEndpoint": "Endpoint URL",
+    "llmEndpointPlaceholder": "http://localhost:11434",
+    "llmApiKey": "API Key",
+    "llmApiKeyPlaceholder": "sk-...",
+    "llmModel": "Model",
+    "llmModelPlaceholder": "llama3.2"
   },
   "support": {
     "title": "Support",

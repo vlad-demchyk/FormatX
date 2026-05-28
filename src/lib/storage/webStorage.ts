@@ -2,7 +2,7 @@ import initSqlJs from "sql.js/dist/sql-wasm.js";
 import type { Database, SqlJsStatic } from "sql.js";
 import wasmUrl from "sql.js/dist/sql-wasm.wasm?url";
 import { MIGRATION_001, MAX_SNIPPETS, RETENTION_DAYS } from "./schema";
-import type { AppSettings, HistoryItem, TextSnippet, SanitizerSettings } from "./types";
+import type { AppSettings, HistoryItem, TextSnippet, SanitizerSettings, LlmConfig } from "./types";
 
 const DB_KEY = "formatx-sqljs";
 const SETTINGS_KEY = "formatx-settings";
@@ -48,6 +48,16 @@ function defaultSanitizer(): SanitizerSettings {
   };
 }
 
+function defaultLlm(): LlmConfig {
+  return {
+    provider: "ollama",
+    endpoint: "http://localhost:11434",
+    apiKey: "",
+    model: "llama3.2",
+    enabled: false,
+  };
+}
+
 function defaultSettings(): AppSettings {
   return {
     locale: "uk",
@@ -58,6 +68,7 @@ function defaultSettings(): AppSettings {
     notificationsEnabled: true,
     sanitizer: defaultSanitizer(),
     hotkey: "ctrl+shift+v",
+    llm: defaultLlm(),
   };
 }
 
@@ -77,6 +88,8 @@ export async function getSettings(): Promise<AppSettings> {
   }
   // Deep-merge sanitizer settings so new fields get defaults
   parsed.sanitizer = { ...defaults.sanitizer, ...(saved.sanitizer || {}) };
+  // Deep-merge LLM config so new fields get defaults
+  parsed.llm = { ...defaults.llm, ...(saved.llm || {}) };
   return parsed;
 }
 

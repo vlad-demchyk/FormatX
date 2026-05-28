@@ -146,7 +146,21 @@
     "clearHistory": "Очистити історію",
     "settings": "Налаштування",
     "notifLabel": "Сповіщення про завершення",
-    "pwaHint": "Встанови FormatX як додаток через меню браузера"
+    "pwaHint": "Встанови FormatX як додаток через меню браузера",
+    "llm": "AI асистент",
+    "llmDesc": "Налаштуйте локальну або хмарну AI модель для додаткових функцій (переказ, переклад тощо).",
+    "llmEnable": "Увімкнути AI функції",
+    "llmProvider": "Провайдер",
+    "llmProviderOllama": "Ollama (локально)",
+    "llmProviderOpenai": "OpenAI",
+    "llmProviderAnthropic": "Anthropic Claude",
+    "llmProviderCustom": "Свій (сумісний з OpenAI)",
+    "llmEndpoint": "URL сервера",
+    "llmEndpointPlaceholder": "http://localhost:11434",
+    "llmApiKey": "API ключ",
+    "llmApiKeyPlaceholder": "sk-...",
+    "llmModel": "Модель",
+    "llmModelPlaceholder": "llama3.2"
   },
   "support": {
     "title": "Підтримка",
