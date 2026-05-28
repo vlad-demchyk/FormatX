@@ -16,7 +16,7 @@ export class PdfJsAdapter implements DocumentConverter {
 
   async convert(request: ConversionRequest): Promise<ConversionResult> {
     if (!this.workerSrcSet) {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@5.7.284/build/pdf.worker.min.mjs";
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@3.10.111/build/pdf.worker.min.js";
       this.workerSrcSet = true;
     }
 

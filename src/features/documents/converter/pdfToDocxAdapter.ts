@@ -20,7 +20,7 @@ export class PdfToDocxAdapter implements DocumentConverter {
     console.log("[FormatX] PdfToDocxAdapter.convert", request.file.name, request.file.size);
     if (!this.workerSrcSet) {
       console.log("[FormatX] Setting pdf.js worker src");
-      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@5.7.284/build/pdf.worker.min.mjs";
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@3.10.111/build/pdf.worker.min.js";
       this.workerSrcSet = true;
     }
 

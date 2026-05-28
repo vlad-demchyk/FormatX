@@ -32,8 +32,14 @@ export default defineConfig({
   clearScreen: false,
   server: {
     port: 1420,
+    fs: {
+      allow: [".", "../node_modules/pdf-into-svg/runtime"],
+    },
   },
-  optimizeDeps: { include: ["sql.js/dist/sql-wasm.js"] },
+  optimizeDeps: {
+    include: ["sql.js/dist/sql-wasm.js"],
+    exclude: ["pdf-into-svg"],
+  },
   assetsInclude: ["**/*.wasm"],
   build: {
     rollupOptions: {

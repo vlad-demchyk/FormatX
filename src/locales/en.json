@@ -112,9 +112,16 @@
     "sectionTranslateDesc": "Document translation",
     "sectionSign": "Sign",
     "sectionSignDesc": "Electronic document signing",
+    "sectionPdf2Svg": "Vector PDF (SVG)",
+    "sectionPdf2SvgDesc": "Convert PDF to vector SVG",
     "summarizeDesc": "Automatic document summarization — coming soon.",
     "translateDesc": "Document translation — coming soon.",
-    "signDesc": "Electronic document signing — coming soon."
+    "signDesc": "Electronic document signing — coming soon.",
+    "pdf2svgTitle": "PDF → SVG",
+    "pdf2svgDesc": "Convert PDF pages to vector SVG. Images stay sharp at any zoom level.",
+    "pdf2svgDrop": "Drop a PDF file or click to browse",
+    "pdf2svgConvert": "Convert PDF to SVG",
+    "pdf2svgReady": "Ready! File converted to SVG"
   },
   "clipboard": {
     "title": "Clipboard",

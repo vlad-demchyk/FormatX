@@ -112,9 +112,16 @@
     "sectionTranslateDesc": "Traduzione documenti",
     "sectionSign": "Firma",
     "sectionSignDesc": "Firma elettronica dei documenti",
+    "sectionPdf2Svg": "PDF vettoriale (SVG)",
+    "sectionPdf2SvgDesc": "Converti PDF in SVG vettoriale",
     "summarizeDesc": "Riassunto automatico dei documenti — in arrivo.",
     "translateDesc": "Traduzione documenti — in arrivo.",
-    "signDesc": "Firma elettronica dei documenti — in arrivo."
+    "signDesc": "Firma elettronica dei documenti — in arrivo.",
+    "pdf2svgTitle": "PDF → SVG",
+    "pdf2svgDesc": "Converti pagine PDF in SVG vettoriale. Le immagini rimangono nitide a qualsiasi ingrandimento.",
+    "pdf2svgDrop": "Trascina un PDF o clicca per scegliere",
+    "pdf2svgConvert": "Converti PDF in SVG",
+    "pdf2svgReady": "Pronto! File convertito in SVG"
   },
   "clipboard": {
     "title": "Appunti",

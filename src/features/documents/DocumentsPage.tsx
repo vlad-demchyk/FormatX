@@ -4,18 +4,20 @@ import { useDocumentQueue } from "./hooks/useDocumentQueue";
 import { DocumentDropZone } from "./components/DocumentDropZone";
 import { DocumentQueue } from "./components/DocumentQueue";
 import { DocumentToolbar } from "./components/DocumentToolbar";
+import { PdfToSvgSection } from "./components/PdfToSvgSection";
 import { PlaceholderSection } from "./components/PlaceholderSection";
 import { convertDocument, findConverter } from "./converter/registry";
 import { allOutputFormats, formatLabel } from "./formatRegistry";
 import type { DocumentQueueItem, DocumentFormatId } from "./types";
 
-type DocSection = "convert" | "summarize" | "translate" | "sign";
+type DocSection = "convert" | "summarize" | "translate" | "sign" | "pdf2svg";
 
 const SECTIONS: { id: DocSection; labelKey: string; descKey: string; icon: string }[] = [
   { id: "convert",   labelKey: "documents.sectionConvert",   descKey: "documents.sectionConvertDesc",   icon: "🔄" },
   { id: "summarize", labelKey: "documents.sectionSummarize", descKey: "documents.sectionSummarizeDesc", icon: "📝" },
   { id: "translate", labelKey: "documents.sectionTranslate", descKey: "documents.sectionTranslateDesc", icon: "🌐" },
   { id: "sign",      labelKey: "documents.sectionSign",      descKey: "documents.sectionSignDesc",      icon: "✍️" },
+  { id: "pdf2svg",   labelKey: "documents.sectionPdf2Svg",   descKey: "documents.sectionPdf2SvgDesc",   icon: "📄→🖼️" },
 ];
 
 export function DocumentsPage() {
@@ -196,6 +198,12 @@ export function DocumentsPage() {
                 {!queue.length && <p className="empty-state">{t("images.empty")}</p>}
               </div>
             </>
+          )}
+
+          {section === "pdf2svg" && (
+            <div className="card">
+              <PdfToSvgSection />
+            </div>
           )}
 
           {section === "summarize" && (
