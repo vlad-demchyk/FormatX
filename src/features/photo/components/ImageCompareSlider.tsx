@@ -74,13 +74,15 @@ export function ImageCompareSlider({
       {/* After label */}
       <span className="img-compare__label img-compare__label--after">{afterLabel} · {afterSize}</span>
 
+      {/* Before label (outside clipped container so background isn't cut) */}
+      <span className="img-compare__label img-compare__label--before">{beforeLabel} · {beforeSize}</span>
+
       {/* Before (clipped on the right by the divider position) */}
       <div
         className="img-compare__before"
         style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
       >
         <img src={beforeSrc} alt="before" className="img-compare__img" draggable={false} />
-        <span className="img-compare__label img-compare__label--before">{beforeLabel} · {beforeSize}</span>
       </div>
 
       {/* Draggable divider */}

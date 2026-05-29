@@ -425,40 +425,178 @@ body {
   gap: 10px;
 }
 
+/* ── Queue item add animation (на появі) ── */
+
+@keyframes addItem {
+  0% {
+    opacity: 0;
+    transform: translateY(-6px) scaleY(0.92);
+    max-height: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+  }
+  60% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+/* ── Queue item remove animation ── */
+/* Архітектура: docs/uk/ANIMATION.md */
+
+@keyframes removeItem {
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+    filter: blur(0);
+  }
+  30% {
+    transform: translateX(-25%);
+    opacity: 1;
+    filter: blur(0);
+  }
+  60% {
+    transform: translateX(-60%);
+    opacity: 0.4;
+    filter: blur(1.5px);
+  }
+  100% {
+    transform: translateX(-100%);
+    opacity: 0;
+    filter: blur(4px);
+    max-height: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+    overflow: hidden;
+  }
+}
+
+.images-item.is-removing {
+  animation: removeItem 0.5s ease-out forwards;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* ── Card add animation (поява контейнера) ── */
+
+@keyframes addCard {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px) scaleY(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+
+/* ── Card collapse animation (знизу вгору + blur) ── */
+/* Архітектура: docs/uk/ANIMATION.md */
+
+@keyframes collapseCard {
+  0% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(-12px);
+    max-height: 0;
+    margin-top: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+}
+
+.resize-collapse {
+  overflow: hidden;
+  animation: addCard 0.35s ease-out both;
+}
+
+.resize-collapse.is-collapsing {
+  animation: collapseCard 0.5s ease-in-out forwards;
+}
+
 .images-item {
   display: grid;
-  grid-template-columns: auto 72px 1fr auto auto;
-  gap: 12px;
+  grid-template-columns: auto 48px 1fr auto;
+  gap: 10px;
   align-items: center;
-  padding: 12px 14px;
+  padding: 10px 14px;
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 10px;
+  animation: addItem 0.35s ease-out both;
 }
 
-.images-item .images-item__actions {
+/* Info column: name + meta in one flow */
+.images-item__info {
+  min-width: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  flex-direction: column;
+  gap: 1px;
 }
 
-@media (max-width: 640px) {
+.images-item__name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.images-item__meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Actions: all in one row */
+.images-item__actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* ── Icon+label button mixin ── */
+
+.btn--icon-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.btn-icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+@media (max-width: 720px) {
+  .btn--icon-label .btn-label {
+    display: none;
+  }
+
   .images-item {
-    grid-template-columns: auto 48px 1fr;
     gap: 8px;
-    padding: 10px 12px;
-  }
-  .images-item .images-item__actions {
-    grid-column: 1 / -1;
-  }
-  .images-item > :nth-child(4) {
-    grid-column: 1 / -1;
-    justify-self: start;
+    padding: 8px 10px;
   }
 
   .images-item .images-item__actions .btn {
-    font-size: 0.78rem;
-    padding: 6px 10px;
+    padding: 6px;
   }
 }
 

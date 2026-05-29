@@ -57,14 +57,13 @@
   padding-inline: 8px;
 }
 
-/* SVGs inside buttons: fill container, keep aspect ratio */
+/* SVGs inside buttons: fixed size, stay centered */
 .btn svg,
 .btn-icon svg {
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
+  width: 18px;
+  height: 18px;
   display: block;
+  flex-shrink: 0;
 }
 
 /* Icon-only buttons: center the icon */
@@ -1238,13 +1237,13 @@
   justify-content: center;
   width: 100%;
   /* height: 100%; */
-  max-height: 50vh;
+  /* max-height: 50vh; */
   overflow: hidden;
   border-radius: 8px;
   border: 1px solid var(--border);
   user-select: none;
   -webkit-user-select: none;
-  line-height: 0;
+  /* line-height: 0; */
   background: var(--bg);
 }
 
@@ -1252,7 +1251,7 @@
   display: block;
   max-width: 100%;
   max-height: 100%;
-  width: 100%;
+  /* width: 100%; */
 
   object-fit: contain;
   pointer-events: none;
@@ -1296,17 +1295,27 @@
   white-space: nowrap;
   pointer-events: none;
   z-index: 3;
+  box-sizing: content-box;
+  display: inline-block;
 }
 
 .img-compare__label--before {
   left: 8px;
-  background: rgba(0, 0, 0, 0.6);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.65),
+    rgba(30, 30, 30, 0.5)
+  );
   color: #fff;
 }
 
 .img-compare__label--after {
   right: 8px;
-  background: rgba(99, 102, 241, 0.75);
+  background: linear-gradient(
+    135deg,
+    rgba(34, 36, 158, 0.7),
+    rgba(103, 13, 145, 0.712)
+  );
   color: #fff;
 }
 
@@ -1320,6 +1329,17 @@
   cursor: ew-resize;
   z-index: 4;
   transform: translateX(-50%);
+  touch-action: none;
+}
+
+/* Invisible hit‑area expansion — makes dragging much easier */
+.img-compare__divider::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  left: -13px;
+  right: -13px;
 }
 
 .img-compare__handle {
@@ -1583,4 +1603,213 @@
   color: var(--text);
   cursor: pointer;
   min-height: 32px;
+}
+
+/* ── Image options bar (resize tabs + panels) ── */
+
+.image-options {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.image-options__strip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.image-options__scroll {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  flex: 1;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.image-options__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.image-options__tab {
+  scroll-snap-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  touch-action: manipulation;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.image-options__tab:hover {
+  background: color-mix(in srgb, var(--brand-accent) 10%, transparent);
+  color: var(--text);
+}
+
+.image-options__tab.is-active {
+  background: color-mix(in srgb, var(--brand-accent) 18%, transparent);
+  color: var(--brand-accent);
+  border-color: color-mix(in srgb, var(--brand-accent) 30%, transparent);
+  font-weight: 600;
+}
+
+.image-options__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.12s, color 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.image-options__arrow:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--brand-accent) 10%, transparent);
+  color: var(--text);
+}
+
+.image-options__arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* ── Panel ── */
+
+.image-options__panel {
+  margin-top: 12px;
+  padding: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+/* ── Range slider group ── */
+
+.image-options__range-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.image-options__range-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.image-options__range {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.image-options__range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--brand-accent);
+  border: 2px solid var(--bg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  transition: transform 0.12s;
+}
+
+.image-options__range::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.image-options__range::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--brand-accent);
+  border: 2px solid var(--bg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+.image-options__range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* ── Button group (format / crop) ── */
+
+.image-options__btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.image-options__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  touch-action: manipulation;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.image-options__btn:hover {
+  background: color-mix(in srgb, var(--brand-accent) 8%, transparent);
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.image-options__btn.is-active {
+  background: color-mix(in srgb, var(--brand-accent) 18%, transparent);
+  color: var(--brand-accent);
+  border-color: var(--brand-accent);
+  font-weight: 600;
 }

@@ -5,26 +5,8 @@ import { PreviewModal } from "../../../components/PreviewModal";
 import { useResizeQueue, type ResizeOptions } from "../hooks/useResizeQueue";
 import type { QueueItem } from "../../images/types";
 import { ImageCompareSlider } from "./ImageCompareSlider";
-
-const MIME_OPTIONS = [
-  { value: "__same__", labelKey: "images.resize.sameFormat" },
-  { value: "image/png", label: "PNG" },
-  { value: "image/jpeg", label: "JPEG" },
-  { value: "image/webp", label: "WebP" },
-];
-
-
-
-const CROP_OPTIONS = [
-  { value: "", label: "✂️" },
-  { value: "1:1", label: "1:1" },
-  { value: "4:3", label: "4:3" },
-  { value: "3:2", label: "3:2" },
-  { value: "16:9", label: "16:9" },
-  { value: "9:16", label: "9:16" },
-  { value: "2:3", label: "2:3" },
-  { value: "3:4", label: "3:4" },
-];
+import { ImageOptionsBar } from "./ImageOptionsBar";
+import { useAnimationController } from "../hooks/useAnimationController";
 
 const RATIO_MAP: Record<string, number> = {
   "1:1": 1,
@@ -197,7 +179,6 @@ export function ResizeSection() {
     queue,
     addFiles,
     removeItem,
-    clearQueue,
     processOne,
     processAll,
     downloadItem,
@@ -213,6 +194,45 @@ export function ResizeSection() {
   const [galIdx, setGalIdx] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const ratioRef = useRef(1);
+  const naturalWidthRef = useRef(1920);
+
+  /* ── Централізована анімація (AnimationController) ── */
+  const [showCards, setShowCards] = useState(false);
+
+  const animCtrl = useAnimationController(
+    {
+      onRemove: (id: string) => {
+        // Скоригувати galIdx перед видаленням
+        setGalIdx((g) => {
+          const idx = queue.findIndex((q) => q.id === id);
+          if (idx === -1) return g;
+          if (g >= idx && queue.length > 1) return Math.max(0, g - 1);
+          return g;
+        });
+        removeItem(id);
+      },
+      onCollapseEnd: () => {
+        setShowCards(false);
+      },
+    },
+    { staggerMs: 80, removeMs: 450, collapseMs: 400 },
+  );
+
+  // Показувати картки поки є елементи або йде анімація
+  useEffect(() => {
+    if (queue.length > 0) setShowCards(true);
+  }, [queue.length]);
+
+  const handleRemove = useCallback(
+    (id: string) => {
+      animCtrl.startRemove(id);
+    },
+    [animCtrl],
+  );
+
+  const handleClearAll = useCallback(() => {
+    animCtrl.clearAll(queue.map((q) => q.id));
+  }, [animCtrl, queue]);
 
   // ── Compute aspect ratio from the first image ──
   useEffect(() => {
@@ -224,6 +244,7 @@ export function ResizeSection() {
     img.onload = () => {
       if (img.naturalWidth && img.naturalHeight) {
         ratioRef.current = img.naturalWidth / img.naturalHeight;
+        naturalWidthRef.current = img.naturalWidth;
         setOpts((prev) => {
           if (prev.width === defaultOptions.width) {
             return { ...prev, height: Math.max(1, Math.round(prev.width / ratioRef.current)) };
@@ -278,8 +299,8 @@ export function ResizeSection() {
       </div>
 
       {/* ── Input gallery + tools ── */}
-      {queue.length > 0 && (
-        <div className="card" style={{ marginTop: 16 }}>
+      {(showCards || queue.length > 0) && (
+        <div className={`card resize-collapse${animCtrl.phase === 'collapsing' ? ' is-collapsing' : ''}`} style={{ marginTop: 16 }}>
           <h3>{t("images.resize.title")}</h3>
 
           <div className="resize-input-gallery">
@@ -342,39 +363,19 @@ export function ResizeSection() {
             )}
           </div>
 
-          {/* ── Options row ── */}
-          <div className="images-row" style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
-            <div className="field" style={{ flex: "0 0 100px" }}>
-              <label htmlFor="resize-width">{t("images.resize.width")}</label>
-              <input id="resize-width" type="number" min={1} max={10000} value={opts.width}
-                onChange={(e) => handleWidthChange(Number(e.target.value) || 1)} />
-            </div>
-            <div className="field" style={{ flex: "0 0 90px" }}>
-              <label htmlFor="resize-quality">{t("images.quality")}</label>
-              <input id="resize-quality" type="number" min={10} max={100} value={opts.quality}
-                onChange={(e) => setOpts((p) => ({ ...p, quality: Math.min(100, Math.max(10, Number(e.target.value) || 85)) }))} />
-            </div>
-            <div className="field" style={{ flex: "0 0 110px" }}>
-              <label htmlFor="resize-format">{t("images.fmtOut")}</label>
-              <select id="resize-format" value={opts.outMime}
-                onChange={(e) => setOpts((p) => ({ ...p, outMime: e.target.value }))}>
-                {MIME_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {"labelKey" in opt ? t(opt.labelKey!) : opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="field" style={{ flex: "0 0 auto", minWidth: 90 }}>
-              <label>{t("images.resize.crop")}</label>
-              <select className="toolbar-select" value={cropVal}
-                onChange={(e) => setCropVal(e.target.value)}>
-                {CROP_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
+          {/* ── Options bar (tabs + panels) ── */}
+          <ImageOptionsBar
+            width={opts.width}
+            height={opts.height}
+            quality={opts.quality}
+            outMime={opts.outMime}
+            cropVal={cropVal}
+            naturalWidth={naturalWidthRef.current}
+            onWidthChange={handleWidthChange}
+            onQualityChange={(q) => setOpts((p) => ({ ...p, quality: q }))}
+            onMimeChange={(m) => setOpts((p) => ({ ...p, outMime: m }))}
+            onCropChange={setCropVal}
+          />
 
           <div className="images-toolbar" style={{ marginTop: 8 }}>
             <button type="button" className="btn btn-primary" onClick={handleResizeAll}>
@@ -386,7 +387,7 @@ export function ResizeSection() {
             <button type="button" className="btn btn-secondary" onClick={selectNone}>
               {t("images.selNone")}
             </button>
-            <button type="button" className="btn btn-secondary" onClick={clearQueue}>
+            <button type="button" className="btn btn-secondary" onClick={handleClearAll}>
               {t("images.clear")}
             </button>
           </div>
@@ -394,37 +395,37 @@ export function ResizeSection() {
       )}
 
       {/* ── Queue list (1+) ── */}
-      {queue.length > 0 && (
-        <div className="card" style={{ marginTop: 16 }}>
+      {(showCards || queue.length > 0) && (
+        <div className={`card resize-collapse${animCtrl.phase === 'collapsing' ? ' is-collapsing' : ''}`} style={{ marginTop: 16 }}>
           <h3>
             {t("images.queue")}
             <span className="badge" style={{ marginLeft: 8 }}>{queue.length}</span>
           </h3>
           <div className="images-items">
             {queue.map((item) => (
-              <div key={item.id} className="images-item">
+              <div
+                key={item.id}
+                className={`images-item${animCtrl.isRemoving(item.id) ? ' is-removing' : ''}`}
+                onAnimationEnd={() => {
+                  if (animCtrl.isRemoving(item.id)) animCtrl.endRemove(item.id);
+                }}
+              >
                 <input type="checkbox" checked={item.selected} onChange={() => toggleSelect(item.id)} />
                 <div>
                   {item.thumbUrl && <img className="images-thumb" src={item.thumbUrl} alt="" />}
                 </div>
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 200, fontSize: "0.85rem" }}>
-                    {item.file.name}
-                  </div>
-                  <div style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
+                <div className="images-item__info">
+                  <div className="images-item__name">{item.file.name}</div>
+                  <div className="images-item__meta">
                     {(item.file.type.split("/").pop() || "?").toUpperCase()} ({formatSize(item.file.size)})
+                    {item.status === "converting" && <> · {t("images.statusConverting")}</>}
+                    {item.status === "error" && <> · <span style={{ color: "var(--error)" }}>{item.error || t("images.statusError")}</span></>}
+                    {item.status === "ready" && <> · <span style={{ color: "var(--success)" }}>{t("images.statusReady")}</span></>}
+                    {item.status === "pending" && <> · <span className="status-wait">{t("images.statusPending")}</span></>}
+                    {item.status === "ready" && item.blobs?.[0] && (
+                      <> → {(item.blobs[0].type.split("/").pop() || "?").toUpperCase()} ({formatSize(item.blobs[0].size)})</>
+                    )}
                   </div>
-                  {item.status === "ready" && item.blobs?.[0] && (
-                    <div style={{ fontSize: "0.78rem", color: "var(--brand-accent)", display: "flex", alignItems: "center", gap: 4 }}>
-                      → {(item.blobs[0].type.split("/").pop() || "?").toUpperCase()} ({formatSize(item.blobs[0].size)})
-                    </div>
-                  )}
-                </div>
-                <div style={{ fontSize: "0.8rem" }}>
-                  {item.status === "converting" && t("images.statusConverting")}
-                  {item.status === "error" && <span style={{ color: "var(--error)" }}>{item.error || t("images.statusError")}</span>}
-                  {item.status === "ready" && <span style={{ color: "var(--success)" }}>{t("images.statusReady")}</span>}
-                  {item.status === "pending" && <span className="status-wait">{t("images.statusPending")}</span>}
                 </div>
                 <div className="images-item__actions">
                   <button type="button" className="btn btn-ghost btn-icon" title={t("images.preview")}
@@ -439,15 +440,20 @@ export function ResizeSection() {
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
                     </svg>
                   </button>
-                  <button type="button" className="btn btn-secondary" disabled={item.status === "converting"} onClick={() => handleResizeOne(item)}>
-                    {t("images.convert")}
+                  <button type="button" className="btn btn-secondary btn--icon-label" disabled={item.status === "converting"} onClick={() => handleResizeOne(item)}>
+                    <svg className="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                    </svg>
+                    <span className="btn-label">{t("images.convert")}</span>
                   </button>
-                  <button type="button" className="btn btn-primary" disabled={!item.blobs || item.status !== "ready"} onClick={() => handleDownload(item)}>
-                    {t("images.download")}
+                  <button type="button" className="btn btn-primary btn--icon-label" disabled={!item.blobs || item.status !== "ready"} onClick={() => handleDownload(item)}>
+                    <svg className="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    <span className="btn-label">{t("images.download")}</span>
                   </button>
                   <button type="button" className="btn btn-ghost btn-icon" title={t("images.remove")} onClick={() => {
-                    if (galIdx >= queue.length - 1 && queue.length > 1) setGalIdx((p) => Math.max(0, p - 1));
-                    removeItem(item.id);
+                    handleRemove(item.id);
                   }}>
                     <span style={{ fontSize: "1.2rem", lineHeight: 1 }}>×</span>
                   </button>
