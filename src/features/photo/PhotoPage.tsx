@@ -14,7 +14,7 @@ import { showToast } from "../../app/toast";
 import { closeIcon } from "../../app/icons";
 import { hashFor } from "../../app/hooks/useAppRoute";
 
-import convertRaw from "/assets/icons/tabler_photo.svg?raw";
+import convertRaw from "/assets/icons/convert_doc.svg?raw";
 import historyRaw from "/assets/icons/clipboard-list.svg?raw";
 import metadataRaw from "/assets/icons/material-symbols_brush.svg?raw";
 
