@@ -9,6 +9,7 @@ import { PhotoPage } from "../features/photo/PhotoPage";
 import { ClipboardPage } from "../features/clipboard/ClipboardPage";
 import { SupportPage } from "../features/support/SupportPage";
 import { useAppRoute, type Page } from "../app/hooks/useAppRoute";
+import { SelectionToolbar } from "./SelectionToolbar";
 import { useEffect, useRef } from "react";
 import { addClipboardEntry } from "../features/clipboard/storage";
 import { showToast } from "../app/toast";
@@ -150,6 +151,7 @@ export function ShellLayout() {
           {page === "account" && <AccountPage />}
         </main>
       </div>
+      <SelectionToolbar />
     </div>
   );
 }

@@ -17,6 +17,9 @@ dist-ssr
 # LibreOffice WASM (copied on postinstall)
 public/wasm/
 
+# PDF-to-SVG Blazor runtime (copied on postinstall)
+public/assets/runtime/
+
 # Local env
 *.local
 
