@@ -53,8 +53,17 @@ function estimateSizeBytes(
   outFmt: string,
   inFmt: string,
   sourceBpp: number,
+  quality: number,
 ): number {
-  const bpp = outFmt === inFmt ? sourceBpp : (BPP_COEFS[outFmt] ?? 1.5);
+  const baseBpp = outFmt === inFmt ? sourceBpp : (BPP_COEFS[outFmt] ?? 1.5);
+  // Для lossy форматів (jpg, webp) BPP сильно залежить від якості.
+  // Базова BPP відповідає quality ~85. Коригуємо нелінійно:
+  //   q=10 → ~0.14×, q=50 → ~0.43×, q=85 → 1×, q=100 → ~1.33×
+  const isLossy = outFmt === "jpg" || outFmt === "jpeg" || outFmt === "webp";
+  const qFactor = isLossy
+    ? (0.1 + 0.9 * Math.pow(quality / 100, 2)) / (0.1 + 0.9 * Math.pow(85 / 100, 2))
+    : 1;
+  const bpp = baseBpp * qFactor;
   return Math.round((ow * oh * bpp) / 8);
 }
 
@@ -125,7 +134,7 @@ function CropInfo({ item, opts, formatSize: fs }: {
   formatSize: (b: number) => string;
 }) {
   const [text, setText] = useState<string | null>(null);
-  const mountKey = `${item.id}_${opts.width}_${opts.height}_${opts.cropRatio}_${opts.outMime}_${item.blobs?.[0]?.size ?? ""}`;
+  const mountKey = `${item.id}_${opts.width}_${opts.height}_${opts.cropRatio}_${opts.outMime}_${opts.quality}_${item.blobs?.[0]?.size ?? ""}`;
 
   useEffect(() => {
     let cancelled = false;
@@ -160,7 +169,7 @@ function CropInfo({ item, opts, formatSize: fs }: {
 
       const inFmtShort = resolveFmt("__same__", item.file.type);
       const outFmtShort = resolveFmt(opts.outMime, item.file.type);
-      const estimated = estimateSizeBytes(ow, oh, outFmtShort, inFmtShort, sourceBpp);
+      const estimated = estimateSizeBytes(ow, oh, outFmtShort, inFmtShort, sourceBpp, opts.quality);
 
       setText(`${inFmtShort.toUpperCase()} (${fs(item.file.size)}) → ${outFmtShort.toUpperCase()} (~${fs(estimated)})`);
     };
@@ -378,17 +387,29 @@ export function ResizeSection() {
           />
 
           <div className="images-toolbar" style={{ marginTop: 8 }}>
-            <button type="button" className="btn btn-primary" onClick={handleResizeAll}>
-              {t("images.resize.resizeAll")}
+            <button type="button" className="btn btn-primary btn--icon-label" onClick={handleResizeAll}>
+              <svg className="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+              <span className="btn-label">{t("images.resize.resizeAll")}</span>
             </button>
-            <button type="button" className="btn btn-secondary" onClick={selectAll}>
-              {t("images.selAll")}
+            <button type="button" className="btn btn-secondary btn--icon-label" onClick={selectAll}>
+              <svg className="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" /><polyline points="9 12 11 14 15 10" />
+              </svg>
+              <span className="btn-label">{t("images.selAll")}</span>
             </button>
-            <button type="button" className="btn btn-secondary" onClick={selectNone}>
-              {t("images.selNone")}
+            <button type="button" className="btn btn-secondary btn--icon-label" onClick={selectNone}>
+              <svg className="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" /><line x1="9" y1="9" x2="15" y2="15" /><line x1="15" y1="9" x2="9" y2="15" />
+              </svg>
+              <span className="btn-label">{t("images.selNone")}</span>
             </button>
-            <button type="button" className="btn btn-secondary" onClick={handleClearAll}>
-              {t("images.clear")}
+            <button type="button" className="btn btn-secondary btn--icon-label" onClick={handleClearAll}>
+              <svg className="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+              <span className="btn-label">{t("images.clear")}</span>
             </button>
           </div>
         </div>

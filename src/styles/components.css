@@ -980,9 +980,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: auto;
+  overflow: hidden;
   padding: 16px;
   min-height: 0;
+  touch-action: none;
 }
 
 .preview-image {
@@ -996,6 +997,10 @@
   box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4);
   cursor: grab;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-drag: none;
+  touch-action: none;
+  will-change: transform;
 }
 
 .preview-image:active {
