@@ -1,0 +1,262 @@
+/* ═══════════════════════════════════════
+   Shell Layout — header, tabs, main area
+   ═══════════════════════════════════════ */
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.shell-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  padding-top: max(12px, env(safe-area-inset-top));
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  flex-shrink: 0;
+}
+
+.shell-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.shell-header__logo {
+  display: flex;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  color: var(--brand-accent);
+}
+
+.shell-header__logo svg {
+  width: 100%;
+  height: 100%;
+}
+
+.shell-header__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shell-header__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.shell-header__branding {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.shell-header__credit {
+  font-family: "Georgia", "Times New Roman", serif;
+  font-style: italic;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  opacity: 0.55;
+  letter-spacing: 0.03em;
+}
+
+.shell-header__actions .btn.is-active {
+  border-color: var(--brand-accent);
+  color: var(--brand-accent);
+}
+
+.shell-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.shell-tabs-wrap {
+  flex-shrink: 0;
+  order: 2;
+  position: sticky;
+  bottom: 0;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 15;
+}
+
+.shell-tabs {
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  gap: 4px;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 6px 8px 8px;
+}
+
+.shell-tab {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  max-width: 120px;
+  padding: 6px 8px 4px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.shell-tab:hover:not(:disabled) {
+  color: var(--text);
+  background: color-mix(in srgb, var(--brand-accent) 8%, transparent);
+}
+
+.shell-tab[aria-selected="true"] {
+  color: var(--brand-accent);
+  background: color-mix(in srgb, var(--brand-accent) 14%, transparent);
+}
+
+.shell-tab--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.shell-tab__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  pointer-events: none;
+}
+
+.shell-tab__icon svg {
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+
+.shell-tab__label {
+  line-height: 1.2;
+  text-align: center;
+}
+
+.shell-tab__badge {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 0.55rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 1px 5px;
+  border-radius: 999px;
+  background: var(--brand-accent);
+  color: #fff;
+  line-height: 1.3;
+}
+
+.shell-main {
+  flex: 1;
+  order: 1;
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 20px 16px 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Shell responsive ── */
+
+@media (min-width: 900px) {
+  .shell-body {
+    flex-direction: row;
+  }
+
+  .shell-tabs-wrap {
+    order: 0;
+    width: 96px;
+    border-top: none;
+    border-right: 1px solid var(--border);
+    padding-bottom: 0;
+    padding-top: 8px;
+  }
+
+  .shell-tabs {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    max-width: none;
+    margin: 0;
+    padding: 12px 8px;
+    gap: 8px;
+    height: 100%;
+  }
+
+  .shell-tab {
+    flex: 0 0 auto;
+    max-width: none;
+    width: 100%;
+    padding: 12px 8px;
+    font-size: 0.72rem;
+  }
+
+  .shell-tab__icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .shell-tab__icon svg {
+    width: 32px;
+    height: 32px;
+  }
+
+  .shell-tab__badge {
+    top: 6px;
+    right: 6px;
+  }
+
+  .shell-main {
+    padding: 28px 32px 32px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .shell-tabs-wrap {
+    width: 112px;
+  }
+
+  .shell-main {
+    max-width: 1120px;
+    padding: 32px 40px 40px;
+  }
+}

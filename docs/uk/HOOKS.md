@@ -1,5 +1,96 @@
 # React хуки та утиліти
 
+## Спільні хуки (`src/lib/hooks/`)
+
+### useQueueState
+**Файл:** `src/lib/hooks/useQueueState.ts`
+
+Узагальнений хук для керування чергою елементів. Використовується `useImageQueue`, `useDocumentQueue`, `useResizeQueue`.
+
+```typescript
+function useQueueState<T extends { id: string; selected: boolean }>(initial?: T[]): {
+  items: T[];                    // Поточний стан
+  ref: React.RefObject<T[]>;     // Синхронний знімок для асинхронних операцій
+  addItems: (items: T[]) => void;
+  updateItem: (id: string, patch: Partial<T>) => void;
+  updateWhere: (pred: (item: T) => boolean, patch: Partial<T>) => void;
+  removeItem: (id: string) => void;
+  clearQueue: () => void;
+  selectAll: () => void;
+  selectNone: () => void;
+  toggleSelect: (id: string) => void;
+  commit: (next: T[]) => void;   // Повна заміна стану
+}
+```
+
+### useSectionRouting
+**Файл:** `src/lib/hooks/useSectionRouting.ts`
+
+Hash-based навігація по секціях сторінки. Використовується в `PhotoPage`, `DocumentsPage`, `TextPage`.
+
+```typescript
+function useSectionRouting<TSection extends string>(
+  validSections: TSection[],
+  pageRoute: string,
+  hashForFn: (page: string, section?: string) => string,
+): {
+  section: TSection | null;
+  setSection: (s: TSection | null) => void;
+}
+```
+
+**Деталі:**
+- Читає секцію з `window.location.hash` (другий сегмент після `/`)
+- `setSection` оновлює стан і `window.location.hash`
+- Автоматично синхронізується з `hashchange` (back/forward браузера)
+
+### useHistory / useHistoryOnActive
+**Файл:** `src/lib/hooks/useHistory.ts`
+
+Керування історією конвертацій.
+
+```typescript
+function useHistory(type: HistoryItem["type"]): {
+  items: HistoryItem[];
+  refresh: () => Promise<void>;
+  handleClear: () => Promise<void>;
+  handleDelete: (id: string) => Promise<void>;
+}
+
+function useHistoryOnActive(active: boolean, refresh: () => Promise<void>): void
+```
+
+**Деталі:**
+- Фільтрує історію за типом (`image` / `document`)
+- `handleClear` показує toast після очищення
+- `useHistoryOnActive` викликає `refresh()` коли секція стає активною
+
+### useGlobalClipboardCapture
+**Файл:** `src/app/hooks/useGlobalClipboardCapture.ts`
+
+Глобальний перехоплювач clipboard. Викликається один раз у `ShellLayout`.
+
+```typescript
+function useGlobalClipboardCapture(): void
+```
+
+- Слухає події `copy`, `paste` на `window`
+- Слухає `visibilitychange` для мобільних пристроїв (після native copy)
+- Додає текст у clipboard історію та показує toast
+
+### themedIcon / themedIconVar
+**Файл:** `src/lib/iconTheme.ts`
+
+Утиліти для заміни кольорів у raw SVG рядках.
+
+```typescript
+function themedIcon(raw: string): string
+// Замінює fill/stroke на currentColor
+
+function themedIconVar(raw: string, varName?: string): string
+// Замінює fill/stroke на CSS-змінну (за замовчуванням var(--brand-accent))
+```
+
 ## Кастомні хуки
 
 ### useAppRoute
@@ -88,12 +179,13 @@ const {
 ### useDocumentQueue
 **Файл:** `src/features/documents/hooks/useDocumentQueue.ts`
 
+Побудовано на `useQueueState<DocumentQueueItem>`. Додає document-специфічну логіку.
+
 ```typescript
 const {
   queue: DocumentQueueItem[],
   addFiles: (files, outputFormat) => void,
-  removeItem: (id) => void,
-  clearQueue: () => void,
+  removeItem, clearQueue,
   selectAll, selectNone, toggleSelect,
   updateOutputFormat, updateOutputFormatForSelected,
   markReady, markError, markConverting,
@@ -102,12 +194,14 @@ const {
 ```
 
 **Деталі:**
-- Використовує `ref` для синхронізації з асинхронними операціями
+- Використовує `useQueueState` для базових операцій з чергою
 - Читає всі файли паралельно (`Promise.all`) для уникнення NotReadableError
 - Зберігає історію для файлів < 5 MB
 
 ### useImageQueue
 **Файл:** `src/features/photo/hooks/useImageQueue.ts`
+
+Побудовано на `useQueueState<QueueItem>`. Додає image-специфічну логіку.
 
 ```typescript
 const {
@@ -120,6 +214,7 @@ const {
 ```
 
 **Деталі:**
+- Використовує `useQueueState` для базових операцій з чергою
 - Для HEIC файлів: thumbUrl = null (створюється після конвертації)
 - Звільняє ObjectURL при видаленні/очищенні
 - Зберігає історію для файлів < 2 MB
@@ -127,28 +222,27 @@ const {
 ### useResizeQueue
 **Файл:** `src/features/photo/hooks/useResizeQueue.ts`
 
-Хук для керування чергою зміни розміру зображень.
+Побудовано на `useQueueState<QueueItem>`. Хук для керування чергою зміни розміру зображень.
 
 ```typescript
 const {
-  queue: QueueItem[],
-  addFiles, removeItem, clearQueue,
-  resizeOne: (item, opts) => Promise<Blob>,
-  resizeMany: (pred, opts) => Promise<void>,
+  queue, addFiles, removeItem, clearQueue,
+  selectAll, selectNone, toggleSelect,
+  processOne, processAll, processSelected,
   downloadItem, saveToHistory,
 } = useResizeQueue();
 ```
 
 **Деталі:**
+- Використовує `useQueueState` для базових операцій з чергою
 - Використовує `pica` для високоякісного масштабування
 - Підтримує crop з aspect ratio
 - BPP-based прогноз розміру файлу
-- Зберігає історію для файлів < 2 MB
 
 ### useClipboardMonitor
 **Файл:** `src/features/clipboard/hooks/useClipboardMonitor.ts`
 
-Хук для глобального моніторингу clipboard.
+Хук для моніторингу clipboard в межах ClipboardPage (на додачу до глобального `useGlobalClipboardCapture`).
 
 ```typescript
 useClipboardMonitor({
@@ -156,9 +250,8 @@ useClipboardMonitor({
 }): void
 ```
 
-- Слухає події `copy` та `paste` на рівні window
-- Додає скопійований текст в історію ClipboardPage
-- Працює на всіх сторінках (інтегровано в ShellLayout)
+- Періодично оновлює список clipboard записів
+- Використовується тільки на `ClipboardPage`
 
 ### useAnimationController
 **Файл:** `src/features/photo/hooks/useAnimationController.ts`

@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback } from "react";
 import {
   convertItem,
   detectFormatKey,
@@ -8,35 +8,24 @@ import {
   baseName,
 } from "../../images/logic";
 import type { QueueItem, ImageStatus } from "../../images/types";
+import { useQueueState } from "../../../lib/hooks/useQueueState";
 import { addHistoryItem } from "../../../lib/db";
 import { downloadBlob } from "../../../lib/download";
 
 const MAX_HISTORY_BLOB = 2 * 1024 * 1024;
 
 export function useImageQueue() {
-  const [queue, setQueue] = useState<QueueItem[]>([]);
-  const queueRef = useRef<QueueItem[]>([]);
-
-  const updateQueue = useCallback((fn: (prev: QueueItem[]) => QueueItem[]) => {
-    setQueue((prev) => {
-      const next = fn(prev);
-      queueRef.current = next;
-      return [...next];
-    });
-  }, []);
-
-  const updateItem = useCallback(
-    (id: string, patch: Partial<QueueItem>) => {
-      setQueue((prev) => {
-        const next = prev.map((item) =>
-          item.id === id ? { ...item, ...patch } : item,
-        );
-        queueRef.current = next;
-        return next;
-      });
-    },
-    [],
-  );
+  const {
+    items: queue,
+    ref: queueRef,
+    addItems,
+    updateItem,
+    removeItem: removeItemBase,
+    clearQueue: clearQueueBase,
+    selectAll,
+    selectNone,
+    toggleSelect,
+  } = useQueueState<QueueItem>([]);
 
   const addFiles = useCallback(
     (fileList: FileList, fmtIn: string) => {
@@ -56,52 +45,35 @@ export function useImageQueue() {
           heicPreview: asHeic,
         });
       }
-      updateQueue((prev) => [...prev, ...newItems]);
+      addItems(newItems);
     },
-    [updateQueue],
+    [addItems],
   );
 
   const clearQueue = useCallback(() => {
     for (const item of queueRef.current) {
       if (item.thumbUrl) URL.revokeObjectURL(item.thumbUrl);
     }
-    updateQueue(() => []);
-  }, [updateQueue]);
+    clearQueueBase();
+  }, [clearQueueBase, queueRef]);
 
   const removeItem = useCallback(
     (id: string) => {
       const item = queueRef.current.find((q) => q.id === id);
       if (item?.thumbUrl) URL.revokeObjectURL(item.thumbUrl);
-      updateQueue((prev) => prev.filter((q) => q.id !== id));
+      removeItemBase(id);
     },
-    [updateQueue],
-  );
-
-  const selectAll = useCallback(() => {
-    updateQueue((prev) => prev.map((q) => ({ ...q, selected: true })));
-  }, [updateQueue]);
-
-  const selectNone = useCallback(() => {
-    updateQueue((prev) => prev.map((q) => ({ ...q, selected: false })));
-  }, [updateQueue]);
-
-  const toggleSelect = useCallback(
-    (id: string) => {
-      updateQueue((prev) =>
-        prev.map((q) => (q.id === id ? { ...q, selected: !q.selected } : q)),
-      );
-    },
-    [updateQueue],
+    [removeItemBase, queueRef],
   );
 
   const convertOne = useCallback(
     async (item: QueueItem, outMime: string, quality: number, fmtIn: string) => {
-      updateItem(item.id, { status: "converting" });
+      updateItem(item.id, { status: "converting" } as Partial<QueueItem>);
       try {
         await convertItem(item, outMime, quality, fmtIn);
-        updateItem(item.id, { status: item.status, blobs: item.blobs, error: item.error, thumbUrl: item.thumbUrl });
+        updateItem(item.id, { status: item.status, blobs: item.blobs, error: item.error, thumbUrl: item.thumbUrl } as Partial<QueueItem>);
       } catch {
-        updateItem(item.id, { status: "error", error: "Conversion failed" });
+        updateItem(item.id, { status: "error", error: "Conversion failed" } as Partial<QueueItem>);
       }
     },
     [updateItem],
@@ -114,7 +86,7 @@ export function useImageQueue() {
         await convertOne(item, outMime, quality, fmtIn);
       }
     },
-    [convertOne],
+    [convertOne, queueRef],
   );
 
   const downloadItem = useCallback(
@@ -133,7 +105,7 @@ export function useImageQueue() {
       if (zip) downloadBlob(zip, "converted-images.zip");
       else alert("No ready files for ZIP");
     },
-    [],
+    [queueRef],
   );
 
   const saveToHistory = useCallback(

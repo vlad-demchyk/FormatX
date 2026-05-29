@@ -1,0 +1,12 @@
+/* ═══════════════════════════════════════
+   Documents Feature Styles
+   ═══════════════════════════════════════ */
+
+.documents-placeholder {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.documents-placeholder .badge {
+  margin-bottom: 12px;
+}

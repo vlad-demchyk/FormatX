@@ -1,5 +1,8 @@
 # Реструктуризація PhotoPage — додавання секцій
 
+> **Статус:** ✅ Виконано. PhotoPage розкладено на `ConvertSection`, `HistorySection`, `MetadataSection`, `ResizeSection`.
+> Актуальну архітектуру див. у [ARCHITECTURE.md](uk/ARCHITECTURE.md).
+
 ## Контекст
 
 Користувачі FormatX мають три основні сценарії роботи із зображеннями:

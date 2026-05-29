@@ -1,7 +1,8 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import picaLib from "pica";
 type PicaInstance = ReturnType<typeof picaLib>;
 import type { QueueItem, ImageStatus } from "../../images/types";
+import { useQueueState } from "../../../lib/hooks/useQueueState";
 import { extFromMime, baseName } from "../../images/logic";
 import { downloadBlob } from "../../../lib/download";
 import { logger } from "../../../lib/logger";
@@ -38,8 +39,17 @@ const DEFAULT_OPTS: ResizeOptions = {
 };
 
 export function useResizeQueue() {
-  const [queue, setQueue] = useState<QueueItem[]>([]);
-  const queueRef = useRef<QueueItem[]>([]);
+  const {
+    items: queue,
+    ref: queueRef,
+    addItems,
+    updateItem,
+    removeItem: removeItemBase,
+    clearQueue: clearQueueBase,
+    selectAll,
+    selectNone,
+    toggleSelect,
+  } = useQueueState<QueueItem>([]);
   const picaRef = useRef<PicaInstance | null>(null);
 
   const getPica = useCallback(async () => {
@@ -48,17 +58,6 @@ export function useResizeQueue() {
     }
     return picaRef.current;
   }, []);
-
-  const updateQueue = useCallback(
-    (fn: (prev: QueueItem[]) => QueueItem[]) => {
-      setQueue((prev) => {
-        const next = fn(prev);
-        queueRef.current = next;
-        return [...next];
-      });
-    },
-    [],
-  );
 
   const addFiles = useCallback(
     (fileList: FileList) => {
@@ -75,26 +74,26 @@ export function useResizeQueue() {
           heicPreview: false,
         });
       }
-      updateQueue((prev) => [...prev, ...newItems]);
+      addItems(newItems);
     },
-    [updateQueue],
+    [addItems],
   );
 
   const removeItem = useCallback(
     (id: string) => {
       const item = queueRef.current.find((q) => q.id === id);
       if (item?.thumbUrl) URL.revokeObjectURL(item.thumbUrl);
-      updateQueue((prev) => prev.filter((q) => q.id !== id));
+      removeItemBase(id);
     },
-    [updateQueue],
+    [removeItemBase, queueRef],
   );
 
   const clearQueue = useCallback(() => {
     for (const item of queueRef.current) {
       if (item.thumbUrl) URL.revokeObjectURL(item.thumbUrl);
     }
-    updateQueue(() => []);
-  }, [updateQueue]);
+    clearQueueBase();
+  }, [clearQueueBase, queueRef]);
 
   /**
    * Resize a single image using pica.
@@ -189,31 +188,17 @@ export function useResizeQueue() {
 
   const processOne = useCallback(
     async (item: QueueItem, opts: ResizeOptions) => {
-      updateQueue((prev) =>
-        prev.map((q) => (q.id === item.id ? { ...q, status: "converting" as ImageStatus } : q)),
-      );
+      updateItem(item.id, { status: "converting" as ImageStatus } as Partial<QueueItem>);
       try {
         const blob = await resizeOne(item, opts);
-        updateQueue((prev) =>
-          prev.map((q) =>
-            q.id === item.id
-              ? { ...q, blobs: [blob], status: "ready" as ImageStatus }
-              : q,
-          ),
-        );
+        updateItem(item.id, { blobs: [blob], status: "ready" as ImageStatus } as Partial<QueueItem>);
       } catch (e) {
         const msg = e instanceof Error ? e.message : "Resize failed";
         logger.error("Resize error:", msg, e);
-        updateQueue((prev) =>
-          prev.map((q) =>
-            q.id === item.id
-              ? { ...q, status: "error" as ImageStatus, error: msg }
-              : q,
-          ),
-        );
+        updateItem(item.id, { status: "error" as ImageStatus, error: msg } as Partial<QueueItem>);
       }
     },
-    [updateQueue, resizeOne],
+    [updateItem, resizeOne],
   );
 
   const processAll = useCallback(
@@ -244,23 +229,6 @@ export function useResizeQueue() {
       downloadBlob(item.blobs[0], name);
     },
     [],
-  );
-
-  const selectAll = useCallback(() => {
-    updateQueue((prev) => prev.map((q) => ({ ...q, selected: true })));
-  }, [updateQueue]);
-
-  const selectNone = useCallback(() => {
-    updateQueue((prev) => prev.map((q) => ({ ...q, selected: false })));
-  }, [updateQueue]);
-
-  const toggleSelect = useCallback(
-    (id: string) => {
-      updateQueue((prev) =>
-        prev.map((q) => (q.id === id ? { ...q, selected: !q.selected } : q)),
-      );
-    },
-    [updateQueue],
   );
 
   const saveToHistory = useCallback(async (item: QueueItem) => {

@@ -9,6 +9,7 @@ import type { ClipboardEntry } from "./storage";
 import { loadPinned, removePinnedEntry, clearPinned, getPinnedBlob } from "./pinnedStorage";
 import type { PinnedEntry } from "./pinnedStorage";
 import { PreviewModal } from "../../components/PreviewModal";
+import { themedIcon, themedIconVar } from "../../lib/iconTheme";
 import rawViewIcon from "/assets/icons/lsicon_view-filled.svg?raw";
 import rawUploadIcon from "/assets/icons/material-symbols_upload-rounded.svg?raw";
 import rawPhotoIcon from "/assets/icons/tabler_photo.svg?raw";
@@ -17,22 +18,11 @@ import rawTextIcon from "/assets/icons/solar_text-bold.svg?raw";
 import { pinIcon } from "./pinIcon";
 import { pinWithCheck } from "./pinWithCheck";
 
-function themedSvg(raw: string): string {
-  return raw
-    .replace(/fill="#6366F1"/gi, 'fill="currentColor"')
-    .replace(/stroke="#6366F1"/gi, 'stroke="currentColor"')
-    .replace(/\s(width|height)="\d+"/g, " ");
-}
-
-const viewIcon = rawViewIcon
-  .replace(/fill="#6366F1"/gi, 'fill="var(--brand-accent)"')
-  .replace(/stroke="#6366F1"/gi, 'stroke="var(--brand-accent)"')
-  .replace(/\s(width|height)="\d+"/g, " ");
-
-const uploadIcon = themedSvg(rawUploadIcon);
-const photoIcon = themedSvg(rawPhotoIcon);
-const docsIcon = themedSvg(rawDocsIcon);
-const textIcon = themedSvg(rawTextIcon);
+const viewIcon = themedIconVar(rawViewIcon);
+const uploadIcon = themedIcon(rawUploadIcon);
+const photoIcon = themedIcon(rawPhotoIcon);
+const docsIcon = themedIcon(rawDocsIcon);
+const textIcon = themedIcon(rawTextIcon);
 
 type ClipTab = "clipboard" | "pinned";
 

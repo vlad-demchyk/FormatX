@@ -3,7 +3,7 @@ import { ErrorBoundary } from "../components/ErrorBoundary";
 import { StorageProvider } from "./providers/StorageProvider";
 import { I18nProvider } from "./providers/I18nProvider";
 import { ThemeProvider } from "./providers/ThemeProvider";
-import { ShellLayout } from "../components/ShellLayout";
+import { ShellLayout } from "./layout/ShellLayout";
 import { BootError } from "../components/BootError";
 import { requestNotificationPermission } from "../lib/notifications";
 

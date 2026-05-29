@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { copyText } from "../../lib/clipboard";
 import { addTextSnippet } from "../../lib/db";
@@ -9,6 +9,7 @@ import { SnippetsList } from "./components/SnippetsList";
 import { PlaceholderSection } from "../documents/components/PlaceholderSection";
 import { useSanitizer } from "./hooks/useSanitizer";
 import { hashFor } from "../../app/hooks/useAppRoute";
+import { useSectionRouting } from "../../lib/hooks/useSectionRouting";
 
 type TextSection = "format" | "replace" | "classes" | "translate" | "summarize" | "generate";
 
@@ -142,28 +143,9 @@ export function TextPage() {
   const { t } = useTranslation();
   const [dualMode, setDualMode] = useState(false);
 
-  // Read single section from URL hash
-  const sectionFromHash = (): TextSection | null => {
-    const parts = window.location.hash.replace(/^#\/?/, "").split("/");
-    const valid: TextSection[] = ["format", "replace", "classes", "translate", "summarize", "generate"];
-    return parts.length > 1 && parts[0] === "text" && valid.includes(parts[1] as TextSection)
-      ? (parts[1] as TextSection)
-      : null;
-  };
-
-  const [singleSection, setSingleSectionState] = useState<TextSection | null>(() => sectionFromHash());
-
-  const setSingleSection = useCallback((s: TextSection | null) => {
-    setSingleSectionState(s);
-    window.location.hash = s ? hashFor("text", s) : hashFor("text");
-  }, []);
-
-  // Sync section when hash changes externally
-  useEffect(() => {
-    const onHash = () => setSingleSectionState(sectionFromHash());
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, []);
+  /* ── Single-section routing ── */
+  const validSections: TextSection[] = ["format", "replace", "classes", "translate", "summarize", "generate"];
+  const { section: singleSection, setSection: setSingleSection } = useSectionRouting(validSections, "text", hashFor as (page: string, section?: string) => string);
 
   // Independent state for left & right panels in dual mode
   const [leftSection, setLeftSection] = useState<TextSection | null>(null);
