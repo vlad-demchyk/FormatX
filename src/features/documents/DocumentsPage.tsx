@@ -222,22 +222,23 @@ export function DocumentsPage() {
                   onClear={clearQueue}
                 />
               </div>
-              <div className="card" style={{ marginTop: 16 }}>
-                <h3>
-                  {t("images.queue")}
-                  <span className="badge" style={{ marginLeft: 8 }}>{queue.length}</span>
-                </h3>
-                <DocumentQueue
-                  items={queue}
-                  onConvert={handleConvert}
-                  onDownload={downloadItem}
-                  onPreview={handlePreview}
-                  onRemove={removeItem}
-                  onToggleSelect={toggleSelect}
-                  onOutputFormatChange={updateOutputFormat}
-                />
-                {!queue.length && <p className="empty-state">{t("images.empty")}</p>}
-              </div>
+              {queue.length > 0 && (
+                <div className="card" style={{ marginTop: 16 }}>
+                  <h3>
+                    {t("images.queue")}
+                    <span className="badge" style={{ marginLeft: 8 }}>{queue.length}</span>
+                  </h3>
+                  <DocumentQueue
+                    items={queue}
+                    onConvert={handleConvert}
+                    onDownload={downloadItem}
+                    onPreview={handlePreview}
+                    onRemove={removeItem}
+                    onToggleSelect={toggleSelect}
+                    onOutputFormatChange={updateOutputFormat}
+                  />
+                </div>
+              )}
 
               <PreviewModal
                 item={previewItem}

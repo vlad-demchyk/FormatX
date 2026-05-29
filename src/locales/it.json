@@ -105,7 +105,23 @@
     "sectionHistory": "Cronologia",
     "sectionHistoryDesc": "Visualizza file convertiti in precedenza",
     "sectionMetadata": "Pulizia metadati",
-    "sectionMetadataDesc": "Rimuovi EXIF e altri dati nascosti"
+    "sectionMetadataDesc": "Rimuovi EXIF e altri dati nascosti",
+    "sectionResize": "Ridimensiona",
+    "sectionResizeDesc": "Riduci dimensione e comprimi immagini",
+    "resize": {
+      "title": "Ridimensiona immagini",
+      "width": "Larghezza (px)",
+      "height": "Altezza (px)",
+      "sameFormat": "Come il file",
+      "resizeAll": "Ridimensiona tutto",
+      "ratio": "Proporzioni",
+      "crop": "Ritaglio",
+      "noPreview": "Nessuna anteprima",
+      "before": "Prima",
+      "after": "Dopo",
+      "lock": "Blocca proporzioni",
+      "unlock": "Sblocca proporzioni"
+    }
   },
   "documents": {
     "title": "Documenti",

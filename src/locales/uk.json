@@ -105,7 +105,23 @@
     "sectionHistory": "Історія",
     "sectionHistoryDesc": "Перегляд раніше конвертованих файлів",
     "sectionMetadata": "Очищення метаданих",
-    "sectionMetadataDesc": "Видалення EXIF та інших прихованих даних"
+    "sectionMetadataDesc": "Видалення EXIF та інших прихованих даних",
+    "sectionResize": "Зміна розміру",
+    "sectionResizeDesc": "Зменшення розміру та стиснення зображень",
+    "resize": {
+      "title": "Зміна розміру",
+      "width": "Ширина (px)",
+      "height": "Висота (px)",
+      "sameFormat": "Як у файлі",
+      "resizeAll": "Змінити всі",
+      "ratio": "Співвідношення",
+      "crop": "Кадрування",
+      "noPreview": "Немає прев'ю",
+      "before": "До",
+      "after": "Після",
+      "lock": "Заблокувати пропорції",
+      "unlock": "Розблокувати пропорції"
+    }
   },
   "documents": {
     "title": "Документи",

@@ -11,6 +11,21 @@ const viewIcon = rawViewIcon
   .replace(/stroke="#6366F1"/gi, 'stroke="var(--brand-accent)"')
   .replace(/\s(width|height)="\d+"/g, " ");
 
+function shortName(name: string, maxLen = 28): string {
+  if (name.length <= maxLen) return name;
+  const dot = name.lastIndexOf(".");
+  const ext = dot > 0 ? name.slice(dot) : "";
+  const baseMax = maxLen - ext.length - 1;
+  if (baseMax < 6) return name.slice(0, maxLen - 3) + "…";
+  return name.slice(0, baseMax) + "…" + ext;
+}
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / 1024 / 1024).toFixed(2) + " MB";
+}
+
 interface Props {
   items: DocumentQueueItem[];
   onConvert: (item: DocumentQueueItem) => void;
@@ -48,11 +63,18 @@ export function DocumentQueue({
               onChange={() => onToggleSelect(item.id)}
             />
             <div style={{ flex: 1, minWidth: 0, gridColumn: "2 / 4" }}>
-              <div style={{ fontWeight: 600, wordBreak: "break-all", fontSize: "0.9rem" }}>
-                {item.file.name}
+              <div style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 300, fontSize: "0.9rem" }} title={item.file.name}>
+                {shortName(item.file.name)}
               </div>
-              <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: 4 }}>
-                {formatLabel(item.inputFormat)} · {(item.file.size / 1024).toFixed(0)} KB
+              <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: 4, display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
+                <span>{formatLabel(item.inputFormat)} ({formatSize(item.file.size)})</span>
+                {item.status === "ready" && item.blobs?.[0] && (
+                  <>
+                    <span style={{ color: "var(--brand-accent)" }}>→</span>
+                    <span>{formatLabel(item.outputFormat)}</span>
+                    <span style={{ fontSize: "0.75rem", opacity: 0.7 }}>({formatSize(item.blobs[0].size)})</span>
+                  </>
+                )}
               </div>
               <div className="format-per-file">
                 <select

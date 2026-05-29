@@ -17,6 +17,7 @@ import { hashFor } from "../../app/hooks/useAppRoute";
 import convertRaw from "/assets/icons/tabler_photo.svg?raw";
 import historyRaw from "/assets/icons/clipboard-list.svg?raw";
 import metadataRaw from "/assets/icons/material-symbols_brush.svg?raw";
+import { ResizeSection } from "./components/ResizeSection";
 
 function themedIcon(raw: string): string {
   return raw
@@ -26,12 +27,18 @@ function themedIcon(raw: string): string {
     .replace(/stroke="black"/gi, 'stroke="currentColor"');
 }
 
-type PhotoSection = "convert" | "history" | "metadata";
+type PhotoSection = "convert" | "history" | "metadata" | "resize";
 
 const SECTIONS: { id: PhotoSection; labelKey: string; descKey: string; icon: string }[] = [
   { id: "convert",  labelKey: "images.sectionConvert",  descKey: "images.sectionConvertDesc",  icon: themedIcon(convertRaw) },
   { id: "history",  labelKey: "images.sectionHistory",  descKey: "images.sectionHistoryDesc",  icon: themedIcon(historyRaw) },
   { id: "metadata", labelKey: "images.sectionMetadata", descKey: "images.sectionMetadataDesc", icon: themedIcon(metadataRaw) },
+  {
+    id: "resize",
+    labelKey: "images.sectionResize",
+    descKey: "images.sectionResizeDesc",
+    icon: `<svg width=\"48\" height=\"48\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M15 3h6v6\"/><path d=\"M9 21H3v-6\"/><path d=\"M21 3l-7 7\"/><path d=\"M3 21l7-7\"/></svg>`,
+  },
 ];
 
 export function PhotoPage() {
@@ -40,7 +47,7 @@ export function PhotoPage() {
   // Read section from URL hash
   const sectionFromHash = (): PhotoSection | null => {
     const parts = window.location.hash.replace(/^#\/?/, "").split("/");
-    const valid: PhotoSection[] = ["convert", "history", "metadata"];
+    const valid: PhotoSection[] = ["convert", "history", "metadata", "resize"];
     return parts.length > 1 && valid.includes(parts[1] as PhotoSection) ? (parts[1] as PhotoSection) : null;
   };
 
@@ -264,21 +271,22 @@ export function PhotoPage() {
                   onClear={clearQueue}
                 />
               </div>
-              <div className="card" style={{ marginTop: 16 }}>
-                <h3>
-                  {t("images.queue")}
-                  <span className="badge" style={{ marginLeft: 8 }}>{queue.length}</span>
-                </h3>
-                <QueueList
-                  queue={queue}
-                  onConvert={handleConvertOne}
-                  onDownload={(item) => downloadItem(item, fmtOut)}
-                  onPreview={handlePreview}
-                  onRemove={removeItem}
-                  onToggleSelect={toggleSelect}
-                />
-                {!queue.length && <p className="empty-state">{t("images.empty")}</p>}
-              </div>
+              {queue.length > 0 && (
+                <div className="card" style={{ marginTop: 16 }}>
+                  <h3>
+                    {t("images.queue")}
+                    <span className="badge" style={{ marginLeft: 8 }}>{queue.length}</span>
+                  </h3>
+                  <QueueList
+                    queue={queue}
+                    onConvert={handleConvertOne}
+                    onDownload={(item) => downloadItem(item, fmtOut)}
+                    onPreview={handlePreview}
+                    onRemove={removeItem}
+                    onToggleSelect={toggleSelect}
+                  />
+                </div>
+              )}
             </>
           )}
 
@@ -357,6 +365,9 @@ export function PhotoPage() {
               <PlaceholderSection titleKey="images.sectionMetadata" descKey="images.sectionMetadataDesc" icon="🧹" />
             </div>
           )}
+
+          {/* Resize */}
+          {section === "resize" && <ResizeSection />}
         </>
       )}
 
