@@ -7,6 +7,9 @@ import type { QueueItem } from "../../images/types";
 import { ImageCompareSlider } from "./ImageCompareSlider";
 import { ImageOptionsBar } from "./ImageOptionsBar";
 import { useAnimationController } from "../hooks/useAnimationController";
+import { pinIcon } from "../../clipboard/pinIcon";
+import { pinWithCheck } from "../../clipboard/pinWithCheck";
+import { baseName, extFromMime } from "../../images/logic";
 
 const RATIO_MAP: Record<string, number> = {
   "1:1": 1,
@@ -188,7 +191,7 @@ export function ResizeSection() {
     queue,
     addFiles,
     removeItem,
-    processOne,
+    processOneWithHistory,
     processAll,
     downloadItem,
     selectAll,
@@ -292,8 +295,8 @@ export function ResizeSection() {
   );
 
   const handleResizeOne = useCallback(
-    async (item: (typeof queue)[number]) => { await processOne(item, currentOpts); },
-    [processOne, currentOpts],
+    async (item: (typeof queue)[number]) => { await processOneWithHistory(item, currentOpts); },
+    [processOneWithHistory, currentOpts],
   );
 
   const handleResizeAll = useCallback(() => { void processAll(currentOpts); }, [processAll, currentOpts]);
@@ -473,6 +476,19 @@ export function ResizeSection() {
                     </svg>
                     <span className="btn-label">{t("images.download")}</span>
                   </button>
+                  {item.status === "ready" && item.blobs?.[0] && (
+                    <button type="button" className="btn btn-ghost btn-icon" title="Pin" onClick={() => {
+                      const blob = item.blobs![0]!;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        const pinName = `${baseName(item.file.name)}_resized.${extFromMime(blob.type)}`;
+                        pinWithCheck({ type: "image", label: pinName, content: reader.result as string, mime: blob.type, size: blob.size });
+                      };
+                      reader.readAsDataURL(blob);
+                    }}>
+                      <span dangerouslySetInnerHTML={{ __html: pinIcon }} style={{ display: "flex", width: 16, height: 16 }} />
+                    </button>
+                  )}
                   <button type="button" className="btn btn-ghost btn-icon" title={t("images.remove")} onClick={() => {
                     handleRemove(item.id);
                   }}>

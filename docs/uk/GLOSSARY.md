@@ -32,3 +32,15 @@
 | **Toast** | Тимчасове сповіщення в інтерфейсі |
 | **Web Worker** | Потік для фонових обчислень (SVG растеризація) |
 | **WorkerPool** | Пул Web Workers для паралельної обробки |
+| **AnimationController** | Клас для керування анімацією видалення елементів |
+| **BPP** | Bits Per Pixel — коефіцієнт для прогнозу розміру файлу |
+| **CropRatio** | Співвідношення сторін кадрування (w/h) |
+| **MetaFile** | Файл з аналізом метаданих (EXIF/SVG) для MetadataSection |
+| **PhotoSection** | Секція PhotoPage: convert \| history \| metadata \| resize |
+| **PlacedSignature** | Координати підпису на сторінці документа (0–1) |
+| **ResizeOptions** | Параметри зміни розміру: width, height, outMime, quality, cropRatio |
+| **SignDocumentSource** | Джерело документа для підпису: image, pdf, docx, doc |
+| **SignPage** | Сторінка документа для SignCanvas (index, previewUrl, bitmap) |
+| **SvgIssue** | Проблемний елемент SVG: metadata, comment, editor-attrs, raster, empty-id |
+| **SVGO** | Бібліотека для глибокої оптимізації SVG (lazy-loaded, browser entry `svgo/browser`) |
+| **DOMParser** | Браузерний API для парсингу XML/SVG (використовується як легка альтернатива SVGO) |

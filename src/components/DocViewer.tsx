@@ -26,6 +26,7 @@ const DOCS: DocEntry[] = [
   { id: "PWA",            titleKey: "docs.pwa",            file: "PWA.md",            icon: "📱" },
   { id: "SIGN_SECTION",   titleKey: "docs.signSection",    file: "SIGN_SECTION.md",   icon: "✍️" },
   { id: "GLOSSARY",       titleKey: "docs.glossary",       file: "GLOSSARY.md",       icon: "📚" },
+  { id: "ANIMATION",      titleKey: "docs.animation",      file: "ANIMATION.md",      icon: "🎬" },
 ];
 
 const DOCS_BASE = `${import.meta.env.BASE_URL}docs/uk/`;

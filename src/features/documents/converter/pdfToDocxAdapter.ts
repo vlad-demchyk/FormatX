@@ -17,16 +17,12 @@ export class PdfToDocxAdapter implements DocumentConverter {
   }
 
   async convert(request: ConversionRequest): Promise<ConversionResult> {
-    console.log("[FormatX] PdfToDocxAdapter.convert", request.file.name, request.file.size);
     if (!this.workerSrcSet) {
-      console.log("[FormatX] Setting pdf.js worker src");
       pdfjsLib.GlobalWorkerOptions.workerSrc = "https://unpkg.com/pdfjs-dist@3.10.111/build/pdf.worker.min.js";
       this.workerSrcSet = true;
     }
 
-    console.log("[FormatX] Loading PDF, size:", request.data.byteLength);
     const pdf = await pdfjsLib.getDocument({ data: request.data }).promise;
-    console.log("[FormatX] PDF loaded, pages:", pdf.numPages);
     const stem = request.file.name.replace(/\.[^.]+$/, "");
 
     const paragraphs: Paragraph[] = [];

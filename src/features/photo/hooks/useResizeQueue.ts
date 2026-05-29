@@ -2,9 +2,10 @@ import { useCallback, useRef, useState } from "react";
 import picaLib from "pica";
 type PicaInstance = ReturnType<typeof picaLib>;
 import type { QueueItem, ImageStatus } from "../../images/types";
-import { extFromMime } from "../../images/logic";
+import { extFromMime, baseName } from "../../images/logic";
 import { downloadBlob } from "../../../lib/download";
 import { logger } from "../../../lib/logger";
+import { addHistoryItem } from "../../../lib/db";
 
 const MIME_SAME = "__same__";
 
@@ -262,6 +263,29 @@ export function useResizeQueue() {
     [updateQueue],
   );
 
+  const saveToHistory = useCallback(async (item: QueueItem) => {
+    const blob = item.blobs?.[0];
+    if (!blob || blob.size > 2 * 1024 * 1024) return;
+    const mime = blob.type;
+    await addHistoryItem({
+      id: crypto.randomUUID(),
+      type: "image",
+      filename: `${baseName(item.file.name)}_resized.${extFromMime(mime)}`,
+      mime,
+      size: blob.size,
+      blob,
+    });
+  }, []);
+
+  const processOneWithHistory = useCallback(
+    async (item: QueueItem, opts: ResizeOptions) => {
+      await processOne(item, opts);
+      const updated = queueRef.current.find((q) => q.id === item.id);
+      if (updated?.status === "ready") await saveToHistory(updated);
+    },
+    [processOne, saveToHistory],
+  );
+
   return {
     queue,
     addFiles,
@@ -270,6 +294,7 @@ export function useResizeQueue() {
     processOne,
     processAll,
     processSelected,
+    processOneWithHistory,
     downloadItem,
     selectAll,
     selectNone,

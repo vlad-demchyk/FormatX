@@ -72,14 +72,14 @@ src/
 │   ├── ShellLayout.tsx             # Головний layout
 │   └── TabBar.tsx                  # Навігаційна панель
 ├── features/
-│   ├── account/                    # Налаштування, історія
-│   ├── clipboard/                  # Кліпборд, Pinned items
-│   ├── documents/                  # Конвертація документів
-│   ├── images/                     # Логіка обробки зображень
-│   ├── photo/                      # UI конвертації зображень
+│   ├── account/                    # Налаштування, історія, AI Assistant
+│   ├── clipboard/                  # Кліпборд, Pinned items (текст/зображення/документи)
+│   ├── documents/                  # Конвертація документів, PDF→SVG, підпис
+│   ├── images/                     # Логіка обробки зображень (HEIC, SVG, raster)
+│   ├── photo/                      # UI конвертації, історії, метаданих, resize
 │   ├── sanitizer/                  # Логіка санітайзера тексту
 │   ├── support/                    # Сторінка підтримки
-│   └── text/                       # UI текстових інструментів
+│   └── text/                       # UI текстових інструментів (dual mode)
 ├── lib/
 │   ├── clipboard.ts                # clipboard.writeText
 │   ├── download.ts                 # Скачування blob

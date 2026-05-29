@@ -308,7 +308,10 @@ export function ClipboardPage() {
                     )}
                     {formatTime(entry.createdAt)}
                   </span>
-                  <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginLeft: 8 }}>{entry.label}</span>
+                  <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginLeft: 8 }}>
+                    {entry.label}
+                    {entry.type !== "text" && entry.size != null && <> · {formatSize(entry.size)}</>}
+                  </span>
                 </div>
 
                 {/* Type-specific content */}
@@ -394,4 +397,11 @@ function formatTime(ts: number): string {
   if (diff < 3600000) return `${Math.floor(diff / 60000)}m`;
   if (diff < 86400000) return `${Math.floor(diff / 3600000)}h`;
   return new Date(ts).toLocaleDateString();
+}
+
+function formatSize(bytes?: number): string {
+  if (bytes === undefined || bytes === null) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }

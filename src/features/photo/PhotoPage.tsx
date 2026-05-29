@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useImageQueue } from "./hooks/useImageQueue";
+import { useAnimationController } from "./hooks/useAnimationController";
 import { DropZone } from "./components/DropZone";
 import { QueueList } from "./components/QueueList";
 import { Toolbar } from "./components/Toolbar";
 import { PreviewModal } from "../../components/PreviewModal";
-import { PlaceholderSection } from "../documents/components/PlaceholderSection";
 import type { QueueItem } from "../images/types";
 import { showNotification } from "../../lib/notifications";
 import { listHistory, clearHistory, deleteHistoryItem, type HistoryItem } from "../../lib/db";
@@ -18,6 +18,7 @@ import convertRaw from "/assets/icons/tabler_photo.svg?raw";
 import historyRaw from "/assets/icons/clipboard-list.svg?raw";
 import metadataRaw from "/assets/icons/material-symbols_brush.svg?raw";
 import { ResizeSection } from "./components/ResizeSection";
+import { MetadataSection } from "./components/MetadataSection";
 
 function themedIcon(raw: string): string {
   return raw
@@ -52,11 +53,11 @@ export function PhotoPage() {
   };
 
   const [section, setSectionState] = useState<PhotoSection | null>(() => sectionFromHash());
-  const [fmtIn, setFmtIn] = useState("auto");
   const [fmtOut, setFmtOut] = useState("image/png");
   const [quality, setQuality] = useState(92);
   const [previewItem, setPreviewItem] = useState<{ blob: Blob; name: string } | null>(null);
   const convertingRef = useRef(false);
+  const [showConvertCards, setShowConvertCards] = useState(false);
 
   /* ── History state ── */
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
@@ -119,22 +120,22 @@ export function PhotoPage() {
   } = useImageQueue();
 
   const handleFiles = useCallback(
-    (files: FileList) => addFiles(files, fmtIn),
-    [addFiles, fmtIn],
+    (files: FileList) => addFiles(files, "auto"),
+    [addFiles],
   );
 
   const handleConvertOne = useCallback(
     async (item: QueueItem) => {
-      await convertOne(item, fmtOut, quality, fmtIn);
+      await convertOne(item, fmtOut, quality, "auto");
     },
-    [convertOne, fmtOut, quality, fmtIn],
+    [convertOne, fmtOut, quality],
   );
 
   const handleConvertAll = useCallback(() => {
     if (convertingRef.current) return;
     convertingRef.current = true;
     const total = queue.length;
-    void convertMany(() => true, fmtOut, quality, fmtIn).then(() => {
+    void convertMany(() => true, fmtOut, quality, "auto").then(() => {
       convertingRef.current = false;
       const lang = i18n.language;
       const body =
@@ -143,15 +144,15 @@ export function PhotoPage() {
           : lang === "it"
             ? `Conversione completata: ${total} file`
             : `Conversion complete: ${total} files`;
-      void showNotification(lang === "uk" ? "FormatX" : "FormatX", body);
+      void showNotification("FormatX", body);
     });
-  }, [convertMany, fmtOut, quality, fmtIn, queue.length, i18n.language]);
+  }, [convertMany, fmtOut, quality, queue.length, i18n.language]);
 
   const handleConvertSelected = useCallback(() => {
     if (convertingRef.current) return;
     convertingRef.current = true;
     const selected = queue.filter((q) => q.selected).length;
-    void convertMany((q) => q.selected, fmtOut, quality, fmtIn).then(() => {
+    void convertMany((q) => q.selected, fmtOut, quality, "auto").then(() => {
       convertingRef.current = false;
       const lang = i18n.language;
       const body =
@@ -162,7 +163,7 @@ export function PhotoPage() {
             : `Conversion complete: ${selected} files`;
       void showNotification("FormatX", body);
     });
-  }, [convertMany, fmtOut, quality, fmtIn, queue, i18n.language]);
+  }, [convertMany, fmtOut, quality, queue, i18n.language]);
 
   const handleZipSelected = useCallback(
     () => void downloadZip((q) => q.selected && !!q.blobs && q.status === "ready", fmtOut),
@@ -179,6 +180,19 @@ export function PhotoPage() {
     if (!blob) return;
     setPreviewItem({ blob, name: item.file.name });
   }, []);
+
+  /* ── Convert section animation ── */
+  const convertAnim = useAnimationController(
+    {
+      onRemove: (id) => removeItem(id),
+      onCollapseEnd: () => setShowConvertCards(false),
+    },
+    { staggerMs: 80, removeMs: 450, collapseMs: 400 },
+  );
+
+  useEffect(() => {
+    if (queue.length > 0) setShowConvertCards(true);
+  }, [queue.length]);
 
   const handleHistoryPreview = useCallback((item: HistoryItem) => {
     if (item.blob) {
@@ -227,38 +241,6 @@ export function PhotoPage() {
           {section === "convert" && (
             <>
               <div className="card">
-                <div className="images-row">
-                  <div className="field">
-                    <label htmlFor="fmtIn">{t("images.fmtIn")}</label>
-                    <select id="fmtIn" value={fmtIn} onChange={(e) => setFmtIn(e.target.value)}>
-                      <option value="auto">{t("images.auto")}</option>
-                      <option value="heic">HEIC</option>
-                      <option value="svg">SVG</option>
-                      <option value="png">PNG</option>
-                      <option value="jpeg">JPEG</option>
-                      <option value="webp">WebP</option>
-                    </select>
-                  </div>
-                  <div className="field">
-                    <label htmlFor="fmtOut">{t("images.fmtOut")}</label>
-                    <select id="fmtOut" value={fmtOut} onChange={(e) => setFmtOut(e.target.value)}>
-                      <option value="image/png">PNG</option>
-                      <option value="image/jpeg">JPEG</option>
-                      <option value="image/webp">WebP</option>
-                    </select>
-                  </div>
-                  <div className="field">
-                    <label htmlFor="quality">{t("images.quality")}</label>
-                    <input
-                      id="quality"
-                      type="number"
-                      min={40}
-                      max={100}
-                      value={quality}
-                      onChange={(e) => setQuality(Number(e.target.value) || 92)}
-                    />
-                  </div>
-                </div>
                 <DropZone onFiles={handleFiles} />
                 <Toolbar
                   queue={queue}
@@ -271,19 +253,42 @@ export function PhotoPage() {
                   onClear={clearQueue}
                 />
               </div>
-              {queue.length > 0 && (
-                <div className="card" style={{ marginTop: 16 }}>
+
+              {/* Format options + Queue */}
+              {(showConvertCards || queue.length > 0) && (
+                <div className={`card resize-collapse${convertAnim.phase === 'collapsing' ? ' is-collapsing' : ''}`} style={{ marginTop: 16 }}>
                   <h3>
                     {t("images.queue")}
                     <span className="badge" style={{ marginLeft: 8 }}>{queue.length}</span>
                   </h3>
+
+                  <div className="format-bar" style={{ marginBottom: 14 }}>
+                    <span className="format-bar__label">{t("images.fmtOut")}</span>
+                    <select value={fmtOut} onChange={(e) => setFmtOut(e.target.value)}>
+                      <option value="image/png">PNG</option>
+                      <option value="image/jpeg">JPEG</option>
+                      <option value="image/webp">WebP</option>
+                    </select>
+                    <div className="toolbar-sep" />
+                    <span className="format-bar__label">{t("images.quality")}</span>
+                    <input
+                      type="number"
+                      min={40}
+                      max={100}
+                      value={quality}
+                      onChange={(e) => setQuality(Number(e.target.value) || 92)}
+                      style={{ width: 70, font: "inherit", padding: "4px 8px", border: "1px solid var(--border)", borderRadius: 6, background: "var(--bg)", color: "var(--text)" }}
+                    />
+                  </div>
+
                   <QueueList
                     queue={queue}
                     onConvert={handleConvertOne}
                     onDownload={(item) => downloadItem(item, fmtOut)}
                     onPreview={handlePreview}
-                    onRemove={removeItem}
+                    onRemove={(id) => convertAnim.startRemove(id)}
                     onToggleSelect={toggleSelect}
+                    removingIds={convertAnim}
                   />
                 </div>
               )}
@@ -359,12 +364,8 @@ export function PhotoPage() {
             </div>
           )}
 
-          {/* Metadata cleanup (placeholder) */}
-          {section === "metadata" && (
-            <div className="card">
-              <PlaceholderSection titleKey="images.sectionMetadata" descKey="images.sectionMetadataDesc" icon="🧹" />
-            </div>
-          )}
+          {/* Metadata cleanup */}
+          {section === "metadata" && <MetadataSection />}
 
           {/* Resize */}
           {section === "resize" && <ResizeSection />}

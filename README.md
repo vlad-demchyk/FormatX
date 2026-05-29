@@ -23,15 +23,17 @@ npm run test
 
 | Модуль |          |
 |--------|:--------:|
-| 📷 Photo — convert, batch ZIP | ✅ |
-| 📄 Documents — PDF/DOCX/MD/XLS | ✅ |
-| ✏️ Text — sanitize, classes→CSS | ✅ |
-| 👤 Account (theme, locale, history) | ✅ |
+| 📷 Photo — convert, batch ZIP, metadata cleanup, resize+crop | ✅ |
+| 📄 Documents — PDF/DOCX/MD/XLS, PDF→SVG, sign documents | ✅ |
+| ✏️ Text — sanitize, format, classes→CSS, dual mode | ✅ |
+| 📋 Clipboard — history, pinned items (text/images/docs) | ✅ |
+| 👤 Account — theme, locale, history, AI Assistant, SVG cleaner | ✅ |
 
 - **i18n:** uk, it, en (react-i18next)
-- **Storage:** SQL.js
-- **Documents:** pdf-lib, pdf.js, mammoth, marked, xlsx, docx
-- **Images:** heic-to (WASM), jszip
+- **Storage:** SQL.js + IndexedDB (Dexie)
+- **Documents:** pdf-lib, pdf.js, mammoth, marked, xlsx, docx, pdf-into-svg, LibreOffice WASM
+- **Images:** heic-to (WASM), jszip, exifr, pica, svgo (lazy-loaded)
+- **Sign:** signature_pad, pdf-lib, LibreOffice WASM
 
 ## Project Structure
 
@@ -41,13 +43,19 @@ src/
   app/                  # Shell, routing, providers, i18n
   components/           # ShellLayout, TabBar, ErrorBoundary
   features/
-    text/               # Text sanitizer (React)
-    photo/              # Image converter (React + heic-to)
+    text/               # Text sanitizer (React + dual mode)
+    photo/              # Image converter + metadata + resize (React)
     documents/          # Document converter (pdf, docx, md, xlsx...)
-    account/            # Settings, history
+    clipboard/          # Clipboard history + pinned storage
+    account/            # Settings, history, AI Assistant
+    support/            # Support page
+    sanitizer/          # Pure logic: sanitize, format, classes
+    images/             # Pure logic: convert, detect, zip
   lib/
-    storage/            # SQL.js storage
-    notifications.ts    # Browser notifications
+    storage/            # SQL.js storage + Dexie
+    workers/            # Web Worker pool + SVG converter
+    animation/          # AnimationController
+    download.ts, clipboard.ts, logger.ts, notifications.ts
   locales/              # en.json, it.json, uk.json
   styles/               # CSS design tokens (light/dark)
 ```
@@ -86,6 +94,7 @@ src/
 | [PWA.md](docs/uk/PWA.md) | PWA та деплой |
 | [SIGN_SECTION.md](docs/uk/SIGN_SECTION.md) | Секція підпису документів |
 | [GLOSSARY.md](docs/uk/GLOSSARY.md) | Глосарій термінів |
+| [ANIMATION.md](docs/uk/ANIMATION.md) | Система анімації |
 
 ### Research & migration docs
 

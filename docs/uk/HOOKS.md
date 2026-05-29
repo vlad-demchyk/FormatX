@@ -124,10 +124,61 @@ const {
 - Звільняє ObjectURL при видаленні/очищенні
 - Зберігає історію для файлів < 2 MB
 
+### useResizeQueue
+**Файл:** `src/features/photo/hooks/useResizeQueue.ts`
+
+Хук для керування чергою зміни розміру зображень.
+
+```typescript
+const {
+  queue: QueueItem[],
+  addFiles, removeItem, clearQueue,
+  resizeOne: (item, opts) => Promise<Blob>,
+  resizeMany: (pred, opts) => Promise<void>,
+  downloadItem, saveToHistory,
+} = useResizeQueue();
+```
+
+**Деталі:**
+- Використовує `pica` для високоякісного масштабування
+- Підтримує crop з aspect ratio
+- BPP-based прогноз розміру файлу
+- Зберігає історію для файлів < 2 MB
+
 ### useClipboardMonitor
 **Файл:** `src/features/clipboard/hooks/useClipboardMonitor.ts`
 
-(Хук для моніторингу clipboard — читає файл для деталей)
+Хук для глобального моніторингу clipboard.
+
+```typescript
+useClipboardMonitor({
+  onCopy: (text: string) => void,
+}): void
+```
+
+- Слухає події `copy` та `paste` на рівні window
+- Додає скопійований текст в історію ClipboardPage
+- Працює на всіх сторінках (інтегровано в ShellLayout)
+
+### useAnimationController
+**Файл:** `src/features/photo/hooks/useAnimationController.ts`
+
+React-обгортка для `AnimationController`.
+
+```typescript
+const anim = useAnimationController(
+  { onRemove: (id) => void, onCollapseEnd: () => void },
+  { staggerMs?: number, removeMs?: number, collapseMs?: number },
+);
+
+// Властивості
+anim.phase        // "idle" | "removing" | "collapsing"
+anim.removingIds  // Set<string> — ID елементів що анімуються
+anim.startRemove(id)  // Почати анімацію видалення
+anim.clearAll(ids)    // Анімоване очищення всіх
+```
+
+Детальний опис в [ANIMATION.md](ANIMATION.md).
 
 ## Допоміжні функції
 

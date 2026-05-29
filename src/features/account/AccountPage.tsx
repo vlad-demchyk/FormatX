@@ -109,6 +109,23 @@ export function AccountPage() {
             />
           </label>
         </div>
+        <div className="settings-toggles" style={{ marginTop: 12 }}>
+          <label className="toggle-row">
+            <span>SVG cleaner: {localStorage.getItem("formatx-svg-cleaner") === "domparser" ? "DOMParser" : "SVGO"}</span>
+            <select
+              value={localStorage.getItem("formatx-svg-cleaner") || "svgo"}
+              onChange={(e) => {
+                localStorage.setItem("formatx-svg-cleaner", e.target.value);
+                // Force re-render
+                setSettingsState(settings ? { ...settings } : null);
+              }}
+              style={{ font: "inherit", fontSize: "0.8rem", padding: "4px 8px", border: "1px solid var(--border)", borderRadius: 6, background: "var(--bg)", color: "var(--text)" }}
+            >
+              <option value="svgo">SVGO (потужний)</option>
+              <option value="domparser">DOMParser (швидкий)</option>
+            </select>
+          </label>
+        </div>
         <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>{t("account.pwaHint")}</p>
       </div>
       <div className="card" style={{ marginTop: 16 }}>

@@ -29,6 +29,46 @@
 4. Конвертація: HEIC → WASM, SVG → Worker, решта → Canvas
 5. Скачування окремо або ZIP-архівом
 
+### Photo секції
+Сторінка фото має 4 секції, доступні через картки або URL hash:
+
+| Секція | Шлях | Опис |
+|--------|------|------|
+| Convert | `#/photo/convert` | Конвертація зображень між форматами |
+| History | `#/photo/history` | Історія раніше конвертованих файлів |
+| Metadata | `#/photo/metadata` | Очищення EXIF/SVG метаданих |
+| Resize | `#/photo/resize` | Зміна розміру зображень з кадруванням |
+
+#### Очищення метаданих (Metadata Section)
+**Компонент:** `src/features/photo/components/MetadataSection.tsx`
+
+Підтримує аналіз та очищення метаданих для:
+- **Raster images (JPEG, PNG, WebP тощо):**
+  - Читання EXIF/IPTC через бібліотеку `exifr`
+  - Очищення через Canvas 2D (перемальовування без метаданих)
+- **SVG:**
+  - Аналіз: `<metadata>` теги, XML коментарі, редакторські атрибути (inkscape, sodipodi, illustrator, data-name), вбудовані растрові зображення, згенеровані ID
+  - Кольорове підсвічування проблемних зон
+  - Два методи очищення:
+    - **SVGO** (потужний, multipass, багато плагінів) — за замовчуванням, lazy-loaded (~300 KB)
+    - **DOMParser** (легкий, сумісний, працює скрізь)
+  - Ручний редактор SVG з підсвічуванням проблем
+- Вибір методу очищення SVG доступний в `AccountPage`
+
+#### Зміна розміру (Resize Section)
+**Компонент:** `src/features/photo/components/ResizeSection.tsx`
+**Хук:** `src/features/photo/hooks/useResizeQueue.ts`
+
+- Високоякісне масштабування через бібліотеку `pica` (WASM + Web Workers)
+- Кадрування (crop) з фіксованим співвідношенням сторін: 1:1, 4:3, 3:2, 16:9, 9:16, 2:3, 3:4
+- Налаштування вихідного формату (PNG/JPEG/WebP/оригінал) та якості
+- Прогноз розміру файлу (BPP-based estimation)
+- Візуальний crop preview з затемненням області кадрування
+- Image Compare Slider (порівняння до/після з drag-слайдером)
+- Pin результату до Clipboard
+- Пакетна обробка з анімацією видалення
+- Збереження в історію SQL.js (для файлів < 2 MB)
+
 ---
 
 ## 2. Documents — Конвертація документів
@@ -139,6 +179,7 @@ PDF, DOCX, DOC, ODT, RTF, TXT, HTML, Markdown (MD), XLSX, XLS, CSV
 - **AI Assistant**: налаштування LLM (Ollama, OpenAI, Anthropic, Custom)
   - Провайдер, endpoint, API key, модель
   - Поки не інтегровано в основний функціонал
+- **SVG cleaner method**: вибір між SVGO (потужний, lazy-loaded) та DOMParser (швидкий)
 
 ---
 
@@ -150,3 +191,26 @@ PDF, DOCX, DOC, ODT, RTF, TXT, HTML, Markdown (MD), XLSX, XLS, CSV
 - Buy me a coffee (посилання)
 - Контакти автора (GitHub, LinkedIn, Telegram)
 - Посилання на документацію
+
+---
+
+## 7. Animation — Система анімації
+
+**Файли:** `src/lib/animation/AnimationController.ts`
+**Хук:** `src/features/photo/hooks/useAnimationController.ts`
+
+Централізована система для анімації видалення елементів.
+
+### Фазова модель
+```
+idle → startRemove(id) → removing (CSS animation) → всі endRemove → collapsing → idle
+```
+
+### Можливості
+- Анімація видалення: слайд + fade + shrink
+- Схлопування контейнера знизу вгору
+- Stagger-затримка між елементами
+- `clearAll(ids)` — анімоване очищення всіх елементів
+- Колбеки: `onRemove(id)`, `onCollapseEnd()`
+- Використовується в Photo (queue), Resize, Documents
+- CSS @keyframes, не transitions

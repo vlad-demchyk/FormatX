@@ -404,7 +404,7 @@ body {
 
 .images-toolbar {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 8px;
   justify-content: center;
   margin-top: 16px;
@@ -659,6 +659,18 @@ body {
 
   .images-item .images-item__actions .btn {
     padding: 6px;
+  }
+}
+
+/* На вузьких екранах — кнопки переносяться на новий ряд по центру */
+@media (max-width: 580px) {
+  .images-item {
+    grid-template-columns: auto 48px 1fr;
+  }
+
+  .images-item__actions {
+    grid-column: 1 / -1;
+    justify-content: center;
   }
 }
 

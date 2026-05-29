@@ -25,9 +25,7 @@ const converters: DocumentConverter[] = [
 
 /** Find the first converter that can handle this conversion */
 export function findConverter(from: DocumentFormatId, to: DocumentFormatId): DocumentConverter | null {
-  const found = converters.find((c) => c.canConvert(from, to)) ?? null;
-  logger.log("findConverter", from, "→", to, "=>", found?.name ?? null);
-  return found;
+  return converters.find((c) => c.canConvert(from, to)) ?? null;
 }
 
 /**
@@ -35,7 +33,6 @@ export function findConverter(from: DocumentFormatId, to: DocumentFormatId): Doc
  * Throws if no converter found.
  */
 export async function convertDocument(request: ConversionRequest): Promise<ConversionResult> {
-  logger.log("convertDocument", request.file.name, request.inputFormat, "→", request.outputFormat);
   const converter = findConverter(request.inputFormat, request.outputFormat);
   if (!converter) {
     throw new Error(
@@ -44,7 +41,6 @@ export async function convertDocument(request: ConversionRequest): Promise<Conve
   }
   try {
     const result = await converter.convert(request);
-    logger.log("convertDocument success:", result.filename, result.mime, result.blob.size);
     return result;
   } catch (e) {
     logger.error("convertDocument error:", converter.name, e);

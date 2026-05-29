@@ -248,6 +248,7 @@
     "hooks": "Hooks & Utilities",
     "pwa": "PWA & Deploy",
     "signSection": "Document Signing",
-    "glossary": "Glossary"
+    "glossary": "Glossary",
+    "animation": "Animation System"
   }
 }

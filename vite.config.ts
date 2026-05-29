@@ -56,6 +56,7 @@ export default defineConfig({
           if (id.includes("heic-to")) return "heic-to";
           if (id.includes("@matbee/libreoffice-converter")) return "libreoffice";
           if (id.includes("pdfjs-dist")) return "pdfjs";
+          if (id.includes("svgo") || id.includes("css-tree") || id.includes("csso")) return "svgo";
         },
       },
     },

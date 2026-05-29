@@ -1,5 +1,6 @@
 import { QueueItemRow } from "./QueueItem";
 import type { QueueItem } from "../../images/types";
+import type { AnimationController } from "../../../lib/animation/AnimationController";
 
 interface Props {
   queue: QueueItem[];
@@ -8,6 +9,7 @@ interface Props {
   onPreview: (item: QueueItem) => void;
   onRemove: (id: string) => void;
   onToggleSelect: (id: string) => void;
+  removingIds: AnimationController;
 }
 
 export function QueueList({
@@ -17,6 +19,7 @@ export function QueueList({
   onPreview,
   onRemove,
   onToggleSelect,
+  removingIds,
 }: Props) {
   if (!queue.length) return null;
 
@@ -31,6 +34,10 @@ export function QueueList({
           onPreview={onPreview}
           onRemove={onRemove}
           onToggleSelect={onToggleSelect}
+          isRemoving={removingIds.isRemoving(item.id)}
+          onAnimationEnd={() => {
+            if (removingIds.isRemoving(item.id)) removingIds.endRemove(item.id);
+          }}
         />
       ))}
     </div>

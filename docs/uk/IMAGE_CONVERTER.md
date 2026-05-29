@@ -88,6 +88,76 @@ buildZipForItems(list: QueueItem[], outMime: string): Promise<Blob | null>
 - Додає числовий префікс при >1 файлах
 - Повертає null, якщо немає готових файлів
 
+## Очищення метаданих (Metadata Section)
+
+**Компонент:** `src/features/photo/components/MetadataSection.tsx`
+
+Секція для аналізу та видалення метаданих із зображень.
+
+### Raster images (JPEG, PNG, WebP)
+- **Аналіз:** `exifr.parse(file, { multiSegment: true })` — читає EXIF, IPTC, ICC, XMP
+- **Очищення:** `stripMetaViaCanvas(file)` — перемальовує через `<img>` → `<canvas>` → `toBlob()`
+- Втрачаються всі EXIF дані (GPS, камера, дата, автор), але зберігається якість
+
+### SVG
+- **Аналіз:** `analyzeSvg(text)` через DOMParser:
+  - `<metadata>` теги
+  - XML коментарі (`<!-- -->`)
+  - Редакторські атрибути (inkscape, sodipodi, illustator, data-name)
+  - Вбудовані растрові зображення (`data:image/...;base64,...`)
+  - Згенеровані ID (st0, st1…)
+- **Два методи очищення:**
+  - **SVGO** (метод `autoCleanSvgSvgo`): `import("svgo/browser")` — офіційний browser entry point, lazy-loaded (~300 KB)
+  - **DOMParser** (метод `autoCleanSvgDom`): видаляє nodes через DOM API
+  - SVGO використовує вбудовану браузерну збірку (`dist/svgo.browser.js`), без Node.js залежностей
+- **Метод вибирається** через `localStorage.getItem("formatx-svg-cleaner")` || "svgo"
+- **Ручний редактор:** contentEditable div з кольоровим підсвічуванням проблемних зон
+
+## Зміна розміру (Resize Section)
+
+**Компонент:** `src/features/photo/components/ResizeSection.tsx`
+**Хук:** `src/features/photo/hooks/useResizeQueue.ts`
+
+### Бібліотека pica
+```
+import picaLib from "pica";
+const instance = picaLib({ features: ["wasm", "ww", "js"] });
+```
+
+- WASM + Web Workers для високопродуктивного масштабування
+- Використовує Lanczos фільтр
+
+### Параметри (ResizeOptions)
+```typescript
+interface ResizeOptions {
+  width: number;          // Цільова ширина px
+  height: number;         // Цільова висота px
+  outMime: string;        // Вихідний MIME або "__same__"
+  quality: number;        // 0-100
+  cropRatio: number|null; // Співвідношення сторін (w/h) або null
+}
+```
+
+### Процес
+1. Декодування в `<img>` елемент
+2. Crop (якщо увімкнено) — обчислення offset + canvas crop
+3. Масштабування через pica (`pica.resize()`)
+4. Експорт через `toBlob()`
+
+### Crop Preview
+- Візуальне затемнення області за межами кадрування
+- Автоматичний розрахунок центрованого crop
+
+### Оцінка розміру
+- BPP (bits-per-pixel) коефіцієнти для різних форматів
+- Корекція якості для lossy форматів
+- Прогнозування розміру до конвертації
+
+### ImageCompareSlider
+- Компонент для порівняння оригіналу та результату
+- Drag-слайдер посередині
+- Ліва/права половинки з підписами
+
 ## Історія конвертацій
 
 Після конвертації, якщо розмір < 2 MB, зберігає blob у SQL.js для історії.

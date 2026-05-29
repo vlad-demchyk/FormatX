@@ -1,13 +1,8 @@
 import { useTranslation } from "react-i18next";
 import type { QueueItem } from "../../images/types";
-import rawViewIcon from "/assets/icons/lsicon_view-filled.svg?raw";import { closeIcon } from "../../../app/icons";
 import { pinIcon } from "../../clipboard/pinIcon";
 import { pinWithCheck } from "../../clipboard/pinWithCheck";
-/** Prepare SVG icon: use brand accent color, remove fixed size so it fills the container. */
-const themedViewIcon = rawViewIcon
-  .replace(/fill="#6366F1"/gi, 'fill="var(--brand-accent)"')
-  .replace(/stroke="#6366F1"/gi, 'stroke="var(--brand-accent)"')
-  .replace(/\s(width|height)="\d+"/g, " ");
+import { baseName, extFromMime } from "../../images/logic";
 
 /** Shorten filename: show start + "…" + extension. */
 function shortName(name: string, maxLen = 28): string {
@@ -43,6 +38,8 @@ interface Props {
   onPreview: (item: QueueItem) => void;
   onRemove: (id: string) => void;
   onToggleSelect: (id: string) => void;
+  isRemoving?: boolean;
+  onAnimationEnd?: () => void;
 }
 
 export function QueueItemRow({
@@ -52,6 +49,8 @@ export function QueueItemRow({
   onPreview,
   onRemove,
   onToggleSelect,
+  isRemoving,
+  onAnimationEnd,
 }: Props) {
   const { t } = useTranslation();
 
@@ -60,7 +59,10 @@ export function QueueItemRow({
   const outFormat = outputBlob ? (MIME_TO_EXT[outputBlob.type] || outputBlob.type.split("/").pop() || "?") : null;
 
   return (
-    <div className="images-item">
+    <div
+      className={`images-item${isRemoving ? ' is-removing' : ''}`}
+      onAnimationEnd={onAnimationEnd}
+    >
       <input
         type="checkbox"
         checked={item.selected}
@@ -73,73 +75,55 @@ export function QueueItemRow({
           <img className="images-thumb" src={item.thumbUrl || ""} alt="" />
         )}
       </div>
-      <div>
-        <div style={{ fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 200 }} title={item.file.name}>
+      <div className="images-item__info">
+        <div className="images-item__name" title={item.file.name}>
           {shortName(item.file.name)}
         </div>
-        <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
-          <span>{detectedFormat.toUpperCase()} ({formatSize(item.file.size)})</span>
+        <div className="images-item__meta">
+          {detectedFormat.toUpperCase()} ({formatSize(item.file.size)})
           {outFormat && (
-            <>
-              <span style={{ color: "var(--brand-accent)" }}>→</span>
-              <span>{outFormat}</span>
-              <span style={{ fontSize: "0.75rem", opacity: 0.7 }}>({formatSize(outputBlob!.size)})</span>
-            </>
+            <> → {outFormat} ({formatSize(outputBlob!.size)})</>
           )}
+          {item.status === "converting" && <> · {t("images.statusConverting")}</>}
+          {item.status === "error" && <> · <span style={{ color: "var(--error)" }}>{item.error || t("images.statusError")}</span></>}
+          {item.status === "ready" && <> · <span style={{ color: "var(--success)" }}>{t("images.statusReady")}</span></>}
+          {item.status === "pending" && <> · <span className="status-wait">{t("images.statusPending")}</span></>}
         </div>
-      </div>
-      <div
-        className={
-          item.status === "ready"
-            ? "status-ready"
-            : item.status === "error"
-              ? "status-err"
-              : item.status === "converting"
-                ? ""
-                : "status-wait"
-        }
-      >
-        {item.status === "ready"
-          ? t("images.statusReady")
-          : item.status === "error"
-            ? item.error || t("images.statusError")
-            : item.status === "converting"
-              ? t("images.statusConverting")
-              : t("images.statusPending")}
       </div>
       <div className="images-item__actions">
         <button
           type="button"
-          className="btn btn-secondary"
+          className="btn btn-secondary btn--icon-label"
           disabled={item.status === "converting"}
           onClick={() => onConvert(item)}
         >
-          {t("images.convert")}
+          <svg className="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+          <span className="btn-label">{t("images.convert")}</span>
         </button>
         <button
           type="button"
-          className="btn btn-primary"
+          className="btn btn-primary btn--icon-label"
           disabled={!item.blobs || item.status !== "ready"}
           onClick={() => onDownload(item)}
         >
-          {t("images.download")}
+          <svg className="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          <span className="btn-label">{t("images.download")}</span>
         </button>
         {item.status === "ready" && item.blobs?.[0] && (
           <button
             type="button"
-            className="btn btn-ghost btn-sm btn-icon"
+            className="btn btn-ghost btn-icon"
             title="Pin"
             onClick={() => {
               const blob = item.blobs![0]!;
               const reader = new FileReader();
               reader.onload = () => {
-                pinWithCheck({
-                  type: "image",
-                  label: item.file.name,
-                  content: reader.result as string,
-                  mime: blob.type,
-                  size: blob.size,
-                });
+                const pinName = `${baseName(item.file.name)}.${extFromMime(blob.type)}`;
+                pinWithCheck({ type: "image", label: pinName, content: reader.result as string, mime: blob.type, size: blob.size });
               };
               reader.readAsDataURL(blob);
             }}
@@ -150,11 +134,13 @@ export function QueueItemRow({
         {item.status === "ready" && item.blobs?.[0] && (
           <button
             type="button"
-            className="btn btn-ghost btn-sm btn-icon"
+            className="btn btn-ghost btn-icon"
             title={t("images.preview")}
             onClick={() => onPreview(item)}
           >
-            <span dangerouslySetInnerHTML={{ __html: themedViewIcon }} style={{ display: "flex", width: 20, height: 20 }} />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
+            </svg>
           </button>
         )}
         <button
@@ -163,7 +149,7 @@ export function QueueItemRow({
           title={t("images.remove")}
           onClick={() => onRemove(item.id)}
         >
-          <span dangerouslySetInnerHTML={{ __html: closeIcon }} />
+          <span style={{ fontSize: "1.2rem", lineHeight: 1 }}>×</span>
         </button>
       </div>
     </div>
